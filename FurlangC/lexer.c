@@ -1,6 +1,7 @@
-#include "lex.h"
+#include "lexer.h"
 
 void printToken(Token *token) {
+	// TODO: finsh theses
 	switch (token->type) {
 		case IDENT:
 			printf("Token {\n\tType: IDENT\n\tLine: %d\n\tColumn: %d\n\tValue: \"%s\"\n}\n", 
@@ -361,6 +362,37 @@ TokenType keyword(char *word) {
 	if (strcmp(word, "type") == 0) return TYPE;
 	if (strcmp(word, "var") == 0) return VAR;
 	return IDENT;
+}
+
+// returns the precendence of the token
+int Precedence(Token *token) {
+	switch (token->type) {
+		case LOR:
+			return 1;
+		case LAND:
+			return 2;
+		case EQL:
+		case NEQ:
+		case LSS:
+		case LEQ:
+		case GTR:
+		case GEQ:
+			return 3;
+		case ADD:
+		case SUB:
+		case OR:
+		case XOR:
+			return 4;
+		case MUL:
+		case QUO:
+		case REM:
+		case SHL:
+		case SHR:
+		case AND:
+		case AND_NOT:
+			return 5;
+	}
+	return LowPrec;
 }
 
 Token *Lex(char *source) {
