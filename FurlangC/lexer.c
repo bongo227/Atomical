@@ -364,37 +364,6 @@ TokenType keyword(char *word) {
 	return IDENT;
 }
 
-// returns the precendence of the token
-int Precedence(Token *token) {
-	switch (token->type) {
-		case LOR:
-			return 1;
-		case LAND:
-			return 2;
-		case EQL:
-		case NEQ:
-		case LSS:
-		case LEQ:
-		case GTR:
-		case GEQ:
-			return 3;
-		case ADD:
-		case SUB:
-		case OR:
-		case XOR:
-			return 4;
-		case MUL:
-		case QUO:
-		case REM:
-		case SHL:
-		case SHR:
-		case AND:
-		case AND_NOT:
-			return 5;
-	}
-	return LowPrec;
-}
-
 Token *Lex(char *source) {
 	Lexer lexer = {source, 1, 1, false};
 

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "lexer.c"
+#include "../FurlangC/lexer.c"
 #include <stdlib.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

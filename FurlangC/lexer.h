@@ -109,9 +109,4 @@ typedef struct {
 	bool semi;
 } Lexer;
 
-const int LowPrec = 0
-const int UnaryPrec = 6
-const int HighPrec = 7
-
-int Precedence(Token *token);
-Token *Lex(char *input);
+Token *Lex(char *source);

@@ -127,6 +127,7 @@
     <ClInclude Include="ast.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="parser.h" />
+    <ClInclude Include="uthash.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -138,7 +139,6 @@
     <Import Project="..\packages\libintl.0.18.2.1\build\native\libintl.targets" Condition="Exists('..\packages\libintl.0.18.2.1\build\native\libintl.targets')" />
     <Import Project="..\packages\zlib.redist.1.2.8.7\build\native\zlib.redist.targets" Condition="Exists('..\packages\zlib.redist.1.2.8.7\build\native\zlib.redist.targets')" />
     <Import Project="..\packages\zlib.1.2.7.30\build\native\zlib.targets" Condition="Exists('..\packages\zlib.1.2.7.30\build\native\zlib.targets')" />
-    <Import Project="..\packages\glib.2.36.2.11\build\native\glib.targets" Condition="Exists('..\packages\glib.2.36.2.11\build\native\glib.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -152,6 +152,5 @@
     <Error Condition="!Exists('..\packages\libintl.0.18.2.1\build\native\libintl.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libintl.0.18.2.1\build\native\libintl.targets'))" />
     <Error Condition="!Exists('..\packages\zlib.redist.1.2.8.7\build\native\zlib.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.redist.1.2.8.7\build\native\zlib.redist.targets'))" />
     <Error Condition="!Exists('..\packages\zlib.1.2.7.30\build\native\zlib.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.1.2.7.30\build\native\zlib.targets'))" />
-    <Error Condition="!Exists('..\packages\glib.2.36.2.11\build\native\glib.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glib.2.36.2.11\build\native\glib.targets'))" />
   </Target>
 </Project>

@@ -2,11 +2,6 @@
 
 # include "lexer.h"
 
-typedef struct {
-	scope outer;
-	
-} scope;
-
 // Object 
 // An object represents a named construct such as a constant, type, varible, function.
 typedef struct {
@@ -20,25 +15,27 @@ typedef struct {
 	} type;
 	char *name;
 	void *node;
-	void *type;
+	void *typeInfo;
 } Object;
 
-typedef struct {
-	enum { 
-		identExp, 
-		literalExp,
-		parenExp,
-		selectorExp,
-		braceLiteralExp, 
-		parenLiteralExp, 
-		indexExp, 
-		sliceExp, 
-		callExp, 
-		castExp, 
-		starExp,
-		binaryExp, 
-		unaryExp 
-	} type;
+typedef enum {
+	identExp,
+	literalExp,
+	parenExp,
+	selectorExp,
+	braceLiteralExp,
+	parenLiteralExp,
+	indexExp,
+	sliceExp,
+	callExp,
+	castExp,
+	starExp,
+	binaryExp,
+	unaryExp
+} ExpType;
+
+struct _Exp {
+	ExpType type;
 	union {
 		// identExp
 		struct {
@@ -50,18 +47,19 @@ typedef struct {
 		Token literal;
 
 		// parenExp
-		Exp *paren;
+		struct _Exp *paren;
 
+		// selectorExp
 		struct {
-			Exp *exp;
-			Exp *selector;
+			struct _Exp *exp;
+			struct _Exp *selector;
 		} selector;
 
 		// braceLiteralExp
 		// TODO: add type
 		struct {
 			Token lBrace;
-			Exp *exp;
+			struct _Exp *exp;
 			int expCount;
 			Token rBrace;
 		} braceLiteral;
@@ -69,61 +67,63 @@ typedef struct {
 		// parenLiteralExp
 		struct {
 			Token lParen;
-			Exp *exp;
+			struct _Exp *exp;
 			int expCount;
 			Token rParen;
 		} parenLiteral;
 
 		// indexExp
 		struct {
-			Exp *exp;
+			struct _Exp *exp;
 			Token lBrack;
-			Exp *index;
+			struct _Exp *index;
 			Token rBrack;
 		} index;
 
 		// sliceExp
 		struct {
-			Exp *exp;
+			struct _Exp *exp;
 			Token lBrack;
-			Exp *low;
+			struct _Exp *low;
 			Token Colon;
-			Exp *high;
+			struct _Exp *high;
 			Token rBrack;
 		} slice;
 
 		// callExp
 		struct {
-			Exp *function;
-			Exp *args;
+			struct _Exp *function;
+			struct _Exp *args;
 		} call;
 
 		// castExp
 		struct {
 			Token lParen;
-			Exp *exp;
+			struct _Exp *exp;
 			Token rParen;
 		} castExp;
 
 		// starExp
-		Exp *star;
+		struct _Exp *star;
 
 		// unaryExp
 		struct {
-			Token Op;
-			Exp *right;
+			Token op;
+			struct _Exp *right;
 		} unary;
 
 		// binaryExp
 		struct {
-			Exp *left;
-			Token Op;
-			Exp *right;
+			struct _Exp *left;
+			Token op;
+			struct _Exp *right;
 		} binary;
 	} node;
-} Exp;
+};
 
-typedef struct {
+typedef struct _Exp Exp;
+
+struct _Dcl {
 	enum {
 		functionDcl,
 		argumentDcl,
@@ -134,9 +134,9 @@ typedef struct {
 		struct {
 			Exp *name;
 			Token dColon;
-			Dcl *args;
+			struct _Dcl *args;
 			int argCount;
-			Smt *body;
+			struct _Smt *body;
 		} function;
 
 		// argumentDcl
@@ -150,9 +150,11 @@ typedef struct {
 			Exp *value;
 		} varible;
 	} node;
-} Dcl;
+};
 
-typedef struct {
+typedef struct _Dcl Dcl;
+
+struct _Smt {
 	enum {
 		declareSmt,
 		assignmentSmt,
@@ -181,7 +183,7 @@ typedef struct {
 		// blockSmt
 		struct {
 			Token lBrace;
-			Smt *smts;
+			struct _Smt *smts;
 			int smtCount;
 			Token rBrace;
 		} block;
@@ -190,13 +192,19 @@ typedef struct {
 		struct {
 			Token ifs;
 			Exp *cond;
-			Smt *body;
-			Smt *elses;
+			struct _Smt *body;
+			struct _Smt *elses;
 		} ifs;
 	} node;
-} Smt;
+};
+
+typedef struct _Smt Smt;
 
 typedef struct {
 	Dcl *functions;
 	int functionCount;
 } Ast;
+
+Exp *newIdentExp(char *ident);
+Exp *newBinaryExp(Exp *left, Token op, Exp *right);
+Exp *newSelectorExp(Exp *exp, Exp* selector);
