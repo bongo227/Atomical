@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FurlangC", "FurlangC\Furlan
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FurlangCTest", "FurlangCTest\FurlangCTest.vcxproj", "{BA473668-2E48-4F26-9CA5-AFB9281C6371}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FurLib", "FurLib\FurLib.vcxproj", "{2B7646D6-20F7-4815-9042-D20C562A4005}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{BA473668-2E48-4F26-9CA5-AFB9281C6371}.Release|x64.Build.0 = Release|x64
 		{BA473668-2E48-4F26-9CA5-AFB9281C6371}.Release|x86.ActiveCfg = Release|Win32
 		{BA473668-2E48-4F26-9CA5-AFB9281C6371}.Release|x86.Build.0 = Release|Win32
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Debug|x64.ActiveCfg = Debug|x64
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Debug|x64.Build.0 = Debug|x64
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Debug|x86.ActiveCfg = Debug|Win32
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Debug|x86.Build.0 = Debug|Win32
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Release|x64.ActiveCfg = Release|x64
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Release|x64.Build.0 = Release|x64
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Release|x86.ActiveCfg = Release|Win32
+		{2B7646D6-20F7-4815-9042-D20C562A4005}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
