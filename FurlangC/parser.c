@@ -116,6 +116,12 @@ void expect(Parser *parser, TokenType type) {
 	ParserNext(parser);
 }
 
+void expectSemi(Parser *parser) {
+	ASSERT(parser->tokens->type == SEMI || 
+		parser->tokens->type == END, "Expected semi");
+	ParserNext(parser);
+}
+
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
 Exp *nud(Parser *parser, Token *token) {
 	switch (token->type) {
@@ -177,6 +183,14 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 }
 
 Smt *smtd(Parser *parser, Token *token) {
+	switch(token->type) {
+		case RETURN: {
+			parser->tokens++;
+			Smt *s = newReturnSmt(ParseExpression(parser, 0));
+			expectSemi(parser);
+			return s; 
+		}
+	}
 	return NULL;
 }
 

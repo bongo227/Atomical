@@ -175,7 +175,6 @@ struct _Smt {
 
 		// returnSmt
 		struct {
-			Token ret;
 			Exp *result;
 		} ret;
 

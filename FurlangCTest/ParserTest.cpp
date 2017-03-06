@@ -110,5 +110,13 @@ namespace FurlangCTest
 			Assert::AreEqual("a", smt->node.assignment.right->node.binary.left->node.ident.name);
 			Assert::AreEqual("b", smt->node.assignment.right->node.binary.right->node.ident.name);
 		}
+
+		TEST_METHOD(ParseReturnStatment) {
+			char *src = "return a";
+			Parser *parser = NewParser(Lex(src));
+			Smt *smt = ParseStatment(parser);
+
+			Assert::AreEqual((int)returnSmt, (int)smt->type);
+		}
 	};
 }

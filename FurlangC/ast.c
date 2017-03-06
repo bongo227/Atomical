@@ -88,3 +88,11 @@ Smt *newOrAssignmentSmt(Exp *left, Exp *right) {
 Smt *newShlAssignmentSmt(Exp *left, Exp *right) {
 	return newBinaryAssignmentSmt(left, SHL, right);
 }
+
+Smt *newReturnSmt(Exp *result) {
+	Smt *s = (Smt *)malloc(sizeof(Smt));
+	s->type = returnSmt;
+	s->node.ret.result = result;
+	
+	return s;
+}
