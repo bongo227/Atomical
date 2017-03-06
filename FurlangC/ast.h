@@ -186,7 +186,6 @@ struct _Smt {
 
 		// ifSmt
 		struct {
-			Token ifs;
 			Exp *cond;
 			struct _Smt *body;
 			struct _Smt *elses;

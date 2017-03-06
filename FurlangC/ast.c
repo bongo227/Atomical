@@ -105,3 +105,13 @@ Smt *newBlockSmt(Smt *smts, int smtCount) {
 
 	return s; 
 }
+
+Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
+	Smt *s = (Smt *)malloc(sizeof(Smt));
+	s->type = ifSmt;
+	s->node.ifs.cond = cond;
+	s->node.ifs.body = body;
+	s->node.ifs.elses = elses;
+
+	return s;
+}

@@ -200,7 +200,7 @@ Smt *smtd(Parser *parser, Token *token) {
 			Smt *smtsPrt = smts;
 			while(parser->tokens->type != RBRACE) {
 				smtCount++;
-				memcpy(smtsPrt, ParseStatment(parser), sizeof(Smt));
+				memcpy(smtsPrt, ParseStatement(parser), sizeof(Smt));
 				smtsPrt++;
 			}
 			realloc(smts, sizeof(Smt) * smtCount);
@@ -211,13 +211,35 @@ Smt *smtd(Parser *parser, Token *token) {
 
 			return s;
 		}
+		// if statement
+		case IF: {
+			parser->tokens++;
+			
+			Exp *cond = ParseExpression(parser, 0);
+			Smt *block = ParseStatement(parser);
+			Smt *elses = NULL;
+
+			// Check for elseif/else
+			if (parser->tokens->type == ELSE) {
+				parser->tokens++;
+				if (parser->tokens->type == IF) {
+					// else if, so recursivly parse else chain
+					elses = ParseStatement(parser);
+				}
+
+				// final else statment only has a body
+				elses = newIfSmt(NULL, ParseStatement(parser), NULL);
+			}
+
+			return newIfSmt(cond, block, elses);
+		}
 	}
 	return NULL;
 }
 
 // Parses the next statement by calling smtd on the first token else handle
 // the declaration/assignment
-Smt *ParseStatment(Parser *parser) {
+Smt *ParseStatement(Parser *parser) {
 	Token *t = parser->tokens;
 	Smt *smt = smtd(parser, t);
 	if (smt != NULL) {

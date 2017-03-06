@@ -94,7 +94,7 @@ namespace FurlangCTest
 		TEST_METHOD(ParseAssignmentOperator) {
 			char *src = "a = b";
 			Parser *parser = NewParser(Lex(src));
-			Smt *smt = ParseStatment(parser);
+			Smt *smt = ParseStatement(parser);
 
 			Assert::AreEqual((int)assignmentSmt, (int)smt->type);
 		}
@@ -102,7 +102,7 @@ namespace FurlangCTest
 		TEST_METHOD(ParseAddAssigmentOperator) {
 			char *src = "a += b";
 			Parser *parser = NewParser(Lex(src));
-			Smt *smt = ParseStatment(parser);
+			Smt *smt = ParseStatement(parser);
 
 			Assert::AreEqual((int)assignmentSmt, (int)smt->type);
 			Assert::AreEqual((int)binaryExp, (int)smt->node.assignment.right->type);
@@ -114,7 +114,7 @@ namespace FurlangCTest
 		TEST_METHOD(ParseReturnStatment) {
 			char *src = "return a";
 			Parser *parser = NewParser(Lex(src));
-			Smt *smt = ParseStatment(parser);
+			Smt *smt = ParseStatement(parser);
 
 			Assert::AreEqual((int)returnSmt, (int)smt->type);
 		}
@@ -123,11 +123,22 @@ namespace FurlangCTest
 			// TODO: fix parser not inserting semis
 			char *src = "{\nreturn test;\n}";
 			Parser *parser = NewParser(Lex(src));
-			Smt *smt = ParseStatment(parser);
+			Smt *smt = ParseStatement(parser);
 
 			Assert::AreEqual((int)blockSmt, (int)smt->type);
 			Assert::AreEqual(1, smt->node.block.count);
 			Assert::AreEqual((int)returnSmt, (int)smt->node.block.smts->type);
+		}
+
+		TEST_METHOD(ParseIfStatment) {
+			char *src = "if true {\nreturn false;\n}";
+			Parser *parser = NewParser(Lex(src));
+			Smt *smt = ParseStatement(parser);
+
+			Assert::AreEqual((int)ifSmt, (int)smt->type);
+			Assert::AreEqual((int)identExp, (int)smt->node.ifs.cond->type);
+			Assert::AreEqual((int)blockSmt, (int)smt->node.ifs.body->type);
+			Assert::IsNull(smt->node.ifs.elses);
 		}
 	};
 }

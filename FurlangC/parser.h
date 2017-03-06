@@ -22,4 +22,4 @@ typedef struct {
 
 Parser *NewParser(Token *tokens);
 Exp *ParseExpression(Parser *parser, int rbp);
-Smt *ParseStatment(Parser *parser);
+Smt *ParseStatement(Parser *parser);
