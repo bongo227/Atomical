@@ -118,5 +118,16 @@ namespace FurlangCTest
 
 			Assert::AreEqual((int)returnSmt, (int)smt->type);
 		}
+
+		TEST_METHOD(ParseBlockStatment) {
+			// TODO: fix parser not inserting semis
+			char *src = "{\nreturn test;\n}";
+			Parser *parser = NewParser(Lex(src));
+			Smt *smt = ParseStatment(parser);
+
+			Assert::AreEqual((int)blockSmt, (int)smt->type);
+			Assert::AreEqual(1, smt->node.block.count);
+			Assert::AreEqual((int)returnSmt, (int)smt->node.block.smts->type);
+		}
 	};
 }

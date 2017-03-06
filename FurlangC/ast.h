@@ -180,10 +180,8 @@ struct _Smt {
 
 		// blockSmt
 		struct {
-			Token lBrace;
 			struct _Smt *smts;
-			int smtCount;
-			Token rBrace;
+			int count;
 		} block;
 
 		// ifSmt

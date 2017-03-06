@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fur.h"
-
 typedef struct {
 	char *name;
 	Object *obj;
@@ -24,3 +22,4 @@ typedef struct {
 
 Parser *NewParser(Token *tokens);
 Exp *ParseExpression(Parser *parser, int rbp);
+Smt *ParseStatment(Parser *parser);

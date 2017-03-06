@@ -96,3 +96,12 @@ Smt *newReturnSmt(Exp *result) {
 	
 	return s;
 }
+
+Smt *newBlockSmt(Smt *smts, int smtCount) {
+	Smt *s = (Smt *)malloc(sizeof(Smt));
+	s->type = blockSmt;
+	s->node.block.smts = smts;
+	s->node.block.count = smtCount;
+
+	return s; 
+}

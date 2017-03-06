@@ -184,11 +184,32 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 
 Smt *smtd(Parser *parser, Token *token) {
 	switch(token->type) {
+		// return statement
 		case RETURN: {
 			parser->tokens++;
 			Smt *s = newReturnSmt(ParseExpression(parser, 0));
 			expectSemi(parser);
 			return s; 
+		}
+		// block statement
+		case LBRACE: {
+			parser->tokens++;
+			
+			int smtCount = 0;
+			Smt *smts = (Smt *)malloc(sizeof(Smt) * 1024);
+			Smt *smtsPrt = smts;
+			while(parser->tokens->type != RBRACE) {
+				smtCount++;
+				memcpy(smtsPrt, ParseStatment(parser), sizeof(Smt));
+				smtsPrt++;
+			}
+			realloc(smts, sizeof(Smt) * smtCount);
+
+			Smt *s = newBlockSmt(smts, smtCount);
+
+			expect(parser, RBRACE);
+
+			return s;
 		}
 	}
 	return NULL;
