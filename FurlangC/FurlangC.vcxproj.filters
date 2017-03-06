@@ -44,5 +44,8 @@
     <ClInclude Include="uthash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fur.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

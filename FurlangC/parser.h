@@ -1,7 +1,6 @@
 #pragma once
 
-#include "ast.h"
-#include "uthash.h"
+#include "fur.h"
 
 typedef struct {
 	char *name;

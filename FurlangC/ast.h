@@ -75,9 +75,7 @@ struct _Exp {
 		// indexExp
 		struct {
 			struct _Exp *exp;
-			Token lBrack;
 			struct _Exp *index;
-			Token rBrack;
 		} index;
 
 		// sliceExp
@@ -154,15 +152,17 @@ struct _Dcl {
 
 typedef struct _Dcl Dcl;
 
+typedef enum {
+	declareSmt,
+	assignmentSmt,
+	returnSmt,
+	blockSmt,
+	ifSmt,
+	forSmt,
+} SmtType;
+
 struct _Smt {
-	enum {
-		declareSmt,
-		assignmentSmt,
-		returnSmt,
-		blockSmt,
-		ifSmt,
-		forSmt,
-	} type;
+	SmtType type;
 	union {
 		// declareSmt
 		Dcl *declare;
@@ -170,7 +170,6 @@ struct _Smt {
 		// assignmentSmt
 		struct {
 			Exp *left;
-			Token assign;
 			Exp *right;
 		} assignment;
 
@@ -199,6 +198,23 @@ struct _Smt {
 };
 
 typedef struct _Smt Smt;
+
+/*
+typedef enum {
+	Expression,
+	Statment,
+	Declaration,
+} NodeType;
+
+typedef struct {
+	NodeType type;
+	union {
+		Exp exp;
+		Smt smt;
+		Dcl dcl;
+	} node;
+} Node;
+*/
 
 typedef struct {
 	Dcl *functions;

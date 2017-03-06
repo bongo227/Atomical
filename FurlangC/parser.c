@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "fur.h"
 
 Parser *NewParser(Token *tokens) {
 	Scope *scope = (Scope *)malloc(sizeof(Scope));
@@ -60,11 +60,19 @@ Object *FindScope(Parser *parser, char *name) {
 
 int BindingPower(TokenType type) {
 	switch (type) {
+	case END:
+		return -10;
 	// Non-binding operators
 	case SEMI:
 		return 0;
 	// Assignment operators
 	case ASSIGN:
+	case ADD_ASSIGN:
+	case SUB_ASSIGN:
+	case MUL_ASSIGN:
+	case REM_ASSIGN:
+	case OR_ASSIGN:
+	case SHR_ASSIGN:
 	case DEFINE:
 		return 10;
 	// Logical operators
@@ -95,6 +103,7 @@ int BindingPower(TokenType type) {
 	case LPAREN:
 		return 70;
 	}
+	return 0;
 }
 
 void ParserNext(Parser *parser) {
@@ -102,41 +111,125 @@ void ParserNext(Parser *parser) {
 }
 
 void expect(Parser *parser, TokenType type) {
+	// TODO: create TokenType -> string
+	ASSERT(parser->tokens->type == type, "Expect failed");
 	ParserNext(parser);
-	if (parser->tokens->type != type)
-		printf("Expected: %d, Got: %d", type, parser->tokens->type);
 }
 
+// nud parses the current token in a prefix context (at the start of an (sub)expression)
 Exp *nud(Parser *parser, Token *token) {
 	switch (token->type) {
 	case IDENT:
 		return newIdentExp(token->value);
-	}
-}
-
-Exp *led(Parser *parser, Token *token, Exp *exp) {
-	switch (token->type) {
-	case ADD:
+	case NOT:
 	case SUB:
-	case MUL:
-	case QUO:
-	case EQL:
-	case NEQ:
-	case GTR:
-	case LSS:
-	case GEQ:
-	case LEQ:
-		return newBinaryExp(exp, *token, ParseExpression(parser, BindingPower(token->type)));
-	/*case PERIOD:
-		if (exp->type != IDENT) {
-			printf("Expected identifier on the left hand side of '.'");
-		}*/
-	case LBRACK:
-		return NULL;
+		return newUnaryExp(*token, ParseExpression(parser, 60));
 	}
+
+	return NULL;
 }
 
-// Binds tokens until the left binding power is <= right binding power (rbp)
+// led parses the current token in a infix contect (between two nodes)
+Exp *led(Parser *parser, Token *token, Exp *exp) {
+	int bp = BindingPower(token->type);
+	
+	switch (token->type) {
+		// binary expression
+		case ADD:
+		case SUB:
+		case MUL:
+		case QUO:
+		case EQL:
+		case NEQ:
+		case GTR:
+		case LSS:
+		case GEQ:
+		case LEQ: {
+			return newBinaryExp(exp, *token, ParseExpression(parser, bp));
+		} 
+		// selector expression
+		case PERIOD: {
+			return newSelectorExp(exp, ParseExpression(parser, bp));
+		}
+		// index expression
+		case LBRACK: {
+			Exp *index = ParseExpression(parser, 0);
+			expect(parser, RBRACK);
+			return newIndexExp(exp, index);
+		}
+		// right associative binary expression or assignments
+		// if the expression is an assigment, return a binary statement and let
+		// ParseStatment transform it into a statment.
+		case LAND:
+		case LOR:
+		case ASSIGN:
+		case ADD_ASSIGN:
+		case SUB_ASSIGN:
+		case MUL_ASSIGN:
+		case REM_ASSIGN:
+		case OR_ASSIGN:
+		case SHL_ASSIGN: {
+			return newBinaryExp(exp, *token, ParseExpression(parser, bp - 1));	
+		}
+	}
+
+	return NULL;
+}
+
+Smt *smtd(Parser *parser, Token *token) {
+	return NULL;
+}
+
+// Parses the next statement by calling smtd on the first token else handle
+// the declaration/assignment
+Smt *ParseStatment(Parser *parser) {
+	Token *t = parser->tokens;
+	Smt *smt = smtd(parser, t);
+	if (smt != NULL) {
+		return smt;
+	}
+
+	// Statement is an assignment/declaration, so treat it like an expression
+	// and transform it.
+	Exp *exp = ParseExpression(parser, 0);
+	ASSERT(exp->type == binaryExp, "Expecting assigment/declation statement");
+	
+	Exp *left = exp->node.binary.left;
+	Exp *right = exp->node.binary.right;
+
+	switch(exp->node.binary.op.type) {
+		case ASSIGN:
+			smt = newAssignmentSmt(left, right);
+			break;
+		case ADD_ASSIGN:
+			smt = newAddAssignmentSmt(left, right);
+			break;
+		case SUB_ASSIGN:
+			smt = newSubAssignmentSmt(left, right);
+			break;
+		case MUL_ASSIGN:
+			smt = newMulAssignmentSmt(left, right);
+			break;
+		case REM_ASSIGN:
+			smt = newRemAssignmentSmt(left, right);
+			break;
+		case OR_ASSIGN:
+			smt = newOrAssignmentSmt(left, right);
+			break;
+		case SHL_ASSIGN:
+			smt = newShlAssignmentSmt(left, right);
+			break;
+	}
+
+	// If statment is null, the next tokens dont start a valid statement
+	ASSERT(smt != NULL, "Expecting assigment/declation statement");
+
+	free(exp);
+	return smt;
+}
+
+// Parses the next expression by binding tokens until the left binding power is 
+// <= right binding power (rbp)
 Exp *ParseExpression(Parser *parser, int rbp) {
 	Exp *left;
 	Token *t = parser->tokens;
