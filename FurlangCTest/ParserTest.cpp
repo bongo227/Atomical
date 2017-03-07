@@ -29,7 +29,7 @@ namespace FurlangCTest
 		TEST_METHOD(ScopeInsert) {
 			Parser *parser = NewParser(NULL);
 			Object *obj = (Object *)malloc(sizeof(Object));
-			obj->type = Object::badObj;
+			obj->type = badObj;
 			obj->name = "test";
 			obj->node = NULL;
 			obj->typeInfo = NULL;
@@ -43,7 +43,7 @@ namespace FurlangCTest
 		TEST_METHOD(ScopeFind) {
 			Parser *parser = NewParser(NULL);
 			Object *obj = (Object *)malloc(sizeof(Object));
-			obj->type = Object::badObj;
+			obj->type = badObj;
 			obj->name = "test";
 			obj->node = NULL;
 			obj->typeInfo = NULL;
@@ -188,6 +188,18 @@ namespace FurlangCTest
 			Assert::AreEqual((int)identExp, (int)smt->node.ifs.cond->type);
 			Assert::AreEqual((int)blockSmt, (int)smt->node.ifs.body->type);
 			Assert::IsNull(smt->node.ifs.elses);
+		}
+
+		TEST_METHOD(ParserVaribleDeclare) {
+			char *src = "a := 10";
+			Parser *parser = NewParser(Lex(src));
+			Smt *smt = ParseStatement(parser);
+
+			Assert::AreEqual((int)declareSmt, (int)smt->type);
+			Assert::AreEqual((int)varibleDcl, (int)smt->node.declare->type);
+
+			Object *obj = FindScope(parser, "a");
+			Assert::IsTrue(obj->node == smt->node.declare);
 		}
 	};
 }

@@ -2,17 +2,19 @@
 
 # include "lexer.h"
 
+typedef enum {
+	badObj,
+	pkgObj,
+	constObj,
+	typeObj,
+	varObj,
+	funcObj,
+} ObjectType;
+
 // Object 
 // An object represents a named construct such as a constant, type, varible, function.
 typedef struct {
-	enum {
-		badObj,
-		pkgObj,
-		constObj,
-		typeObj,
-		varObj,
-		funcObj,
-	} type;
+	ObjectType type;
 	char *name;
 	void *node;
 	void *typeInfo;
@@ -121,12 +123,14 @@ struct _Exp {
 
 typedef struct _Exp Exp;
 
+typedef enum {
+	functionDcl,
+	argumentDcl,
+	varibleDcl,
+} DclType;
+
 struct _Dcl {
-	enum {
-		functionDcl,
-		argumentDcl,
-		varibleDcl,
-	} type;
+	DclType type;
 	union {
 		// functionDcl
 		struct {

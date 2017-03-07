@@ -59,34 +59,40 @@ Smt *newBinaryAssignmentSmt(Exp *left, TokenType op, Exp *right) {
 	Smt *e = (Smt *)malloc(sizeof(Smt));
 	e->type = assignmentSmt;
 	e->node.assignment.left = left;
-	Token t = {op, 0, 0, ""};
-	e->node.assignment.right = newBinaryExp(left, t, right);
+	
+	Token t = {ADD, 0, 0, ""};
+	
+	switch(op) {
+		case ASSIGN:
+			break;
+		case ADD_ASSIGN:
+			t.type = ADD;
+			right = newBinaryExp(left, t, right);
+			break;
+		case SUB_ASSIGN:
+			t.type = SUB; 
+			right = newBinaryExp(left, t, right);
+			break;
+		case MUL_ASSIGN:
+			t.type = MUL;
+			right = newBinaryExp(left, t, right);
+			break;
+		case REM_ASSIGN:
+			t.type = REM;
+			right = newBinaryExp(left, t, right);
+			break;
+		case OR_ASSIGN:
+			t.type = OR; 
+			right = newBinaryExp(left, t, right);
+			break;
+		case SHL_ASSIGN:
+			t.type = SHL;
+			right = newBinaryExp(left, t, right);
+			break;
+	}
 
+	e->node.assignment.right = right;
 	return e; 
-}
-
-Smt *newAddAssignmentSmt(Exp *left, Exp *right) {
-	return newBinaryAssignmentSmt(left, ADD, right);
-}
-
-Smt *newSubAssignmentSmt(Exp *left, Exp *right) {
-	return newBinaryAssignmentSmt(left, SUB, right);
-}
-
-Smt *newMulAssignmentSmt(Exp *left, Exp *right) {
-	return newBinaryAssignmentSmt(left, MUL, right);
-}
-
-Smt *newRemAssignmentSmt(Exp *left, Exp *right) {
-	return newBinaryAssignmentSmt(left, REM, right);
-}
-
-Smt *newOrAssignmentSmt(Exp *left, Exp *right) {
-	return newBinaryAssignmentSmt(left, OR, right);
-}
-
-Smt *newShlAssignmentSmt(Exp *left, Exp *right) {
-	return newBinaryAssignmentSmt(left, SHL, right);
 }
 
 Smt *newReturnSmt(Exp *result) {
@@ -114,4 +120,21 @@ Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
 	s->node.ifs.elses = elses;
 
 	return s;
+}
+
+Dcl *newVaribleDcl(Exp *name, Exp *value) {
+	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
+	d->type = varibleDcl;
+	d->node.varible.name = name;
+	d->node.varible.value = value;
+
+	return d;
+}
+
+Smt *newDeclareSmt(Dcl *dcl) {
+	Smt *s = (Smt *)malloc(sizeof(Smt));
+	s->type = declareSmt;
+	s->node.declare = dcl;
+
+	return s; 
 }

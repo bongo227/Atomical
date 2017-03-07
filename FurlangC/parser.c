@@ -186,7 +186,8 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 		case MUL_ASSIGN:
 		case REM_ASSIGN:
 		case OR_ASSIGN:
-		case SHL_ASSIGN: {
+		case SHL_ASSIGN: 
+		case DEFINE: {
 			return newBinaryExp(exp, *token, ParseExpression(parser, bp - 1));	
 		}
 	}
@@ -208,6 +209,8 @@ Smt *smtd(Parser *parser, Token *token) {
 		case LBRACE: {
 			parser->tokens++;
 			
+			EnterScope(parser);
+
 			int smtCount = 0;
 			Smt *smts = (Smt *)malloc(sizeof(Smt) * 1024);
 			Smt *smtsPrt = smts;
@@ -222,6 +225,8 @@ Smt *smtd(Parser *parser, Token *token) {
 
 			expect(parser, RBRACE);
 
+			ExitScope(parser);
+
 			return s;
 		}
 		// if statement
@@ -230,6 +235,7 @@ Smt *smtd(Parser *parser, Token *token) {
 			
 			Exp *cond = ParseExpression(parser, 0);
 			Smt *block = ParseStatement(parser);
+			ASSERT(block->type == blockSmt, "Expected block after if condition");
 			Smt *elses = NULL;
 
 			// Check for elseif/else
@@ -266,29 +272,32 @@ Smt *ParseStatement(Parser *parser) {
 	
 	Exp *left = exp->node.binary.left;
 	Exp *right = exp->node.binary.right;
+	Token op = exp->node.binary.op;
 
-	switch(exp->node.binary.op.type) {
+	switch(op.type) {
 		case ASSIGN:
-			smt = newAssignmentSmt(left, right);
-			break;
 		case ADD_ASSIGN:
-			smt = newAddAssignmentSmt(left, right);
-			break;
 		case SUB_ASSIGN:
-			smt = newSubAssignmentSmt(left, right);
-			break;
 		case MUL_ASSIGN:
-			smt = newMulAssignmentSmt(left, right);
-			break;
 		case REM_ASSIGN:
-			smt = newRemAssignmentSmt(left, right);
-			break;
 		case OR_ASSIGN:
-			smt = newOrAssignmentSmt(left, right);
-			break;
 		case SHL_ASSIGN:
-			smt = newShlAssignmentSmt(left, right);
+			smt = newBinaryAssignmentSmt(left, op.type, right);
 			break;
+		case DEFINE:
+			ASSERT(left->type == identExp, 
+				"Expected left hand side of declare to be identifier");
+
+			smt = newDeclareSmt(newVaribleDcl(left, right));
+			
+			// Added declaration to scope
+			char *name = left->node.ident.name;
+			Object *obj =(Object *)malloc(sizeof(Object));
+			obj->name = name;
+			obj->node = smt->node.declare;
+			obj->type = varObj;
+			obj->typeInfo = NULL;
+			InsertScope(parser, name, obj);
 	}
 
 	// If statment is null, the next tokens dont start a valid statement
