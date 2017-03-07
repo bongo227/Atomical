@@ -1,26 +1,32 @@
 #include "fur.h"
 
-Parser *NewParser(Token *tokens) {
+// creates a new empty scope
+Scope *newScope(Scope *outer) {
 	Scope *scope = (Scope *)malloc(sizeof(Scope));
-	scope->outer = NULL;
-	scope->objects = NULL;
-	
+	scope->outer = outer;
+	ScopeObject *objects = NULL;
+	scope->objects = objects;
+
+	return scope;
+}
+
+// NewParser creates a new parser
+Parser *NewParser(Token *tokens) {
 	Parser *parser = (Parser *)malloc(sizeof(Parser));
 	parser->tokens = tokens;
+	parser->scope = newScope(NULL);
 	parser->expLevel = 0;
 	parser->rhs = false;
 	
 	return parser;
 }
 
+// EnterScope enters a new inner scope
 void EnterScope(Parser *parser) {
-	Scope *scope = (Scope *)malloc(sizeof(Scope));
-	scope->outer = parser->scope->outer;
-	scope->objects = NULL;
-
-	parser->scope = scope;
+	parser->scope = newScope(parser->scope);
 }
 
+// ExitScope exits the current scope
 void ExitScope(Parser *parser) {
 	// clear hash table and free all scope objects
 	ScopeObject *obj, *tmp;
@@ -35,6 +41,7 @@ void ExitScope(Parser *parser) {
 	parser->scope = outer;
 }
 
+// InsertScope inserts an object into the current scope
 void InsertScope(Parser *parser, char *name, Object *object) {
 	// check if name is already in scope
 	ScopeObject *obj;
@@ -48,6 +55,7 @@ void InsertScope(Parser *parser, char *name, Object *object) {
 	HASH_ADD_KEYPTR(hh, parser->scope->objects, obj->name, strlen(obj->name), obj);
 }
 
+// FindScope finds an object in scope
 Object *FindScope(Parser *parser, char *name) {
 	ScopeObject *obj;
 	for (Scope *scope = parser->scope; scope != NULL; scope = scope->outer) {
@@ -58,6 +66,7 @@ Object *FindScope(Parser *parser, char *name) {
 	printf("\"%s\" not in scope", name);
 }
 
+// BindingPower returns the left binding power of a token
 int BindingPower(TokenType type) {
 	switch (type) {
 	case END:
@@ -106,16 +115,19 @@ int BindingPower(TokenType type) {
 	return 0;
 }
 
+// ParserNext moves the parser onto the next token
 void ParserNext(Parser *parser) {
 	parser->tokens++;
 }
 
+// expect asserts that the token is of type type, if true parser advances
 void expect(Parser *parser, TokenType type) {
 	// TODO: create TokenType -> string
 	ASSERT(parser->tokens->type == type, "Expect failed");
 	ParserNext(parser);
 }
 
+// expectSemi expects a semicolon
 void expectSemi(Parser *parser) {
 	ASSERT(parser->tokens->type == SEMI || 
 		parser->tokens->type == END, "Expected semi");
@@ -182,6 +194,7 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 	return NULL;
 }
 
+// smtd parser the current token in the context of the start of a statement
 Smt *smtd(Parser *parser, Token *token) {
 	switch(token->type) {
 		// return statement

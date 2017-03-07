@@ -10,6 +10,56 @@ namespace FurlangCTest
 {
 	TEST_CLASS(ParserTest) {
 	public:
+		TEST_METHOD(ScopeEnter) {
+			Parser *parser = NewParser(NULL);
+			Scope *outer = parser->scope;
+			Assert::IsNull(outer->outer);
+			EnterScope(parser);
+			Assert::IsTrue(outer == parser->scope->outer);
+		}
+
+		TEST_METHOD(ScopeExit) {
+			Parser *parser = NewParser(NULL);
+			Scope *outer = parser->scope;
+			EnterScope(parser);
+			ExitScope(parser);
+			Assert::IsTrue(outer == parser->scope);
+		}
+
+		TEST_METHOD(ScopeInsert) {
+			Parser *parser = NewParser(NULL);
+			Object *obj = (Object *)malloc(sizeof(Object));
+			obj->type = Object::badObj;
+			obj->name = "test";
+			obj->node = NULL;
+			obj->typeInfo = NULL;
+			InsertScope(parser, "test", obj);
+
+			ScopeObject *found;
+			HASH_FIND_STR(parser->scope->objects, "test", found);
+			Assert::AreEqual(obj->name, found->obj->name);			
+		}
+
+		TEST_METHOD(ScopeFind) {
+			Parser *parser = NewParser(NULL);
+			Object *obj = (Object *)malloc(sizeof(Object));
+			obj->type = Object::badObj;
+			obj->name = "test";
+			obj->node = NULL;
+			obj->typeInfo = NULL;
+			InsertScope(parser, "test", obj);
+
+			// Enter and exit some scopes
+			EnterScope(parser);
+			EnterScope(parser);
+			ExitScope(parser);
+			EnterScope(parser);
+			ExitScope(parser);
+
+			Object *found = FindScope(parser, "test");
+			Assert::AreSame(obj->name, found->name);
+		}
+
 		TEST_METHOD(ParseIdentExpression) {
 			char *src = "a";
 			Parser *parser = NewParser(Lex(src));
