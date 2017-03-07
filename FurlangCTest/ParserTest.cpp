@@ -190,7 +190,7 @@ namespace FurlangCTest
 			Assert::IsNull(smt->node.ifs.elses);
 		}
 
-		TEST_METHOD(ParserVaribleDeclare) {
+		TEST_METHOD(ParserShortVaribleDeclare) {
 			char *src = "a := 10";
 			Parser *parser = NewParser(Lex(src));
 			Smt *smt = ParseStatement(parser);
@@ -200,6 +200,29 @@ namespace FurlangCTest
 
 			Object *obj = FindScope(parser, "a");
 			Assert::IsTrue(obj->node == smt->node.declare);
+		}
+
+		TEST_METHOD(ParseLongVaribleDeclare) {
+			char *src = "var int a = 10";
+			Parser *parser = NewParser(Lex(src));
+			Smt *smt = ParseStatement(parser);
+
+			Assert::AreEqual((int)declareSmt, (int)smt->type);
+			Assert::AreEqual((int)varibleDcl, (int)smt->node.declare->type);
+			Assert::AreEqual((int)identExp, (int)smt->node.declare->node.varible.name->type);
+			Assert::AreEqual("int", smt->node.declare->node.varible.type->node.ident.name);
+
+			Object *obj = FindScope(parser, "a");
+			Assert::IsNotNull(obj);
+			Assert::IsTrue(obj->node == smt->node.declare);
+		}
+
+		TEST_METHOD(ParseArrayType) {
+			char *src = "int[3]";
+			Parser *parser = NewParser(Lex(src));
+			Exp *type = ParseType(parser);
+
+			Assert::AreEqual((int)arrayTypeExp, (int)type->type);
 		}
 	};
 }

@@ -64,6 +64,7 @@ Object *FindScope(Parser *parser, char *name) {
 	}
 
 	printf("\"%s\" not in scope", name);
+	return NULL;
 }
 
 // BindingPower returns the left binding power of a token
@@ -195,6 +196,23 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 	return NULL;
 }
 
+Exp *ParseType(Parser *parser) {
+	Exp *type = ParseExpression(parser, 0);
+	switch (type->type) {
+	case identExp:
+		break;
+	case indexExp:
+		// type is array type so convert indexExp -> arrayTypeExp
+		type = newArrayTypeExp(type->node.index.exp,
+			type->node.index.index);
+		break;
+	default:
+		ASSERT(false, "Expecting a type");
+	}
+
+	return type;
+}
+
 // smtd parser the current token in the context of the start of a statement
 Smt *smtd(Parser *parser, Token *token) {
 	switch(token->type) {
@@ -252,6 +270,36 @@ Smt *smtd(Parser *parser, Token *token) {
 
 			return newIfSmt(cond, block, elses);
 		}
+		// varible declaration
+		case VAR: {
+			parser->tokens++;
+			
+			// parse declaration type
+			Exp *type = ParseType(parser);
+
+			// parse declaration name
+			ASSERT(parser->tokens->type == IDENT,
+				"Expected var to have name after type");
+			Exp *name = newIdentExp(parser->tokens->value);
+			ParserNext(parser);
+
+			expect(parser, ASSIGN);
+
+			// parse declaration value
+			Exp *value = ParseExpression(parser, 0);
+
+			Smt *smt = newDeclareSmt(newVaribleDcl(name, type, value));
+
+			// Added declaration to scope
+			Object *obj =(Object *)malloc(sizeof(Object));
+			obj->name = name->node.ident.name;
+			obj->node = smt->node.declare;
+			obj->type = varObj;
+			obj->typeInfo = NULL;
+			InsertScope(parser, name->node.ident.name, obj);
+
+			return smt;
+		}
 	}
 	return NULL;
 }
@@ -288,7 +336,7 @@ Smt *ParseStatement(Parser *parser) {
 			ASSERT(left->type == identExp, 
 				"Expected left hand side of declare to be identifier");
 
-			smt = newDeclareSmt(newVaribleDcl(left, right));
+			smt = newDeclareSmt(newVaribleDcl(left, NULL, right));
 			
 			// Added declaration to scope
 			char *name = left->node.ident.name;
@@ -298,6 +346,7 @@ Smt *ParseStatement(Parser *parser) {
 			obj->type = varObj;
 			obj->typeInfo = NULL;
 			InsertScope(parser, name, obj);
+			break;
 	}
 
 	// If statment is null, the next tokens dont start a valid statement

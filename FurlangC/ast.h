@@ -33,7 +33,11 @@ typedef enum {
 	castExp,
 	starExp,
 	binaryExp,
-	unaryExp
+	unaryExp,
+	arrayTypeExp,
+	fieldTypeExp,
+	structTypeExp,
+	procTypeExp, // TODO: add this
 } ExpType;
 
 struct _Exp {
@@ -118,6 +122,24 @@ struct _Exp {
 			Token op;
 			struct _Exp *right;
 		} binary;
+
+		// arrayExp
+		struct {
+			struct _Exp *type;
+			struct _Exp *length;
+		} arrayType;
+
+		// fieldExp
+		struct {
+			struct _Exp *type;
+			struct _Exp *name;
+		} fieldType;
+
+		// structExp
+		struct {
+			struct _Exp *fields;
+			int feildCount; 
+		} structType;
 	} node;
 };
 
@@ -149,6 +171,7 @@ struct _Dcl {
 		// varibleDcl
 		struct {
 			Exp *name;
+			Exp *type;
 			Exp *value;
 		} varible;
 	} node;
@@ -199,28 +222,7 @@ struct _Smt {
 
 typedef struct _Smt Smt;
 
-/*
-typedef enum {
-	Expression,
-	Statment,
-	Declaration,
-} NodeType;
-
-typedef struct {
-	NodeType type;
-	union {
-		Exp exp;
-		Smt smt;
-		Dcl dcl;
-	} node;
-} Node;
-*/
-
-typedef struct {
-	Dcl *functions;
-	int functionCount;
-} Ast;
-
+// TODO: finish these and consider name scheme
 Exp *newIdentExp(char *ident);
 Exp *newBinaryExp(Exp *left, Token op, Exp *right);
 Exp *newSelectorExp(Exp *exp, Exp* selector);

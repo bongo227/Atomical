@@ -122,10 +122,11 @@ Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
 	return s;
 }
 
-Dcl *newVaribleDcl(Exp *name, Exp *value) {
+Dcl *newVaribleDcl(Exp *name, Exp *type, Exp *value) {
 	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
 	d->type = varibleDcl;
 	d->node.varible.name = name;
+	d->node.varible.type = type;
 	d->node.varible.value = value;
 
 	return d;
@@ -137,4 +138,31 @@ Smt *newDeclareSmt(Dcl *dcl) {
 	s->node.declare = dcl;
 
 	return s; 
+}
+
+Exp *newArrayTypeExp(Exp *type, Exp *length) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = arrayTypeExp;
+	e->node.arrayType.type = type;
+	e->node.arrayType.length = length;
+
+	return e;
+}
+
+Exp *newFieldTypeExp(Exp *type, Exp *name) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = fieldTypeExp;
+	e->node.fieldType.type = type;
+	e->node.fieldType.name = name;
+
+	return e;
+}
+
+Exp *newStructTypeExp(Exp *fields, int count) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = structTypeExp;
+	e->node.structType.fields = fields;
+	e->node.structType.feildCount = count;
+
+	return e;
 }
