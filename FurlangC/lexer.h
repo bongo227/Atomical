@@ -10,16 +10,15 @@
 #define false 0
 
 typedef enum {
-	IDENT,
-	STRING,
 	ILLEGAL,
+	IDENT,
 	
 	// literals
 	INT,
 	FLOAT,
 	HEX,
 	OCTAL,
-	SEMI,
+	STRING,
 
 	// key words
 	BREAK,
@@ -43,6 +42,7 @@ typedef enum {
 	VAR,
 
 	// symbols
+	SEMI,
 	COLON,
 	DEFINE,
 	DOUBLE_COLON,
@@ -110,3 +110,4 @@ typedef struct {
 } Lexer;
 
 Token *Lex(char *source);
+char *TokenName(TokenType type);

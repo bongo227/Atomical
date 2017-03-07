@@ -401,11 +401,11 @@ Token *Lex(char *source) {
 			// token is a symbol
 			switch (*lexer.source) {
 				case '\n':
-					lexer.semi = false;
 					token.type = SEMI;
-					next(&lexer);
+					lexer.semi = false;
 					lexer.column = 1;
 					lexer.line++;
+					next(&lexer);
 					break;
 
 				case '"':
@@ -563,4 +563,78 @@ Token *Lex(char *source) {
 	tokens[i] = token;
 
 	return tokens;
+}
+
+char *TokenName(TokenType type) {
+	switch(type) {
+		case ILLEGAL: return "illegal";
+		case IDENT: return "ident";
+		
+		case INT: return "[int]";
+		case FLOAT: return "[float]";
+		case HEX: return "[hex]";
+		case OCTAL: return "[octal]";
+		case STRING: return "[string]";
+		
+		case BREAK: return "break";
+		case CASE: return "case";
+		case CONST: return "const";
+		case CONTINUE: return "continue";
+		case DEFAULT: return "default";
+		case ELSE: return "else";
+		case FALLTHROUGH: return "fallthrough";
+		case FOR: return "for";
+		case FUNC: return "func";
+		case PROC: return "proc";
+		case IF: return "if";
+		case IMPORT: return "import";
+		case RETURN: return "return";
+		case SELECT: return "select";
+		case STRUCT: return "struct";
+		case SWITCH: return "switch";
+		case TYPE: return "type";
+		case VAR: return "var";
+		
+		case SEMI: return ";";
+		case COLON: return ":";
+		case DOUBLE_COLON: return "::";
+		case ELLIPSE: return "...";
+		case PERIOD: return ".";
+		case COMMA: return ",";
+		case LPAREN: return "(";
+		case RPAREN: return ")";
+		case LBRACK: return "[";
+		case RBRACE: return "]";
+		case LBRACE: return "{";
+		case RBRACE: return "}";
+		case ADD: return "+";
+		case ADD_ASSIGN: return "+=";
+		case INC: return "++";
+		case ARROW: return "->";
+		case SUB: return "-";
+		case SUB_ASSIGN: return "-=";
+		case DEC: return "--";
+		case MUL: return "*";
+		case MUL_ASSIGN: return "*=";
+		case QUO: return "/";
+		case QUO_ASSIGN: return "/=";
+		case REM: return "%";
+		case REM_ASSIGN: return "%=";
+		case XOR: return "^";
+		case XOR_ASSIGN: return "^=";
+		case LSS: return "<";
+		case LEQ: return "<=";
+		case SHL: return "<<";
+		case SHL: return "<<=";
+		case ASSIGN: return "=";
+		case EQL: return "==";
+		case NOT: return "!";
+		case NEQ: return "!=";
+		case AND_NOT: return "&^";
+		case AND_NOT_ASSIGN: return "&^=";
+		case LAND: return "&&";
+		case OR: return "|";
+		case OR_ASSIGN: return "|=";
+		case LOR: return "||";
+	}
 }

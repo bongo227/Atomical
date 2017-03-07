@@ -157,7 +157,7 @@ namespace FurlangCTest
 			}
 		}
 
-		TEST_METHOD(Lines) {
+		TEST_METHOD(LineNumbers) {
 			Token *tokens = Lex("1\n2\n3");
 			
 			for (int i = 0; i < 3; i++) {
@@ -165,12 +165,17 @@ namespace FurlangCTest
 			}
 		}
 
-		TEST_METHOD(Columns) {
+		TEST_METHOD(ColumnNumbers) {
 			Token *tokens = Lex("foo bar baz");
 
 			Assert::AreEqual(1, tokens[0].column);
 			Assert::AreEqual(5, tokens[1].column);
 			Assert::AreEqual(9, tokens[2].column);
+		}
+
+		TEST_METHOD(SemiColonInsertion) {
+			Token *tokens = Lex("foo\nbar");
+			Assert::AreEqual((int)SEMI, (int)tokens[1].type);
 		}
 	};
 }
