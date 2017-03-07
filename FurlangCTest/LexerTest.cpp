@@ -28,9 +28,9 @@ namespace FurlangCTest
 
 				Token *tokens = Lex(c.input);
 
-				Assert::AreEqual((int)c.expectedType, (int)tokens[0].type);
+				Assert::AreEqual(TokenName(c.expectedType), TokenName(tokens[0].type));
 				Assert::IsTrue(strcmp(c.expectedValue, tokens[0].value) == 0);
-				Assert::AreEqual((int)END, (int)tokens[1].type);
+				Assert::AreEqual(TokenName(END), TokenName(tokens[1].type));
 			}
 		}
 
@@ -51,9 +51,9 @@ namespace FurlangCTest
 
 				Token *tokens = Lex(c.input);
 
-				Assert::AreEqual((int)c.expectedType, (int)tokens[0].type);
+				Assert::AreEqual(TokenName(c.expectedType), TokenName(tokens[0].type));
 				Assert::IsTrue(strcmp(c.expectedValue, tokens[0].value) == 0);
-				Assert::AreEqual((int)END, (int)tokens[1].type);
+				Assert::AreEqual(TokenName(END), TokenName(tokens[1].type));
 			}
 		}
 
@@ -74,9 +74,9 @@ namespace FurlangCTest
 
 				Token *tokens = Lex(c.input);
 
-				Assert::AreEqual((int)c.expectedType, (int)tokens[0].type);
+				Assert::AreEqual(TokenName(c.expectedType), TokenName(tokens[0].type));
 				Assert::IsTrue(strcmp(c.expectedValue, tokens[0].value) == 0);
-				Assert::AreEqual((int)END, (int)tokens[1].type);
+				Assert::AreEqual(TokenName(END), TokenName(tokens[1].type));
 			}
 		}
 
@@ -151,9 +151,9 @@ namespace FurlangCTest
 
 				Token *tokens = Lex(c.input);
 
-				Assert::AreEqual((int)c.expectedType, (int)tokens[0].type);
+				Assert::AreEqual(TokenName(c.expectedType), TokenName(tokens[0].type));
 				Assert::IsTrue(strcmp(c.expectedValue, tokens[0].value) == 0);
-				Assert::AreEqual((int)END, (int)tokens[1].type);
+				Assert::AreEqual(TokenName(END), TokenName(tokens[1].type));
 			}
 		}
 
@@ -175,7 +175,7 @@ namespace FurlangCTest
 
 		TEST_METHOD(SemiColonInsertion) {
 			Token *tokens = Lex("foo\nbar");
-			Assert::AreEqual((int)SEMI, (int)tokens[1].type);
+			Assert::AreEqual(TokenName(SEMI), TokenName(tokens[1].type));
 		}
 	};
 }

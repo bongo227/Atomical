@@ -548,8 +548,6 @@ Token *Lex(char *source) {
 		// Check for newline
 		if (*lexer.source == '\n') {
 			lexer.line++;
-			lexer.column = 1;
-			next(&lexer);
 		}
 
 	}
@@ -604,7 +602,7 @@ char *TokenName(TokenType type) {
 		case LPAREN: return "(";
 		case RPAREN: return ")";
 		case LBRACK: return "[";
-		case RBRACE: return "]";
+		case RBRACK: return "]";
 		case LBRACE: return "{";
 		case RBRACE: return "}";
 		case ADD: return "+";
@@ -625,7 +623,7 @@ char *TokenName(TokenType type) {
 		case LSS: return "<";
 		case LEQ: return "<=";
 		case SHL: return "<<";
-		case SHL: return "<<=";
+		case SHL_ASSIGN: return "<<=";
 		case ASSIGN: return "=";
 		case EQL: return "==";
 		case NOT: return "!";
@@ -637,4 +635,6 @@ char *TokenName(TokenType type) {
 		case OR_ASSIGN: return "|=";
 		case LOR: return "||";
 	}
+
+	return "UNKOWN_NAME";
 }

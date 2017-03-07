@@ -120,8 +120,7 @@ namespace FurlangCTest
 		}
 
 		TEST_METHOD(ParseBlockStatment) {
-			// TODO: fix parser not inserting semis
-			char *src = "{\nreturn test;\n}";
+			char *src = "{\nreturn test\n}";
 			Parser *parser = NewParser(Lex(src));
 			Smt *smt = ParseStatement(parser);
 
@@ -131,7 +130,7 @@ namespace FurlangCTest
 		}
 
 		TEST_METHOD(ParseIfStatment) {
-			char *src = "if true {\nreturn false;\n}";
+			char *src = "if true {\nreturn false\n}";
 			Parser *parser = NewParser(Lex(src));
 			Smt *smt = ParseStatement(parser);
 
