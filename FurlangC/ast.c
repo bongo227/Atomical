@@ -166,3 +166,24 @@ Exp *newStructTypeExp(Exp *fields, int count) {
 
 	return e;
 }
+
+Dcl *newArgumentDcl(Exp *type, Exp *name) {
+	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
+	d->type = argumentDcl;
+	d->node.argument.type = type;
+	d->node.argument.name = name;
+
+	return d;
+}
+
+Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *body) {
+	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
+	d->type = functionDcl;
+	d->node.function.name = name;
+	d->node.function.args = args;
+	d->node.function.argCount = argCount;
+	d->node.function.returnType = returnType;
+	d->node.function.body = body;
+
+	return d;
+}

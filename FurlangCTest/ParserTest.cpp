@@ -224,5 +224,13 @@ namespace FurlangCTest
 
 			Assert::AreEqual((int)arrayTypeExp, (int)type->type);
 		}
+
+		TEST_METHOD(ParseFunctionDefinition) {
+			char *src = "proc test :: int a, int b {\nreturn a + b\n}";
+			Parser *parser = NewParser(Lex(src));
+			Dcl *dcl = ParseFunction(parser);
+
+			Assert::AreEqual((int)functionDcl, (int)dcl->type);
+		}
 	};
 }

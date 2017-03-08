@@ -304,6 +304,38 @@ Smt *smtd(Parser *parser, Token *token) {
 	return NULL;
 }
 
+Exp *ParseIdent(Parser *parser) {
+	ASSERT(parser->tokens->type == IDENT,
+		"Expected identifier");
+	Exp *ident = newIdentExp(parser->tokens->value);
+	ParserNext(parser);
+
+	return ident;
+}
+
+Dcl *ParseFunction(Parser *parser) {
+	expect(parser, PROC);
+	Exp *name = ParseIdent(parser); // function name
+	expect(parser, DOUBLE_COLON);
+
+	// parse arguments
+	Dcl *args = (Dcl *)malloc(0);
+	int argCount = 0;
+	while(parser->tokens->type != ARROW) {
+		realloc(args, argCount++);
+		Exp *type = ParseType(parser); // arg type
+		Exp *name = ParseIdent(parser); // arg name
+		memcpy(args + argCount - 1, newArgumentDcl(type, name), sizeof(Dcl));
+	}
+
+	expect(parser, ARROW);
+
+	Exp *returnType = ParseType(parser);
+	Smt *body = ParseStatement(parser);
+
+	return newFunctionDcl(name, args, argCount, returnType, body);
+}
+
 // Parses the next statement by calling smtd on the first token else handle
 // the declaration/assignment
 Smt *ParseStatement(Parser *parser) {

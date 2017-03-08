@@ -157,14 +157,15 @@ struct _Dcl {
 		// functionDcl
 		struct {
 			Exp *name;
-			Token dColon;
 			struct _Dcl *args;
 			int argCount;
+			Exp *returnType;
 			struct _Smt *body;
 		} function;
 
 		// argumentDcl
 		struct {
+			Exp *type;
 			Exp *name;
 		} argument;
 
@@ -226,3 +227,4 @@ typedef struct _Smt Smt;
 Exp *newIdentExp(char *ident);
 Exp *newBinaryExp(Exp *left, Token op, Exp *right);
 Exp *newSelectorExp(Exp *exp, Exp* selector);
+Dcl *newArgumentDcl(Exp *type, Exp *name);
