@@ -14,6 +14,9 @@ CTestTestfile.cmake
 
 # End of https://www.gitignore.io/api/cmake
 
+build/*
+!build/CMakeList.txt
+
 # Created by https://www.gitignore.io/api/c,visualstudio,visualstudiocode
 
 ### C ###
