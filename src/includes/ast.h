@@ -1,6 +1,15 @@
 #pragma once
 
-# include "lexer.h"
+#include "all.h"
+
+struct _Exp;
+typedef struct _Exp Exp;
+
+struct _Dcl;
+typedef struct _Dcl Dcl;
+
+struct _Smt;
+typedef struct _Smt Smt;
 
 typedef enum {
 	badObj,
@@ -143,7 +152,12 @@ struct _Exp {
 	} node;
 };
 
-typedef struct _Exp Exp;
+Exp *newIdentExp(char *ident);
+Exp *newUnaryExp(Token op, Exp *right);
+Exp *newBinaryExp(Exp *left, Token op, Exp *right);
+Exp *newSelectorExp(Exp *exp, Exp* selector);
+Exp *newIndexExp(Exp *exp, Exp *index);
+Exp *newArrayTypeExp(Exp *type, Exp *length);
 
 typedef enum {
 	functionDcl,
@@ -179,6 +193,10 @@ struct _Dcl {
 };
 
 typedef struct _Dcl Dcl;
+
+Dcl *newArgumentDcl(Exp *type, Exp *name);
+Dcl *newVaribleDcl(Exp *name, Exp *type, Exp *value);
+Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *body);
 
 typedef enum {
 	declareSmt,
@@ -223,8 +241,8 @@ struct _Smt {
 
 typedef struct _Smt Smt;
 
-// TODO: finish these and consider name scheme
-Exp *newIdentExp(char *ident);
-Exp *newBinaryExp(Exp *left, Token op, Exp *right);
-Exp *newSelectorExp(Exp *exp, Exp* selector);
-Dcl *newArgumentDcl(Exp *type, Exp *name);
+Smt *newReturnSmt(Exp *result);
+Smt *newBlockSmt(Smt *smts, int smtCount);
+Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses);
+Smt *newDeclareSmt(Dcl *dcl);
+Smt *newBinaryAssignmentSmt(Exp *left, TokenType op, Exp *right);

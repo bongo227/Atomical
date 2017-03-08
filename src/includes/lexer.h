@@ -1,13 +1,6 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <stdbool.h>
-
-#define true 1
-#define false 0
+#include "all.h"
 
 typedef enum {
 	ILLEGAL,

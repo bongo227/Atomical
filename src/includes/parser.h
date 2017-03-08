@@ -1,5 +1,8 @@
 #pragma once
 
+#include "all.h"
+#include "uthash.h"
+
 typedef struct {
 	char *name;
 	Object *obj;

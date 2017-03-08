@@ -1,4 +1,4 @@
-#include "lexer.h"
+#include "includes/lexer.h"
 
 void printToken(Token *token) {
 	// TODO: finsh theses

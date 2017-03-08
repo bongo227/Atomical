@@ -1,4 +1,5 @@
-#include "fur.h"
+#include "includes/uthash.h"
+#include "includes/parser.h"
 
 // creates a new empty scope
 Scope *newScope(Scope *outer) {
