@@ -238,7 +238,7 @@ Smt *smtd(Parser *parser, Token *token) {
 				memcpy(smtsPrt, ParseStatement(parser), sizeof(Smt));
 				smtsPrt++;
 			}
-			realloc(smts, sizeof(Smt) * smtCount);
+			smts = realloc(smts, sizeof(Smt) * smtCount);
 
 			Smt *s = newBlockSmt(smts, smtCount);
 
@@ -323,10 +323,14 @@ Dcl *ParseFunction(Parser *parser) {
 	Dcl *args = (Dcl *)malloc(0);
 	int argCount = 0;
 	while(parser->tokens->type != ARROW) {
-		realloc(args, argCount++);
+		if (argCount > 0) expect(parser, COMMA);
+		args = realloc(args, sizeof(Dcl) * ++argCount);
+
+		// Construct argument
 		Exp *type = ParseType(parser); // arg type
 		Exp *name = ParseIdent(parser); // arg name
-		memcpy(args + argCount - 1, newArgumentDcl(type, name), sizeof(Dcl));
+		Dcl *arg = newArgumentDcl(type, name);
+		memcpy(args + argCount - 1, arg, sizeof(Dcl));
 	}
 
 	expect(parser, ARROW);

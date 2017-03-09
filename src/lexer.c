@@ -75,7 +75,7 @@ char *word(Lexer *lexer) {
 	length++;
 
 	// shrink string to ident length
-	realloc(word, length);
+	word = realloc(word, length);
 
 	return word;
 }
@@ -159,7 +159,7 @@ exit:
 	length++;
 	*numberPtr = '\0';
 
-	realloc(number, length * sizeof(char));
+	number = realloc(number, length * sizeof(char));
 	return number;
 }
 
@@ -258,7 +258,7 @@ char *escape(char **input, char quote) {
 	*esc = '\0';
 	length++;
 
-	realloc(esc, length * sizeof(char));
+	esc = realloc(esc, length * sizeof(char));
 	return esc;
 }
 
@@ -287,7 +287,7 @@ char *string(char **input) {
 	*stringPtr = '\0';
 	length++;
 
-	realloc(string, length * sizeof(char));
+	string = realloc(string, length * sizeof(char));
 	return string;
 }
 

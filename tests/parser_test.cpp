@@ -217,9 +217,11 @@ TEST(ParserTest, ParseArrayType) {
 }
 
 TEST(ParserTest, ParseFunctionDefinition) {
-    char *src = "proc test :: int a, int b {\nreturn a + b\n}";
+    char *src = "proc test :: int a, int b -> int {\nreturn a + b\n}";
     Parser *parser = NewParser(Lex(src));
     Dcl *dcl = ParseFunction(parser);
 
     ASSERT_EQ((int)functionDcl, (int)dcl->type);
+    ASSERT_EQ(2, (int)dcl->node.function.argCount);
+    ASSERT_EQ((int)identExp, (int)dcl->node.function.returnType->type);
 }
