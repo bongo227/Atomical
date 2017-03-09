@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 # Use Clang
-# set(CMAKE_C_COMPILER /usr/bin/clang-3.9)
-set(CMAKE_C_COMPILER /usr/bin/clang++-3.9)
+set(CMAKE_C_COMPILER /usr/bin/clang-3.9)
+# set(CMAKE_C_COMPILER /usr/bin/clang++-3.9)
 add_definitions("-fpermissive")
 
 project(Furlang)
@@ -10,6 +10,9 @@ project(Furlang)
 # Locate GTest
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
+
+# Enable debug symbols
+set(CMAKE_BUILD_TYPE Debug)
 
 # Test executable 
 add_executable(fur_tests ../tests/test.cpp)
