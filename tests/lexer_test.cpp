@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "../src/lexer.c"
-
 struct tcase {
     char *input;
     TokenType expectedType;
@@ -10,9 +8,10 @@ struct tcase {
 
 TEST(LexerTest, Identifier) {
 
-    tcase cases[2] = {
+    tcase cases[] = {
         tcase{"test", IDENT, "test"},
         tcase{"a", IDENT, "a" },
+        tcase{"test123", IDENT, "test123"},
     };
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {

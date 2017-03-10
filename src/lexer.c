@@ -32,14 +32,15 @@ void clearWhitespace(Lexer *lexer) {
 	}
 }
 
-// checks if the character is a letter a-z or A-Z
-bool isLetter(char *input) {
-	return *input >= 'a' && *input <= 'z' || *input >= 'A' && *input <= 'Z';
-}
-
 // checks if the character is a digit 0-9
 bool isDigit(char *input) {
 	return *input >= '0' && *input <= '9';
+}
+
+// checks if the character is a letter a-z or A-Z
+bool isLetter(char *input) {
+	return *input >= 'a' && *input <= 'z' || 
+		*input >= 'A' && *input <= 'Z';
 }
 
 // returns the character as an integer
@@ -68,7 +69,7 @@ char *word(Lexer *lexer) {
 		lexer->source++;
 		lexer->column++;
 		length++;
-	} while (isLetter(lexer->source));
+	} while (isLetter(lexer->source) || isDigit(lexer->source));
 
 	// null-terminate
 	*wordPtr = '\0';
