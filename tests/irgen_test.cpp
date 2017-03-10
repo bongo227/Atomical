@@ -111,45 +111,62 @@ TEST(IrgenTest, CastValues) {
 }
 
 TEST(IrgenTest, FunctionTests) {
-    char *src = "proc add :: int a, int b -> int { return 123 }";
-    LLVMGenericValueRef params[] = { 
-        LLVMCreateGenericValueOfInt(LLVMInt32Type(), 100, 0), 
-        LLVMCreateGenericValueOfInt(LLVMInt32Type(), 23, 0),
+    struct tcase {
+        char *src;    
+        int paramCount;
+        LLVMGenericValueRef params[3];
+        int out;
     };
-    int paramCount = sizeof(params) / sizeof(LLVMGenericValueRef);
-    int out = 123;
-
-    Parser *parser = NewParser(Lex(src));
-    Dcl *d = ParseFunction(parser);
-    Irgen *irgen = NewIrgen();
-    LLVMValueRef function = CompileFunction(irgen, d);
     
-    char *error = NULL;
-    LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
-    LLVMDisposeMessage(error);
+    tcase cases[] = {
+        {
+            "proc returnSmt :: -> int { return 123 }",
+            0,
+            { NULL, NULL, NULL },
+            123,
+        },
+    };
 
-    // create an execution engine
-    LLVMExecutionEngineRef engine;
-    error = NULL;
-    
-    // initialize jit
-    // LLVMLinkInMCJIT();
-    // LLVMInitializeNativeTarget();
-    // LLVMInitializeNativeAsmPrinter();
-    // LLVMInitializeNativeAsmParser();
-    
-    // Initialize intepreter
-    LLVMLinkInInterpreter();
-    LLVMInitializeNativeTarget();
-    LLVMInitializeNativeAsmPrinter();
-    LLVMInitializeNativeAsmParser();
+    for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) { 
+        tcase c = cases[i];
+        log("testing function \"%s\"", c.src);
+        
+        // generate function
+        Parser *parser = NewParser(Lex(c.src));
+        Dcl *d = ParseFunction(parser);
+        Irgen *irgen = NewIrgen();
+        LLVMValueRef function = CompileFunction(irgen, d);
+        
+        // check for errors in module
+        char *error = NULL;
+        LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
+        LLVMDisposeMessage(error);
 
-    ASSERT_EQ(LLVMCreateExecutionEngineForModule(&engine, irgen->module, &error), 0);
-    ASSERT_EQ(error, NULL);
-    
-    LLVMGenericValueRef res = LLVMRunFunction(engine, function, paramCount, params);
-    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), 123);
+        // create an execution engine
+        LLVMExecutionEngineRef engine;
+        error = NULL;
+        
+        // initialize jit
+        // LLVMLinkInMCJIT();
+        // LLVMInitializeNativeTarget();
+        // LLVMInitializeNativeAsmPrinter();
+        // LLVMInitializeNativeAsmParser();
+        
+        // Initialize intepreter
+        LLVMLinkInInterpreter();
+        LLVMInitializeNativeTarget();
+        LLVMInitializeNativeAsmPrinter();
+        LLVMInitializeNativeAsmParser();
 
-    LLVMDisposeBuilder(irgen->builder);
-    LLVMDisposeExecutionEngine(engine);
+        ASSERT_EQ(LLVMCreateExecutionEngineForModule(&engine, irgen->module, &error), 0);
+        ASSERT_EQ(error, NULL);
+
+        // run the function
+        LLVMGenericValueRef res = LLVMRunFunction(engine, function, c.paramCount, c.params);
+        ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), c.out);
+
+        // dispose
+        LLVMDisposeBuilder(irgen->builder);
+        LLVMDisposeExecutionEngine(engine);
+    }    
 }
