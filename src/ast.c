@@ -9,6 +9,14 @@ Exp *newIdentExp(char *ident) {
     return e;
 }
 
+Exp *newLiteralExp(Token lit) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = literalExp;
+	e->node.literal = lit;
+
+	return e;
+}
+
 Exp *newBinaryExp(Exp *left, Token op, Exp *right) {
 	Exp *e = (Exp *)malloc(sizeof(Exp));
 	e->type = binaryExp;

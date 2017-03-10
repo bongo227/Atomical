@@ -1,6 +1,3 @@
-#include "../src/ast.c"
-#include "../src/parser.c"
-
 TEST(ParserTest, ScopeEnter) {
     Parser *parser = NewParser(NULL);
     Scope *outer = parser->scope;
@@ -51,12 +48,32 @@ TEST(ParserTest, ScopeFind) {
     ASSERT_EQ(obj->name, found->name); // pointer should be same
 }
 
+TEST(ParserTest, ParseLiteralExpression) {
+    char *src = "123";
+    Parser *parser = NewParser(Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_FALSE(exp == NULL);
+    ASSERT_EQ((int)literalExp, (int)exp->type);
+    ASSERT_STREQ("123", exp->node.literal.value);
+}
+
 TEST(ParserTest, ParseIdentExpression) {
-    char *src = "a";
+    char *src = "test";
     Parser *parser = NewParser(Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)identExp, (int)exp->type);
+    ASSERT_STREQ("test", exp->node.ident.name);
+}
+
+TEST(ParserTest, ParseIdentExpressionWithNumber) {
+    char *src = "test123";
+    Parser *parser = NewParser(Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_EQ((int)identExp, (int)exp->type);
+    ASSERT_STREQ("test123", exp->node.ident.name);
 }
 
 TEST(ParserTest, ParseBinaryExpression) {

@@ -141,6 +141,14 @@ Exp *nud(Parser *parser, Token *token) {
 	switch (token->type) {
 	case IDENT:
 		return newIdentExp(token->value);
+	
+	case INT:
+	case FLOAT:
+	case HEX:
+	case OCTAL:
+	case STRING:
+		return newLiteralExp(*token);
+
 	case NOT:
 	case SUB:
 		return newUnaryExp(*token, ParseExpression(parser, 60));

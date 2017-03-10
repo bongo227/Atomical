@@ -179,6 +179,7 @@ struct _Dcl {
 
 		// argumentDcl
 		struct {
+			// TODO: name should be char *
 			Exp *type;
 			Exp *name;
 		} argument;
