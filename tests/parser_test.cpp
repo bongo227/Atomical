@@ -187,6 +187,25 @@ TEST(ParserTest, ParseBlockStatment) {
     ASSERT_EQ((int)returnSmt, (int)smt->node.block.smts->type);
 }
 
+TEST(ParserTest, ParserBlockSingleLine) {
+    char *src = "{ return test }";
+    Parser *parser = NewParser(Lex(src));
+    Smt *smt = ParseStatement(parser);
+
+    ASSERT_EQ((int)blockSmt, (int)smt->type);
+    ASSERT_EQ(1, smt->node.block.count);
+    ASSERT_EQ((int)returnSmt, (int)smt->node.block.smts->type);    
+}
+
+TEST(ParserTest, ParserLongBlockSingleLine) {
+    char *src = "{ a = 1; b = 2; return test }";
+    Parser *parser = NewParser(Lex(src));
+    Smt *smt = ParseStatement(parser);
+
+    ASSERT_EQ((int)blockSmt, (int)smt->type);
+    ASSERT_EQ(3, smt->node.block.count);
+}
+
 TEST(ParserTest, ParseIfStatment) {
     char *src = "if true {\nreturn false\n}";
     Parser *parser = NewParser(Lex(src));

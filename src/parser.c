@@ -229,7 +229,6 @@ Smt *smtd(Parser *parser, Token *token) {
 		case RETURN: {
 			parser->tokens++;
 			Smt *s = newReturnSmt(ParseExpression(parser, 0));
-			expectSemi(parser);
 			return s; 
 		}
 		// block statement
@@ -244,6 +243,7 @@ Smt *smtd(Parser *parser, Token *token) {
 			while(parser->tokens->type != RBRACE) {
 				smtCount++;
 				memcpy(smtsPrt, ParseStatement(parser), sizeof(Smt));
+				if(parser->tokens->type != RBRACE) expectSemi(parser);
 				smtsPrt++;
 			}
 			smts = realloc(smts, sizeof(Smt) * smtCount);
