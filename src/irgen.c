@@ -31,7 +31,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     
     // compile argument types
     int argCount = d->node.function.argCount;
-    LLVMTypeRef *argTypes = malloc(argCount * sizeof(Dcl));
+    LLVMTypeRef *argTypes = malloc(argCount * sizeof(LLVMTypeRef));
     for (int i = 0; i < argCount; i++) {
         argTypes[i] = CompileType(d->node.function.args[i].node.argument.type);
     }
@@ -46,7 +46,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     irgen->function = LLVMAddFunction(
         irgen->module, 
         d->node.function.name->node.ident.name,
-        returnType);
+        functionType);
 
     // create entry block and builder
     LLVMBasicBlockRef entry = LLVMAppendBasicBlock(irgen->function, "entry");
@@ -56,17 +56,17 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     // allocate arguments in entry block
     for (int i = 0; i < argCount; i++) {
         // allocate space for argument
-        LLVMValueRef arg = LLVMBuildAlloca(
+        LLVMValueRef argAlloc = LLVMBuildAlloca(
             irgen->builder, 
             argTypes[i], 
             d->node.function.args[i].node.argument.name->node.ident.name);
 
         // store argument in allocated space
-        LLVMBuildStore(
-            irgen->builder,
-            LLVMGetParam(irgen->function, i),
-            arg);
+        LLVMValueRef argValue = LLVMGetParam(irgen->function, i);
+        LLVMBuildStore(irgen->builder, argValue, argAlloc);
     }
+
+    CompileBlock(irgen, d->node.function.body);
 
     return irgen->function;
 }
@@ -83,7 +83,8 @@ void CompileBlock(Irgen *irgen, Smt *s) {
 void CompileReturn(Irgen *irgen, Smt *s) {
     ASSERT(s->type == returnSmt, "Expected a return statement");
 
-    LLVMTypeRef returnType = LLVMGetReturnType(LLVMTypeOf(irgen->function));
+    LLVMTypeRef functionType = LLVMTypeOf(irgen->function);
+    LLVMTypeRef returnType = LLVMGetReturnType(LLVMGetReturnType(functionType));
 
     // build return instruction
     LLVMBuildRet(
@@ -106,6 +107,8 @@ void CompileSmt(Irgen *irgen, Smt *s) {
 
 LLVMValueRef Cast(Irgen *irgen, LLVMValueRef value, LLVMTypeRef type) {
     LLVMTypeRef valueType = LLVMTypeOf(value);
+
+    if(LLVMTypeOf(value) == type) return value;
 
     // create name base on value name + "_cast"
     char *valueName = LLVMGetValueName(value);
@@ -166,7 +169,7 @@ LLVMValueRef CompileLiteral(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case literalExp:
-            CompileLiteral(irgen, e);
+            return CompileLiteral(irgen, e);
         default:
             ASSERT(false, "Unknow expression type");
     }

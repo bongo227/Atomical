@@ -1,4 +1,8 @@
 #include <llvm-c/Core.h>
+#include <llvm-c/ExecutionEngine.h>
+#include <llvm-c/Target.h>
+#include <llvm-c/Analysis.h>
+#include <llvm-c/BitWriter.h>
 
 TEST(IrgenTest, CompileTypes) {
     struct tcase {
@@ -20,6 +24,7 @@ TEST(IrgenTest, CompileTypes) {
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
+        log("Compiling %s type", c.src);
 
         Parser *parser = NewParser(Lex(c.src));
         Exp *e = ParseType(parser);
@@ -46,6 +51,7 @@ TEST(IrgenTest, CompileLiterals) {
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
+        log("Compiling %s to %s", c.src, c.expectedValue);
 
         Parser *parser = NewParser(Lex(c.src));
         Exp *e = ParseExpression(parser, 0);
@@ -57,38 +63,93 @@ TEST(IrgenTest, CompileLiterals) {
     }
 }
 
-// creates an empty function for use in unit tests
-Irgen *createTestFunction() {
-    Irgen *irgen = NewIrgen();
-    
-    irgen->function = LLVMAddFunction(irgen->module, "test", LLVMInt64Type());
-    
-    LLVMBasicBlockRef entry = LLVMAppendBasicBlock(irgen->function, "entry");
-    irgen->builder = LLVMCreateBuilder();
-    LLVMPositionBuilderAtEnd(irgen->builder, entry);
-    
-    return irgen;
-}
 
 TEST(IrgenTest, CastValues) {
     struct tcase {
+        char *testName;
         LLVMValueRef value;
         LLVMTypeRef cast;
     };
 
     tcase cases[] = {
-        { LLVMConstIntOfString(LLVMInt64Type(), "123", 10), LLVMInt32Type() },
-        { LLVMConstIntOfString(LLVMInt16Type(), "32", 10), LLVMFloatType() },
-        { LLVMConstRealOfString(LLVMFloatType(), "1.42"), LLVMDoubleType() },
-        { LLVMConstRealOfString(LLVMDoubleType(), "1245.12"), LLVMInt64Type() },
+        { 
+            "Cast i64 123 to i32", 
+            LLVMConstIntOfString(LLVMInt64Type(), "123", 10), 
+            LLVMInt32Type() 
+        },
+        { 
+            "Cast i16 32 to float",
+            LLVMConstIntOfString(LLVMInt16Type(), "32", 10), LLVMFloatType() 
+        },
+        { 
+            "Cast float 1.42 to double",
+            LLVMConstRealOfString(LLVMFloatType(), "1.42"), 
+            LLVMDoubleType() 
+        },
+        {
+            "Cast double 1245.12 to i64", 
+            LLVMConstRealOfString(LLVMDoubleType(), "1245.12"), 
+            LLVMInt64Type(),
+        },
     };
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
+        log(c.testName);
 
-        Irgen *irgen = createTestFunction();
+        Irgen *irgen = NewIrgen();
+        irgen->function = LLVMAddFunction(irgen->module, "test", LLVMInt64Type());
+        
+        LLVMBasicBlockRef entry = LLVMAppendBasicBlock(irgen->function, "entry");
+        irgen->builder = LLVMCreateBuilder();
+        LLVMPositionBuilderAtEnd(irgen->builder, entry);
+
         LLVMValueRef value = Cast(irgen, c.value, c.cast);
 
         ASSERT_EQ(LLVMTypeOf(value), c.cast);
     }
+}
+
+TEST(IrgenTest, FunctionTests) {
+    char *src = "proc add :: int a, int b -> int { return 123 }";
+    LLVMGenericValueRef params[] = { 
+        LLVMCreateGenericValueOfInt(LLVMInt32Type(), 100, 0), 
+        LLVMCreateGenericValueOfInt(LLVMInt32Type(), 23, 0),
+    };
+    int paramCount = sizeof(params) / sizeof(LLVMGenericValueRef);
+    int out = 123;
+
+    Parser *parser = NewParser(Lex(src));
+    Dcl *d = ParseFunction(parser);
+    Irgen *irgen = NewIrgen();
+    LLVMValueRef function = CompileFunction(irgen, d);
+    
+    char *error = NULL;
+    LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
+    LLVMDisposeMessage(error);
+
+    // create an execution engine
+    LLVMExecutionEngineRef engine;
+    error = NULL;
+    
+    // initialize jit
+    // LLVMLinkInMCJIT();
+    // LLVMInitializeNativeTarget();
+    // LLVMInitializeNativeAsmPrinter();
+    // LLVMInitializeNativeAsmParser();
+    
+    // Initialize intepreter
+    LLVMLinkInInterpreter();
+    LLVMInitializeNativeTarget();
+    LLVMInitializeNativeAsmPrinter();
+    LLVMInitializeNativeAsmParser();
+
+    ASSERT_EQ(LLVMCreateExecutionEngineForModule(&engine, irgen->module, &error), 0);
+    ASSERT_EQ(error, NULL);
+    
+    LLVMGenericValueRef res = LLVMRunFunction(engine, function, paramCount, params);
+    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), 123);
+
+    LLVMDisposeBuilder(irgen->builder);
+    LLVMDisposeExecutionEngine(engine);
 }
