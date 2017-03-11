@@ -64,7 +64,6 @@ Object *FindScope(Parser *parser, char *name) {
 		if (obj != NULL) return obj->obj;
 	}
 
-	printf("\"%s\" not in scope", name);
 	return NULL;
 }
 
@@ -140,7 +139,7 @@ void expectSemi(Parser *parser) {
 Exp *nud(Parser *parser, Token *token) {
 	switch (token->type) {
 	case IDENT:
-		return newIdentExp(token->value);
+		return ParseIdentToken(parser, token);
 	
 	case INT:
 	case FLOAT:
@@ -305,7 +304,6 @@ Smt *smtd(Parser *parser, Token *token) {
 			obj->node = smt->node.declare;
 			obj->type = varObj;
 			obj->typeInfo = NULL;
-			obj->llvmValue = NULL;
 			InsertScope(parser, name->node.ident.name, obj);
 
 			return smt;
@@ -314,12 +312,20 @@ Smt *smtd(Parser *parser, Token *token) {
 	return NULL;
 }
 
-Exp *ParseIdent(Parser *parser) {
-	ASSERT(parser->tokens->type == IDENT,
+Exp *ParseIdentToken(Parser *parser, Token *token) {
+	ASSERT(token->type == IDENT,
 		"Expected identifier");
-	Exp *ident = newIdentExp(parser->tokens->value);
-	ParserNext(parser);
+	
+	char *name = token->value;
+	Exp *ident = newIdentExp(name);
+	ident->node.ident.obj = FindScope(parser, name);
 
+	return ident;
+}
+
+Exp *ParseIdent(Parser *parser) {
+	Exp *ident = ParseIdentToken(parser, parser->tokens);
+	ParserNext(parser);
 	return ident;
 }
 
@@ -351,7 +357,6 @@ Dcl *ParseFunction(Parser *parser) {
 		obj->node = args + i;
 		obj->type = argObj;
 		obj->typeInfo = NULL;
-		obj->llvmValue = NULL;
 		InsertScope(parser, obj->name, obj);
 	}
 

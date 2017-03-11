@@ -5,10 +5,6 @@ Irgen *NewIrgen() {
     irgen->module = LLVMModuleCreateWithName("module");
 }
 
-// proc main :: -> int {
-//     return 100
-// }
-
 LLVMTypeRef CompileType(Exp *e) {
     switch(e->type) {
         case identExp:
@@ -55,11 +51,18 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
 
     // allocate arguments in entry block
     for (int i = 0; i < argCount; i++) {
+        // get argument node
+        Dcl *argNode = d->node.function.args + i;
+        char *argName = argNode->node.argument.name->node.ident.name;
+
         // allocate space for argument
         LLVMValueRef argAlloc = LLVMBuildAlloca(
             irgen->builder, 
             argTypes[i], 
-            d->node.function.args[i].node.argument.name->node.ident.name);
+            argName);
+        
+        // store alloc in node
+        argNode->llvmValue = argAlloc;
 
         // store argument in allocated space
         LLVMValueRef argValue = LLVMGetParam(irgen->function, i);
@@ -147,7 +150,7 @@ LLVMValueRef Cast(Irgen *irgen, LLVMValueRef value, LLVMTypeRef type) {
     }
 }
 
-LLVMValueRef CompileLiteral(Irgen *irgen, Exp *e) {
+LLVMValueRef CompileLiteralExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == literalExp, "Expected literal expression");
     
     switch (e->node.literal.type) {
@@ -166,10 +169,134 @@ LLVMValueRef CompileLiteral(Irgen *irgen, Exp *e) {
     }
 }
 
+LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
+    ASSERT(e->type == binaryExp, "Expected binary expression");
+
+    LLVMValueRef left = CompileExp(irgen, e->node.binary.left);
+    LLVMValueRef right = CompileExp(irgen, e->node.binary.right);
+
+    LLVMTypeRef leftType = LLVMTypeOf(left);
+    LLVMTypeRef rightType = LLVMTypeOf(right);
+    LLVMTypeRef nodeType;    
+
+    // Check for unequal types
+    if (leftType != rightType) {
+        LLVMTypeKind leftKind = LLVMGetTypeKind(leftType);
+        LLVMTypeKind rightKind = LLVMGetTypeKind(rightType);
+        
+        if(leftKind == LLVMIntegerTypeKind && rightKind == LLVMIntegerTypeKind) {
+            nodeType = LLVMInt64Type();
+            Cast(irgen, left, nodeType);
+            Cast(irgen, right, nodeType);
+        } else {
+            // one or more sides are float so premote both sides to float
+            nodeType = LLVMDoubleType();
+            Cast(irgen, left, nodeType);
+            Cast(irgen, right, nodeType);
+        }
+    } else {
+        nodeType = leftType;
+    }
+
+    LLVMTypeKind nodeTypeKind = LLVMGetTypeKind(nodeType);
+
+    // build name
+    char *leftName = LLVMGetValueName(left);
+    char *rightName = LLVMGetValueName(right);
+    char name[strlen(leftName) + 1 + strlen(rightName)];
+    strcpy(name, leftName);
+    strcpy(name, TokenName(e->node.binary.op.type));
+    strcpy(name, rightName);
+
+    switch (e->node.binary.op.type) {
+        case ADD:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFAdd(irgen->builder, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildAdd(irgen->builder, left, right, name);
+                default:
+                    ASSERT(false, "Cannot add non float/int type");
+            }
+        case SUB:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFSub(irgen->builder, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildSub(irgen->builder, left, right, name);
+                default:
+                    ASSERT(false, "Cannot sub non float/int type");
+            }
+        case MUL:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFMul(irgen->builder, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildMul(irgen->builder, left, right, name);
+                default:
+                    ASSERT(false, "Cannot multiply non float/int type");
+            }
+        case QUO:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFDiv(irgen->builder, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildSDiv(irgen->builder, left, right, name);
+                default:
+                    ASSERT(false, "Cannot divide non float/int type");
+            }
+        case REM:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFRem(irgen->builder, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildSRem(irgen->builder, left, right, name);
+                default:
+                    ASSERT(false, "Cannot mod non float/int type");
+            }
+        case XOR:
+        case LSS:
+        case LEQ:
+        case SHL:
+        case GTR:
+        case GEQ:
+        case SHR:
+        case EQL:
+        case NEQ:
+        case AND_NOT:
+        case AND:
+        case LAND:
+        case OR:
+        case LOR:
+            ASSERT(false, "TODO");
+        default:
+            ASSERT(false, "Unknown binary operator");
+    }
+}
+
+LLVMValueRef CompileIdentExp(Irgen *irgen, Exp *e) {
+    ASSERT(e->type == identExp, "Expected identifier expression");
+
+    // Get alloc from ident
+    Dcl *dcl = (Dcl *)(e->node.ident.obj->node);
+    LLVMValueRef alloc = dcl->llvmValue;
+
+    return LLVMBuildLoad(irgen->builder, alloc, e->node.ident.name);
+}
+
 LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case literalExp:
-            return CompileLiteral(irgen, e);
+            return CompileLiteralExp(irgen, e);
+        case binaryExp:
+            return CompileBinaryExp(irgen, e);
+        case identExp:
+            return CompileIdentExp(irgen, e);
         default:
             ASSERT(false, "Unknow expression type");
     }

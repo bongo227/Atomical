@@ -56,7 +56,7 @@ TEST(IrgenTest, CompileLiterals) {
         Parser *parser = NewParser(Lex(c.src));
         Exp *e = ParseExpression(parser, 0);
         Irgen *irgen = NewIrgen();
-        LLVMValueRef value = CompileLiteral(irgen, e);
+        LLVMValueRef value = CompileLiteralExp(irgen, e);
 
         ASSERT_TRUE(LLVMIsConstant(value));
         ASSERT_STREQ(c.expectedValue, LLVMPrintValueToString(value));
@@ -110,6 +110,10 @@ TEST(IrgenTest, CastValues) {
     }
 }
 
+LLVMGenericValueRef intArg(int n) {
+    return LLVMCreateGenericValueOfInt(LLVMInt64Type(), n, true);
+}
+
 TEST(IrgenTest, FunctionTests) {
     struct tcase {
         char *src;    
@@ -120,13 +124,26 @@ TEST(IrgenTest, FunctionTests) {
     
     tcase cases[] = {
         {
-            "proc returnSmt :: -> int { return 123 }",
-            0,
-            { NULL, NULL, NULL },
-            123,
+            "proc test :: -> int { return 123 }",
+            0, { NULL, NULL, NULL }, 123,
+        },
+
+        {
+            "proc test :: -> int { return 121 + 2 }",
+            0, { NULL, NULL, NULL }, 123,
+        },
+
+        {
+            "proc test :: -> int { return 130.75 - 7.75 }",
+            0, { NULL, NULL, NULL }, 123,
+        },
+
+        {
+            "proc test :: int a, int b -> int { return a + b }",
+            2, { intArg(100), intArg(23), NULL }, 123,
         },
     };
-
+    
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) { 
         tcase c = cases[i];
         log("testing function \"%s\"", c.src);

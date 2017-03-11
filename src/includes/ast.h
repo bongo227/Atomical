@@ -1,6 +1,7 @@
 #pragma once
 
 #include "all.h"
+#include <llvm-c/Core.h>
 
 struct _Exp;
 typedef struct _Exp Exp;
@@ -17,6 +18,7 @@ typedef enum {
 	constObj,
 	typeObj,
 	varObj,
+	argObj,
 	funcObj,
 } ObjectType;
 
@@ -26,7 +28,7 @@ typedef struct {
 	ObjectType type;
 	char *name;
 	void *node;
-	void *typeInfo;
+	void *typeInfo; // TODO: can we remove this?
 } Object;
 
 typedef enum {
@@ -167,6 +169,7 @@ typedef enum {
 
 struct _Dcl {
 	DclType type;
+	LLVMValueRef llvmValue;
 	union {
 		// functionDcl
 		struct {
