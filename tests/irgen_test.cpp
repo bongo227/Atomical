@@ -160,6 +160,11 @@ TEST(IrgenTest, FunctionTests) {
         {
             "proc test :: -> int { a := 123; return a }",
             { }, 123,
+        },
+
+        {
+            "proc test :: -> int { if true { return 123 } else { return 321 } }",
+            { }, 123,
         }
     };
 
@@ -176,6 +181,8 @@ TEST(IrgenTest, FunctionTests) {
         Irgen *irgen = NewIrgen();
         LLVMValueRef function = CompileFunction(irgen, d);
         
+        // LLVMDumpModule(irgen->module);
+
         // check for errors in module
         char *error = NULL;
         LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);

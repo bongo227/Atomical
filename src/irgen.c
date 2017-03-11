@@ -46,6 +46,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
 
     // create entry block and builder
     LLVMBasicBlockRef entry = LLVMAppendBasicBlock(irgen->function, "entry");
+    irgen->block = entry;
     irgen->builder = LLVMCreateBuilder();
     LLVMPositionBuilderAtEnd(irgen->builder, entry);
 
@@ -71,6 +72,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
 
     CompileBlock(irgen, d->node.function.body);
 
+    irgen->block = NULL;
     return irgen->function;
 }
 
@@ -115,20 +117,82 @@ void CompileAssignment(Irgen *irgen, Smt *s) {
     LLVMBuildStore(irgen->builder, exp, alloc);
 }
 
+void SetBlock(Irgen *irgen, LLVMBasicBlockRef block) {
+    irgen->block = block;
+    LLVMPositionBuilderAtEnd(irgen->builder, block);
+}
+
+void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlockRef endBlock) {
+    ASSERT(s->type == ifSmt, "Expected if statement");
+    
+    LLVMBasicBlockRef parent = irgen->block;
+    if (block == NULL) block = LLVMAppendBasicBlock(irgen->function, "if");
+    
+    // false block is either the next else/elseif block or block to conitue execution
+    LLVMBasicBlockRef falseBlock;
+    if (s->node.ifs.elses != NULL) {
+        falseBlock = LLVMAppendBasicBlock(irgen->function, "else");
+    } else {
+        falseBlock = endBlock;
+    }
+
+    // compile if block
+    SetBlock(irgen, block);
+    CompileBlock(irgen, s->node.ifs.body);
+    if (LLVMGetBasicBlockTerminator(block) == NULL) {
+        // block is not terminated so continue execution from end block
+        LLVMBuildBr(irgen->builder, endBlock);
+    }
+
+    // Add the conditional branch
+    Exp *cond = s->node.ifs.cond;
+    if (cond != NULL) {
+        SetBlock(irgen, parent);
+        LLVMValueRef condition = CompileExp(irgen, cond);
+        LLVMBuildCondBr(irgen->builder, condition, block, falseBlock);
+    }
+
+    SetBlock(irgen, falseBlock);
+
+    if(s->node.ifs.elses != NULL) {
+        CompileIfBranch(irgen, s->node.ifs.elses, falseBlock, endBlock);
+    }
+
+    SetBlock(irgen, endBlock);
+}
+
+void CompileIf(Irgen *irgen, Smt *s) {
+    LLVMBasicBlockRef endBlock = LLVMAppendBasicBlock(irgen->function, "endBlock");
+    CompileIfBranch(irgen, s, NULL, endBlock);
+    
+    // remove last block if empty
+    if (LLVMGetFirstInstruction(endBlock) == NULL) {
+        LLVMDeleteBasicBlock(endBlock);
+    }
+}
+
 void CompileSmt(Irgen *irgen, Smt *s) {
     switch (s->type) {
         case blockSmt:
             CompileBlock(irgen, s);
             break;
+        
         case returnSmt:
             CompileReturn(irgen, s);
             break;
+        
         case assignmentSmt:
             CompileAssignment(irgen, s);
             break;
+        
         case declareSmt:
             CompileDcl(irgen, s->node.declare);
             break;
+        
+        case ifSmt:
+            CompileIf(irgen, s);
+            break;
+        
         default:
             ASSERT(false, "TODO");
     }
@@ -347,6 +411,10 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
 
 LLVMValueRef CompileIdentExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == identExp, "Expected identifier expression");
+
+    char *ident = e->node.ident.name;
+    if(strcmp(ident, "true") == 0) return LLVMConstInt(LLVMInt1Type(), 1, false);
+    if(strcmp(ident, "false") == 0) return LLVMConstInt(LLVMInt1Type(), 0, false);
 
     LLVMValueRef alloc = GetAlloc(e);
     return LLVMBuildLoad(irgen->builder, alloc, e->node.ident.name);

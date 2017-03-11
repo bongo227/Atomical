@@ -8,6 +8,7 @@ struct _Irgen {
     LLVMModuleRef module;
     LLVMBuilderRef builder;
     LLVMValueRef function;
+    LLVMBasicBlockRef block;
 };
 
 typedef struct _Irgen Irgen;
