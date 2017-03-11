@@ -175,6 +175,11 @@ TEST(IrgenTest, FunctionTests) {
         {
             "proc test :: -> int { if false { return 321 } else if true { return 123 } else { return 0 } }",
             { }, 123,
+        },
+
+        {
+            "proc test :: -> int { if false { return 321 } else if false { return 23 } else if false { return 21; } else { return 123 } }",
+            { }, 123,
         }
     };
 
