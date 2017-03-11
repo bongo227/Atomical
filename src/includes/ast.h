@@ -72,23 +72,6 @@ struct _Exp {
 			struct _Exp *selector;
 		} selector;
 
-		// braceLiteralExp
-		// TODO: add type
-		struct {
-			Token lBrace;
-			struct _Exp *exp;
-			int expCount;
-			Token rBrace;
-		} braceLiteral;
-
-		// parenLiteralExp
-		struct {
-			Token lParen;
-			struct _Exp *exp;
-			int expCount;
-			Token rParen;
-		} parenLiteral;
-
 		// indexExp
 		struct {
 			struct _Exp *exp;
@@ -109,6 +92,7 @@ struct _Exp {
 		struct {
 			struct _Exp *function;
 			struct _Exp *args;
+			int argCount;
 		} call;
 
 		// castExp

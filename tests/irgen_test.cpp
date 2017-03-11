@@ -114,6 +114,38 @@ LLVMGenericValueRef intArg(int n) {
     return LLVMCreateGenericValueOfInt(LLVMInt64Type(), n, false);
 }
 
+LLVMGenericValueRef runLLVMFunction(
+    Irgen *irgen, 
+    LLVMValueRef function, 
+    int paramCount, 
+    LLVMGenericValueRef *params) {
+
+    // create an execution engine
+    LLVMExecutionEngineRef engine;
+    char *error = NULL;
+
+    # if 0
+        // initialize jit
+        LLVMLinkInMCJIT();
+    # else
+        // Initialize intepreter
+        LLVMLinkInInterpreter();
+    # endif
+
+    LLVMInitializeNativeTarget();
+    LLVMInitializeNativeAsmPrinter();
+    LLVMInitializeNativeAsmParser();
+
+    assert(LLVMCreateExecutionEngineForModule(&engine, irgen->module, &error) == 0);
+    assert(error == NULL);
+
+    LLVMGenericValueRef res = LLVMRunFunction(engine, function, paramCount, params);
+
+    LLVMDisposeExecutionEngine(engine);
+    return res;
+}
+
+
 TEST(IrgenTest, FunctionTests) {
     struct tcase {
         char *src;    
@@ -203,31 +235,39 @@ TEST(IrgenTest, FunctionTests) {
         LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
         LLVMDisposeMessage(error);
 
-        // create an execution engine
-        LLVMExecutionEngineRef engine;
-        error = NULL;
-        
-        // initialize jit
-        // LLVMLinkInMCJIT();
-        // LLVMInitializeNativeTarget();
-        // LLVMInitializeNativeAsmPrinter();
-        // LLVMInitializeNativeAsmParser();
-        
-        // Initialize intepreter
-        LLVMLinkInInterpreter();
-        LLVMInitializeNativeTarget();
-        LLVMInitializeNativeAsmPrinter();
-        LLVMInitializeNativeAsmParser();
-
-        ASSERT_EQ(LLVMCreateExecutionEngineForModule(&engine, irgen->module, &error), 0);
-        ASSERT_EQ(error, NULL);
-
         // run the function
-        LLVMGenericValueRef res = LLVMRunFunction(engine, function, paramCount, c.params);
+        LLVMGenericValueRef res = runLLVMFunction(irgen, function, paramCount, c.params);
         ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), c.out);
 
-        // dispose
+        // dispose of builder
         LLVMDisposeBuilder(irgen->builder);
-        LLVMDisposeExecutionEngine(engine);
-    }    
+    }
 }
+
+TEST(IrgenTest, CallTest) {
+    char *src = "proc add :: int a, int b -> int { return a + b }\n"
+                "proc test :: -> int { return add(120, 3) }";
+
+    Parser *parser = NewParser(src, Lex(src));
+    Dcl *addDcl = ParseFunction(parser);
+    Dcl *testDcl = ParseFunction(parser);
+    
+    Irgen *irgen = NewIrgen();
+    LLVMValueRef addFunction = CompileFunction(irgen, addDcl);
+    LLVMValueRef testFunction = CompileFunction(irgen, testDcl);
+
+    // LLVMDumpModule(irgen->module);
+
+    // check for errors in module
+    char *error = NULL;
+    LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
+    LLVMDisposeMessage(error);
+
+    // run the function
+    LLVMGenericValueRef res = runLLVMFunction(irgen, testFunction, 0, NULL);
+    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), 123);
+
+    // dispose of builder
+    LLVMDisposeBuilder(irgen->builder);
+}
+

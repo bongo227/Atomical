@@ -318,3 +318,32 @@ TEST(ParserTest, ParseFunctionDefinition) {
     ASSERT_EQ(dcl->node.function.args, obja->node);
     ASSERT_EQ(dcl->node.function.args + 1, objb->node);
 }
+
+TEST(ParserTest, ParseEmptyCallExpression) {
+    char *src = "test()";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_EQ((int)callExp, (int)exp->type);
+    ASSERT_EQ(0, exp->node.call.argCount);
+}
+
+TEST(ParserTest, ParseCallExpression) {
+    char *src = "test(1, test)";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_EQ((int)callExp, (int)exp->type);
+    ASSERT_EQ(2, exp->node.call.argCount);
+
+    ASSERT_STREQ("1", exp->node.call.args[0].node.literal.value);
+}
+
+TEST(ParserTest, ParseCallInCallExpression) {
+    char *src = "test(test())";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_EQ((int)callExp, (int)exp->type);
+    ASSERT_EQ(1, exp->node.call.argCount);
+}

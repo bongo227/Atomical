@@ -44,6 +44,9 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
         d->node.function.name->node.ident.name,
         functionType);
 
+    // add function to node
+    d->llvmValue = irgen->function;
+
     // create entry block and builder
     LLVMBasicBlockRef entry = LLVMAppendBasicBlock(irgen->function, "entry");
     irgen->block = entry;
@@ -473,6 +476,21 @@ LLVMValueRef CompileUnaryExp(Irgen *irgen, Exp *e) {
     }
 }
 
+LLVMValueRef CompileCallExp(Irgen *irgen, Exp *e) {
+    ASSERT(e->type == callExp, "Expected call expression");
+    
+    LLVMValueRef function = GetAlloc(e->node.call.function);
+
+    // compile arguments
+    int argCount = e->node.call.argCount;
+    LLVMValueRef *args = malloc(argCount * sizeof(LLVMValueRef));
+    for(int i = 0; i < argCount; i++) {
+        args[i] = CompileExp(irgen, e->node.call.args + i);
+    }
+
+    return LLVMBuildCall(irgen->builder, function, args, argCount, "tmp");
+} 
+
 LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case literalExp:
@@ -483,7 +501,8 @@ LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
             return CompileBinaryExp(irgen, e);
         case identExp:
             return CompileIdentExp(irgen, e);
-
+        case callExp:
+            return CompileCallExp(irgen, e); 
         default:
             ASSERT(false, "Unknow expression type");
     }

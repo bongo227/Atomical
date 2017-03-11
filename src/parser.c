@@ -174,17 +174,42 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 		case GEQ:
 		case LEQ: {
 			return newBinaryExp(exp, *token, ParseExpression(parser, bp));
-		} 
+		}
+
 		// selector expression
 		case PERIOD: {
 			return newSelectorExp(exp, ParseExpression(parser, bp));
 		}
+
 		// index expression
 		case LBRACK: {
 			Exp *index = ParseExpression(parser, 0);
 			expect(parser, RBRACK);
 			return newIndexExp(exp, index);
 		}
+
+		// call expression
+		case LPAREN: {
+			int argCount = 0;
+			Exp *args = (Exp *)malloc(0);
+			if(parser->tokens->type != RPAREN) {
+				// arguments are not empty so parse arguments
+				while(true) {
+					argCount++;
+					
+					args = realloc(args, argCount * sizeof(Exp));
+					Exp *arg = ParseExpression(parser, 0);
+					memcpy(args + argCount - 1, arg, sizeof(Exp));
+					
+					if(parser->tokens->type == RPAREN) break;
+					expect(parser, COMMA);
+				}
+			}
+			expect(parser, RPAREN);
+
+			return newCallExp(exp, args, argCount);
+		}
+
 		// right associative binary expression or assignments
 		// if the expression is an assigment, return a binary statement and let
 		// ParseStatment transform it into a statment.
@@ -354,7 +379,7 @@ Dcl *ParseFunction(Parser *parser) {
 	// insert arguments into scope
 	for (int i = 0; i < argCount; i++) {
 		// insert into scope
-		Object *obj =(Object *)malloc(sizeof(Object));
+		Object *obj = (Object *)malloc(sizeof(Object));
 		obj->name = args[i].node.argument.name->node.ident.name;
 		obj->node = args + i;
 		obj->type = argObj;
@@ -367,7 +392,19 @@ Dcl *ParseFunction(Parser *parser) {
 	Exp *returnType = ParseType(parser);
 	Smt *body = ParseStatement(parser);
 
-	return newFunctionDcl(name, args, argCount, returnType, body);
+	if(parser->tokens->type == SEMI) parser->tokens++;
+
+	Dcl* function = newFunctionDcl(name, args, argCount, returnType, body);
+
+	// insert function into scope
+	Object *obj = (Object *)malloc(sizeof(Object));
+	obj->name = name->node.ident.name;
+	obj->node = function;
+	obj->type = funcObj;
+	obj->typeInfo = NULL;
+	InsertScope(parser, name->node.ident.name, obj);
+
+	return function;
 }
 
 // Parses the next statement by calling smtd on the first token else handle

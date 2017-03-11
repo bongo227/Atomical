@@ -195,3 +195,13 @@ Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *bo
 
 	return d;
 }
+
+Exp *newCallExp(Exp *function, Exp *args, int argCount) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = callExp;
+	e->node.call.function = function;
+	e->node.call.args = args;
+	e->node.call.argCount = argCount;
+
+	return e;
+} 
