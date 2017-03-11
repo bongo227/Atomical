@@ -305,6 +305,7 @@ Smt *smtd(Parser *parser, Token *token) {
 			obj->node = smt->node.declare;
 			obj->type = varObj;
 			obj->typeInfo = NULL;
+			obj->llvmValue = NULL;
 			InsertScope(parser, name->node.ident.name, obj);
 
 			return smt;
@@ -338,7 +339,20 @@ Dcl *ParseFunction(Parser *parser) {
 		Exp *type = ParseType(parser); // arg type
 		Exp *name = ParseIdent(parser); // arg name
 		Dcl *arg = newArgumentDcl(type, name);
-		memcpy(args + argCount - 1, arg, sizeof(Dcl));
+		void *dest = memcpy(args + argCount - 1, arg, sizeof(Dcl));
+		
+	}
+
+	// insert arguments into scope
+	for (int i = 0; i < argCount; i++) {
+		// insert into scope
+		Object *obj =(Object *)malloc(sizeof(Object));
+		obj->name = args[i].node.argument.name->node.ident.name;
+		obj->node = args + i;
+		obj->type = argObj;
+		obj->typeInfo = NULL;
+		obj->llvmValue = NULL;
+		InsertScope(parser, obj->name, obj);
 	}
 
 	expect(parser, ARROW);

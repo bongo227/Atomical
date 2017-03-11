@@ -19,13 +19,14 @@ TEST(ParserTest, ScopeInsert) {
     Object *obj = (Object *)malloc(sizeof(Object));
     obj->type = badObj;
     obj->name = "test";
-    obj->node = NULL;
+    obj->node = "nodevalue";
     obj->typeInfo = NULL;
     InsertScope(parser, "test", obj);
 
     ScopeObject *found;
     HASH_FIND_STR(parser->scope->objects, "test", found);
-    ASSERT_STREQ(obj->name, found->obj->name);			
+    ASSERT_STREQ(obj->name, found->obj->name);
+    ASSERT_STREQ((char *)obj->node, (char *)found->obj->node);			
 }
 
 TEST(ParserTest, ScopeFind) {
@@ -260,4 +261,13 @@ TEST(ParserTest, ParseFunctionDefinition) {
     ASSERT_EQ((int)functionDcl, (int)dcl->type);
     ASSERT_EQ(2, (int)dcl->node.function.argCount);
     ASSERT_EQ((int)identExp, (int)dcl->node.function.returnType->type);
+
+    Object *obja = FindScope(parser, "a");
+    Object *objb = FindScope(parser, "b");
+    
+    ASSERT_NE(obja, NULL);
+    ASSERT_NE(objb, NULL);
+    ASSERT_NE(obja->node, objb->node);
+    ASSERT_EQ(dcl->node.function.args, obja->node);
+    ASSERT_EQ(dcl->node.function.args + 1, objb->node);
 }
