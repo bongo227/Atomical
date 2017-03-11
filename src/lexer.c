@@ -542,6 +542,8 @@ Token *Lex(char *source) {
 			}
 		}
 
+		if (token.value == NULL) token.value = TokenName(token.type);
+
 		// Add the token to the array
 		tokens = (Token *)realloc(tokens, (i + 1) * sizeof(Token));
 		tokens[i - 1] = token;
@@ -638,4 +640,29 @@ char *TokenName(TokenType type) {
 	}
 
 	return "UNKOWN_NAME";
+}
+
+char *GetLine(const char *source, int line) {
+	int currentLine = 1;
+
+	while(source != '\0') {
+		if (source++ == '\n') currentLine++;
+		
+		if (currentLine == line) {
+			// find the line length
+			int lineLength = 0;
+			while(source && source != '\n') {
+				source++;
+				lineLength++;
+			}
+
+			// copy the line to a buffer and return
+			char buff[lineLength+1];
+			memcpy(buff, source - lineLength, lineLength);
+			buff[lineLength] = '\0';
+			return buff;
+		}
+	}
+
+	return "LINE_NOT_FOUND";
 }

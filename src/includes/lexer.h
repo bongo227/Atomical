@@ -104,3 +104,4 @@ typedef struct {
 
 Token *Lex(char *source);
 char *TokenName(TokenType type);
+char *GetLine(const char *src, int line);

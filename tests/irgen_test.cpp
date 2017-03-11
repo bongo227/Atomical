@@ -26,7 +26,7 @@ TEST(IrgenTest, CompileTypes) {
         tcase c = cases[i];
         log("Compiling %s type", c.src);
 
-        Parser *parser = NewParser(Lex(c.src));
+        Parser *parser = NewParser(c.src, Lex(c.src));
         Exp *e = ParseType(parser);
         Irgen *irgen = NewIrgen();
         LLVMTypeRef type = CompileType(e);
@@ -53,7 +53,7 @@ TEST(IrgenTest, CompileLiterals) {
         tcase c = cases[i];
         log("Compiling %s to %s", c.src, c.expectedValue);
 
-        Parser *parser = NewParser(Lex(c.src));
+        Parser *parser = NewParser(c.src, Lex(c.src));
         Exp *e = ParseExpression(parser, 0);
         Irgen *irgen = NewIrgen();
         LLVMValueRef value = CompileLiteralExp(irgen, e);
@@ -171,7 +171,7 @@ TEST(IrgenTest, FunctionTests) {
         while(c.params[paramCount] != NULL) paramCount++;
 
         // generate function
-        Parser *parser = NewParser(Lex(c.src));
+        Parser *parser = NewParser(c.src, Lex(c.src));
         Dcl *d = ParseFunction(parser);
         Irgen *irgen = NewIrgen();
         LLVMValueRef function = CompileFunction(irgen, d);

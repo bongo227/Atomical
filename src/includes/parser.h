@@ -17,13 +17,14 @@ struct _Scope {
 typedef struct _Scope Scope;
 
 typedef struct {
+	char *src;
 	Scope *scope;
     Token *tokens;
     int expLevel; // >= 0 when inside expression
     bool rhs; // true if parser is parsing right hand side
 } Parser;
 
-Parser *NewParser(Token *tokens);
+Parser *NewParser(char *src, Token *tokens);
 Exp *ParseIdentToken(Parser *parser, Token *token);
 Exp *ParseExpression(Parser *parser, int rbp);
 Smt *ParseStatement(Parser *parser);

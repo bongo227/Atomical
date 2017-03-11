@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 // src project
+#include "../src/error.c"
 #include "../src/lexer.c"
 #include "../src/ast.c"
 #include "../src/parser.c"

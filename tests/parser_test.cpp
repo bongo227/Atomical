@@ -1,5 +1,5 @@
 TEST(ParserTest, ScopeEnter) {
-    Parser *parser = NewParser(NULL);
+    Parser *parser = NewParser("", NULL);
     Scope *outer = parser->scope;
     ASSERT_EQ(outer->outer, NULL);
     EnterScope(parser);
@@ -7,7 +7,7 @@ TEST(ParserTest, ScopeEnter) {
 }
 
 TEST(ParserTest, ScopeExit) {
-    Parser *parser = NewParser(NULL);
+    Parser *parser = NewParser("", NULL);
     Scope *outer = parser->scope;
     EnterScope(parser);
     ExitScope(parser);
@@ -15,22 +15,26 @@ TEST(ParserTest, ScopeExit) {
 }
 
 TEST(ParserTest, ScopeInsert) {
-    Parser *parser = NewParser(NULL);
+    Parser *parser = NewParser("", NULL);
     Object *obj = (Object *)malloc(sizeof(Object));
     obj->type = badObj;
     obj->name = "test";
     obj->node = "nodevalue";
     obj->typeInfo = NULL;
-    InsertScope(parser, "test", obj);
+    bool inserted = InsertScope(parser, "test", obj);
+    ASSERT_TRUE(inserted);
 
     ScopeObject *found;
     HASH_FIND_STR(parser->scope->objects, "test", found);
     ASSERT_STREQ(obj->name, found->obj->name);
     ASSERT_STREQ((char *)obj->node, (char *)found->obj->node);			
+
+    inserted = InsertScope(parser, "test", obj);
+    ASSERT_FALSE(inserted);
 }
 
 TEST(ParserTest, ScopeFind) {
-    Parser *parser = NewParser(NULL);
+    Parser *parser = NewParser("", NULL);
     Object *obj = (Object *)malloc(sizeof(Object));
     obj->type = badObj;
     obj->name = "test";
@@ -47,11 +51,14 @@ TEST(ParserTest, ScopeFind) {
 
     Object *found = FindScope(parser, "test");
     ASSERT_EQ(obj->name, found->name); // pointer should be same
+
+    found = FindScope(parser, "not here");
+    ASSERT_EQ(found, NULL);
 }
 
 TEST(ParserTest, ParseLiteralExpression) {
     char *src = "123";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_FALSE(exp == NULL);
@@ -61,7 +68,7 @@ TEST(ParserTest, ParseLiteralExpression) {
 
 TEST(ParserTest, ParseIdentExpression) {
     char *src = "test";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)identExp, (int)exp->type);
@@ -70,7 +77,7 @@ TEST(ParserTest, ParseIdentExpression) {
 
 TEST(ParserTest, ParseIdentExpressionWithNumber) {
     char *src = "test123";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)identExp, (int)exp->type);
@@ -79,7 +86,7 @@ TEST(ParserTest, ParseIdentExpressionWithNumber) {
 
 TEST(ParserTest, ParseBinaryExpression) {
     char *src = "a + b";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
@@ -87,7 +94,7 @@ TEST(ParserTest, ParseBinaryExpression) {
 
 TEST(ParserTest, ParseBidmasBinaryExpression) {
     char *src = "a + b * c";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
@@ -97,7 +104,7 @@ TEST(ParserTest, ParseBidmasBinaryExpression) {
 
 TEST(ParserTest, ParseSelectorExpression) {
     char *src = "a.b";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)selectorExp, (int)exp->type);
@@ -107,7 +114,7 @@ TEST(ParserTest, ParseSelectorExpression) {
 
 TEST(ParserTest, ParseDoubleSelectorExpression) {
     char *src = "a.b.c";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)selectorExp, (int)exp->type);
@@ -119,7 +126,7 @@ TEST(ParserTest, ParseDoubleSelectorExpression) {
 
 TEST(ParserTest, ParseIndexExpression) {
     char *src = "test[1]";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)indexExp, (int)exp->type);
@@ -127,7 +134,7 @@ TEST(ParserTest, ParseIndexExpression) {
 
 TEST(ParserTest, ParseRightAssociativeBinaryOperators) {
     char *src = "a || b || c";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
@@ -136,7 +143,7 @@ TEST(ParserTest, ParseRightAssociativeBinaryOperators) {
 
 TEST(ParserTest, ParseUnaryExpression) {
     char *src = "!a";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
     
     ASSERT_EQ((int)unaryExp, (int)exp->type);
@@ -144,7 +151,7 @@ TEST(ParserTest, ParseUnaryExpression) {
 
 TEST(ParserTest, ParseUnaryMinuxExpression) {
     char *src = "-a";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *exp = ParseExpression(parser, 0);
 
     ASSERT_EQ((int)unaryExp, (int)exp->type);
@@ -152,7 +159,7 @@ TEST(ParserTest, ParseUnaryMinuxExpression) {
 
 TEST(ParserTest, ParseAssignmentOperator) {
     char *src = "a = b";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
@@ -160,7 +167,7 @@ TEST(ParserTest, ParseAssignmentOperator) {
 
 TEST(ParserTest, ParseAddAssigmentOperator) {
     char *src = "a += b";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
@@ -172,7 +179,7 @@ TEST(ParserTest, ParseAddAssigmentOperator) {
 
 TEST(ParserTest, ParseReturnStatment) {
     char *src = "return a";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)returnSmt, (int)smt->type);
@@ -180,7 +187,7 @@ TEST(ParserTest, ParseReturnStatment) {
 
 TEST(ParserTest, ParseBlockStatment) {
     char *src = "{\nreturn test\n}";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
@@ -190,7 +197,7 @@ TEST(ParserTest, ParseBlockStatment) {
 
 TEST(ParserTest, ParserBlockSingleLine) {
     char *src = "{ return test }";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
@@ -200,7 +207,7 @@ TEST(ParserTest, ParserBlockSingleLine) {
 
 TEST(ParserTest, ParserLongBlockSingleLine) {
     char *src = "{ a = 1; b = 2; return test }";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
@@ -209,7 +216,7 @@ TEST(ParserTest, ParserLongBlockSingleLine) {
 
 TEST(ParserTest, ParseIfStatment) {
     char *src = "if true {\nreturn false\n}";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
@@ -220,7 +227,7 @@ TEST(ParserTest, ParseIfStatment) {
 
 TEST(ParserTest, ParserShortVaribleDeclare) {
     char *src = "a := 10";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
@@ -232,7 +239,7 @@ TEST(ParserTest, ParserShortVaribleDeclare) {
 
 TEST(ParserTest, ParseLongVaribleDeclare) {
     char *src = "var int a = 10";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
@@ -247,7 +254,7 @@ TEST(ParserTest, ParseLongVaribleDeclare) {
 
 TEST(ParserTest, ParseArrayType) {
     char *src = "int[3]";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Exp *type = ParseType(parser);
 
     ASSERT_EQ((int)arrayTypeExp, (int)type->type);
@@ -255,7 +262,7 @@ TEST(ParserTest, ParseArrayType) {
 
 TEST(ParserTest, ParseFunctionDefinition) {
     char *src = "proc test :: int a, int b -> int {\nreturn a + b\n}";
-    Parser *parser = NewParser(Lex(src));
+    Parser *parser = NewParser(src, Lex(src));
     Dcl *dcl = ParseFunction(parser);
 
     ASSERT_EQ((int)functionDcl, (int)dcl->type);

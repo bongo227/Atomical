@@ -1,4 +1,3 @@
-#include "includes/uthash.h"
 #include "includes/parser.h"
 
 // creates a new empty scope
@@ -12,8 +11,9 @@ Scope *newScope(Scope *outer) {
 }
 
 // NewParser creates a new parser
-Parser *NewParser(Token *tokens) {
+Parser *NewParser(char *src, Token *tokens) {
 	Parser *parser = (Parser *)malloc(sizeof(Parser));
+	parser->src = src;
 	parser->tokens = tokens;
 	parser->scope = newScope(NULL);
 	parser->expLevel = 0;
@@ -43,17 +43,18 @@ void ExitScope(Parser *parser) {
 }
 
 // InsertScope inserts an object into the current scope
-void InsertScope(Parser *parser, char *name, Object *object) {
+bool InsertScope(Parser *parser, char *name, Object *object) {
 	// check if name is already in scope
 	ScopeObject *obj;
 	HASH_FIND_STR(parser->scope->objects, name, obj);
-	if (obj != NULL) printf("\"%s\" already in scope", name);
+	if (obj != NULL) return false;
 
 	// add object to scope
 	obj = (ScopeObject *)malloc(sizeof(ScopeObject));
 	obj->name = name;
 	obj->obj = object;
 	HASH_ADD_KEYPTR(hh, parser->scope->objects, obj->name, strlen(obj->name), obj);
+	return true;
 }
 
 // FindScope finds an object in scope
@@ -318,8 +319,9 @@ Exp *ParseIdentToken(Parser *parser, Token *token) {
 	
 	char *name = token->value;
 	Exp *ident = newIdentExp(name);
-	ident->node.ident.obj = FindScope(parser, name);
-
+	
+	Object *obj = FindScope(parser, name);
+	ident->node.ident.obj = obj;
 	return ident;
 }
 
