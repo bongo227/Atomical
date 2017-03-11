@@ -271,10 +271,10 @@ Smt *smtd(Parser *parser, Token *token) {
 				if (parser->tokens->type == IF) {
 					// else if, so recursivly parse else chain
 					elses = ParseStatement(parser);
+				} else {
+					// final else statment only has a body
+					elses = newIfSmt(NULL, ParseStatement(parser), NULL);
 				}
-
-				// final else statment only has a body
-				elses = newIfSmt(NULL, ParseStatement(parser), NULL);
 			}
 
 			return newIfSmt(cond, block, elses);

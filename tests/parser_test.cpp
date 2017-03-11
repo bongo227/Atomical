@@ -225,6 +225,46 @@ TEST(ParserTest, ParseIfStatment) {
     ASSERT_EQ(smt->node.ifs.elses, NULL);
 }
 
+TEST(ParserTest, ParseIfElseStatement) {
+    char *src = "if true { return 123 } else { return 321 }";
+    Parser *parser = NewParser(src, Lex(src));
+    Smt *smt = ParseStatement(parser);
+
+    ASSERT_EQ((int)ifSmt, (int)smt->type);
+    ASSERT_EQ((int)identExp, (int)smt->node.ifs.cond->type);
+    ASSERT_EQ((int)blockSmt, (int)smt->node.ifs.body->type);
+    ASSERT_NE(smt->node.ifs.elses, NULL);
+
+    Smt *elses = smt->node.ifs.elses;
+    ASSERT_EQ((int)ifSmt, (int)elses->type);
+    ASSERT_EQ(elses->node.ifs.cond, NULL);
+    ASSERT_EQ((int)blockSmt, (int)elses->node.ifs.body->type);
+    ASSERT_EQ(elses->node.ifs.elses, NULL);
+}
+
+TEST(ParserTest, ParseIfElseIfElseStatment) {
+    char *src = "if false { return 321 } else if true { return 123 } else { return 0 }";
+    Parser *parser = NewParser(src, Lex(src));
+    Smt *smt = ParseStatement(parser);
+
+    ASSERT_EQ((int)ifSmt, (int)smt->type);
+    ASSERT_EQ((int)identExp, (int)smt->node.ifs.cond->type);
+    ASSERT_EQ((int)blockSmt, (int)smt->node.ifs.body->type);
+    ASSERT_NE(smt->node.ifs.elses, NULL);
+
+    Smt *elif = smt->node.ifs.elses;
+    ASSERT_EQ((int)ifSmt, (int)elif->type);
+    ASSERT_NE(elif->node.ifs.cond, NULL);
+    ASSERT_EQ((int)blockSmt, (int)elif->node.ifs.body->type);
+    ASSERT_NE(elif->node.ifs.elses, NULL);
+
+    Smt *elses = elif->node.ifs.elses;
+    ASSERT_EQ((int)ifSmt, (int)elses->type);
+    ASSERT_EQ(elses->node.ifs.cond, NULL);
+    ASSERT_EQ((int)blockSmt, (int)elses->node.ifs.body->type);
+    ASSERT_EQ(elses->node.ifs.elses, NULL);
+}
+
 TEST(ParserTest, ParserShortVaribleDeclare) {
     char *src = "a := 10";
     Parser *parser = NewParser(src, Lex(src));

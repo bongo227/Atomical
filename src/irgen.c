@@ -72,6 +72,11 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
 
     CompileBlock(irgen, d->node.function.body);
 
+    // remove last block if empty
+    if (LLVMGetFirstInstruction(irgen->block) == NULL) {
+        LLVMDeleteBasicBlock(irgen->block);
+    }
+
     irgen->block = NULL;
     return irgen->function;
 }
@@ -125,10 +130,30 @@ void SetBlock(Irgen *irgen, LLVMBasicBlockRef block) {
 void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlockRef endBlock) {
     ASSERT(s->type == ifSmt, "Expected if statement");
     
-    LLVMBasicBlockRef parent = irgen->block;
-    if (block == NULL) block = LLVMAppendBasicBlock(irgen->function, "if");
+    Exp *cond = s->node.ifs.cond;
+    if (cond == NULL) {
+        // Compile else block and exit
+        SetBlock(irgen, block);
+        CompileBlock(irgen, s->node.ifs.body);
+        if (LLVMGetBasicBlockTerminator(block) == NULL) {
+            // block is not terminated so continue execution from end block
+            LLVMBuildBr(irgen->builder, endBlock);
+        }
+
+        return;
+    }
+
+    // parent block is the block to branch from
+    LLVMBasicBlockRef parent;
+    if (block == NULL) {
+        parent = irgen->block;
+    } else {
+        parent = block;
+    }
+    // block if condition is true
+    block = LLVMAppendBasicBlock(irgen->function, "if");
     
-    // false block is either the next else/elseif block or block to conitue execution
+    // falseBlock is either the next else/elseif block or block to conitue execution
     LLVMBasicBlockRef falseBlock;
     if (s->node.ifs.elses != NULL) {
         falseBlock = LLVMAppendBasicBlock(irgen->function, "else");
@@ -143,32 +168,25 @@ void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlo
         // block is not terminated so continue execution from end block
         LLVMBuildBr(irgen->builder, endBlock);
     }
-
+    
     // Add the conditional branch
-    Exp *cond = s->node.ifs.cond;
-    if (cond != NULL) {
-        SetBlock(irgen, parent);
-        LLVMValueRef condition = CompileExp(irgen, cond);
-        LLVMBuildCondBr(irgen->builder, condition, block, falseBlock);
-    }
+    SetBlock(irgen, parent);
+    LLVMValueRef condition = CompileExp(irgen, cond);
+    LLVMBuildCondBr(irgen->builder, condition, block, falseBlock);
 
+    // if their is a chaining elseif/else set its parent to the falseBlock
     SetBlock(irgen, falseBlock);
-
     if(s->node.ifs.elses != NULL) {
         CompileIfBranch(irgen, s->node.ifs.elses, falseBlock, endBlock);
     }
 
+    // continue execution from the endBlock
     SetBlock(irgen, endBlock);
 }
 
 void CompileIf(Irgen *irgen, Smt *s) {
     LLVMBasicBlockRef endBlock = LLVMAppendBasicBlock(irgen->function, "endBlock");
     CompileIfBranch(irgen, s, NULL, endBlock);
-    
-    // remove last block if empty
-    if (LLVMGetFirstInstruction(endBlock) == NULL) {
-        LLVMDeleteBasicBlock(endBlock);
-    }
 }
 
 void CompileSmt(Irgen *irgen, Smt *s) {
