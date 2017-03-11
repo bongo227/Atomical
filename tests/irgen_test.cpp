@@ -111,13 +111,12 @@ TEST(IrgenTest, CastValues) {
 }
 
 LLVMGenericValueRef intArg(int n) {
-    return LLVMCreateGenericValueOfInt(LLVMInt64Type(), n, true);
+    return LLVMCreateGenericValueOfInt(LLVMInt64Type(), n, false);
 }
 
 TEST(IrgenTest, FunctionTests) {
     struct tcase {
         char *src;    
-        int paramCount;
         LLVMGenericValueRef params[3];
         int out;
     };
@@ -125,29 +124,37 @@ TEST(IrgenTest, FunctionTests) {
     tcase cases[] = {
         {
             "proc test :: -> int { return 123 }",
-            0, { NULL, NULL, NULL }, 123,
+            { }, 123,
         },
 
         {
             "proc test :: -> int { return 121 + 2 }",
-            0, { NULL, NULL, NULL }, 123,
+            { }, 123,
         },
 
         {
             "proc test :: -> int { return 130.75 - 7.75 }",
-            0, { NULL, NULL, NULL }, 123,
+            { }, 123,
         },
 
         {
             "proc test :: int a, int b -> int { return a + b }",
-            2, { intArg(100), intArg(23), NULL }, 123,
+            { intArg(100), intArg(23) }, 123,
+        },
+
+        {
+            "proc test :: int n -> int { return -n }",
+            { intArg(-123) }, 123,
         },
     };
-    
+
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) { 
         tcase c = cases[i];
         log("testing function \"%s\"", c.src);
-        
+
+        int paramCount = 0;
+        while(c.params[paramCount] != NULL) paramCount++;
+
         // generate function
         Parser *parser = NewParser(Lex(c.src));
         Dcl *d = ParseFunction(parser);
@@ -179,7 +186,7 @@ TEST(IrgenTest, FunctionTests) {
         ASSERT_EQ(error, NULL);
 
         // run the function
-        LLVMGenericValueRef res = LLVMRunFunction(engine, function, c.paramCount, c.params);
+        LLVMGenericValueRef res = LLVMRunFunction(engine, function, paramCount, c.params);
         ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), c.out);
 
         // dispose

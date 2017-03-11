@@ -289,14 +289,52 @@ LLVMValueRef CompileIdentExp(Irgen *irgen, Exp *e) {
     return LLVMBuildLoad(irgen->builder, alloc, e->node.ident.name);
 }
 
+LLVMValueRef CompileUnaryExp(Irgen *irgen, Exp *e) {
+    ASSERT(e->type == unaryExp, "Expected unary expression");
+
+    LLVMValueRef exp = CompileExp(irgen, e->node.unary.right);
+    switch(e->node.unary.op.type) {
+        case ADD:
+            return exp;
+        case SUB: {
+            // build name
+            char *expName = LLVMGetValueName(exp);
+            char *name = alloca(sizeof(char) * (strlen(expName) + 1));
+            strcpy(name, "-");
+            strcpy(name, expName);
+
+            // insert "-1 * exp" instruction 
+            LLVMTypeRef expType = LLVMTypeOf(exp);
+            switch(LLVMGetTypeKind(expType)) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind: {
+                    LLVMValueRef minusOne = LLVMConstReal(expType, -1);
+                    return LLVMBuildFMul(irgen->builder, minusOne, exp, name);
+                }
+                case LLVMIntegerTypeKind: {
+                    LLVMValueRef minusOne = LLVMConstInt(expType, -1, true);
+                    return LLVMBuildMul(irgen->builder, minusOne, exp, name);
+                }
+                default:
+                    ASSERT(false, "Cannot multiply non float/int type by -1");
+            } 
+        }
+        default:
+            ASSERT(false, "Unkown unary operator");
+    }
+}
+
 LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case literalExp:
             return CompileLiteralExp(irgen, e);
+        case unaryExp:
+            return CompileUnaryExp(irgen, e);
         case binaryExp:
             return CompileBinaryExp(irgen, e);
         case identExp:
             return CompileIdentExp(irgen, e);
+
         default:
             ASSERT(false, "Unknow expression type");
     }
