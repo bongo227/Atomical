@@ -146,6 +146,21 @@ TEST(IrgenTest, FunctionTests) {
             "proc test :: int n -> int { return -n }",
             { intArg(-123) }, 123,
         },
+
+        {
+            "proc test :: int n -> int { n = 123; return n }",
+            { intArg(321) }, 123,
+        },
+
+        {
+            "proc test :: -> int { var int a = 123; return a }",
+            { }, 123,
+        },
+
+        {
+            "proc test :: -> int { a := 123; return a }",
+            { }, 123,
+        }
     };
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) { 

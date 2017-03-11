@@ -95,6 +95,26 @@ void CompileReturn(Irgen *irgen, Smt *s) {
         Cast(irgen, CompileExp(irgen, s->node.ret.result), returnType));
 }
 
+// Gets the allocation for an expression
+LLVMValueRef GetAlloc(Exp *e) {
+    switch(e->type) {
+        case identExp: {
+            Dcl *dcl = (Dcl *)(e->node.ident.obj->node); // TODO: can node alway be Dcl
+            return dcl->llvmValue;
+        }
+        default:
+            ASSERT(false, "Cannot get alloc on unknown expression");
+    }
+}
+
+void CompileAssignment(Irgen *irgen, Smt *s) {
+    ASSERT(s->type == assignmentSmt, "Expected an assignment statement");
+
+    LLVMValueRef alloc = GetAlloc(s->node.assignment.left);
+    LLVMValueRef exp = CompileExp(irgen, s->node.assignment.right);
+    LLVMBuildStore(irgen->builder, exp, alloc);
+}
+
 void CompileSmt(Irgen *irgen, Smt *s) {
     switch (s->type) {
         case blockSmt:
@@ -103,8 +123,54 @@ void CompileSmt(Irgen *irgen, Smt *s) {
         case returnSmt:
             CompileReturn(irgen, s);
             break;
+        case assignmentSmt:
+            CompileAssignment(irgen, s);
+            break;
+        case declareSmt:
+            CompileDcl(irgen, s->node.declare);
+            break;
         default:
             ASSERT(false, "TODO");
+    }
+}
+
+void CompileVarible(Irgen *irgen, Dcl *d) {
+    // get argument node
+    char *varName = d->node.varible.name->node.ident.name; //TODO: make this a char * not Exp *
+
+    // compile expression
+    LLVMValueRef exp = CompileExp(irgen, d->node.varible.value);
+
+    // get the type of the varible declaration
+    LLVMTypeRef varType;
+    if (d->node.varible.type != NULL) {
+        varType = CompileType(d->node.varible.type);
+        exp = Cast(irgen, exp, varType);
+    } else {
+        varType = LLVMTypeOf(exp);
+    }
+
+    // allocate space for varible
+    LLVMValueRef varAlloc = LLVMBuildAlloca(
+        irgen->builder, 
+        varType, 
+        varName);
+        
+    // store alloc in node
+    d->llvmValue = varAlloc;
+
+    // store argument in allocated space
+    LLVMBuildStore(irgen->builder, exp, varAlloc);
+}
+
+void CompileDcl(Irgen *irgen, Dcl *d) {
+    switch(d->type) {
+        case functionDcl:
+            CompileFunction(irgen, d);
+        case argumentDcl:
+            ASSERT(false, "Cannot compile argument outside function declaration");
+        case varibleDcl:
+            CompileVarible(irgen, d);
     }
 }
 
@@ -186,13 +252,13 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
         
         if(leftKind == LLVMIntegerTypeKind && rightKind == LLVMIntegerTypeKind) {
             nodeType = LLVMInt64Type();
-            Cast(irgen, left, nodeType);
-            Cast(irgen, right, nodeType);
+            left = Cast(irgen, left, nodeType);
+            right = Cast(irgen, right, nodeType);
         } else {
             // one or more sides are float so premote both sides to float
             nodeType = LLVMDoubleType();
-            Cast(irgen, left, nodeType);
-            Cast(irgen, right, nodeType);
+            left = Cast(irgen, left, nodeType);
+            right = Cast(irgen, right, nodeType);
         }
     } else {
         nodeType = leftType;
@@ -282,10 +348,7 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileIdentExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == identExp, "Expected identifier expression");
 
-    // Get alloc from ident
-    Dcl *dcl = (Dcl *)(e->node.ident.obj->node);
-    LLVMValueRef alloc = dcl->llvmValue;
-
+    LLVMValueRef alloc = GetAlloc(e);
     return LLVMBuildLoad(irgen->builder, alloc, e->node.ident.name);
 }
 
