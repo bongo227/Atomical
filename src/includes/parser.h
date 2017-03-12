@@ -29,6 +29,7 @@ Exp *ParseIdentToken(Parser *parser, Token *token);
 Exp *ParseIdent(Parser *parser);
 Dcl *ParseVar(Parser *parser);
 
+Exp *ParseType(Parser *parser);
 Exp *ParseExpression(Parser *parser, int rbp);
 Smt *ParseStatement(Parser *parser);
 Dcl *ParseDeclaration(Parser *parser);

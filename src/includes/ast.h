@@ -45,6 +45,7 @@ typedef enum {
 	starExp,
 	binaryExp,
 	unaryExp,
+	arrayLiteralExp,
 	arrayTypeExp,
 	fieldTypeExp,
 	structTypeExp,
@@ -63,76 +64,70 @@ struct _Exp {
 		// literalExp
 		Token literal;
 
-		// parenExp
-		struct _Exp *paren;
-
 		// selectorExp
 		struct {
-			struct _Exp *exp;
-			struct _Exp *selector;
+			Exp *exp;
+			Exp *selector;
 		} selector;
 
 		// indexExp
 		struct {
-			struct _Exp *exp;
-			struct _Exp *index;
+			Exp *exp;
+			Exp *index;
 		} index;
 
 		// sliceExp
 		struct {
-			struct _Exp *exp;
-			Token lBrack;
-			struct _Exp *low;
-			Token Colon;
-			struct _Exp *high;
-			Token rBrack;
+			Exp *exp;
+			Exp *low;
+			Exp *high;
 		} slice;
 
 		// callExp
 		struct {
-			struct _Exp *function;
-			struct _Exp *args;
+			Exp *function;
+			Exp *args;
 			int argCount;
 		} call;
 
-		// castExp
-		struct {
-			Token lParen;
-			struct _Exp *exp;
-			Token rParen;
-		} castExp;
-
 		// starExp
-		struct _Exp *star;
+		Exp *star;
 
 		// unaryExp
 		struct {
 			Token op;
-			struct _Exp *right;
+			Exp *right;
 		} unary;
 
 		// binaryExp
 		struct {
-			struct _Exp *left;
+			Exp *left;
 			Token op;
-			struct _Exp *right;
+			Exp *right;
 		} binary;
 
-		// arrayExp
+		// arrayLiteralExp
 		struct {
-			struct _Exp *type;
-			struct _Exp *length;
+			Exp *type;
+			Exp *values;
+			int valueCount;
+		} arrayLiteral;
+
+		// arrayTypeExp
+		struct {
+			Exp *type;
+			Exp *length;
 		} arrayType;
 
-		// fieldExp
+		// fieldTypeExp
 		struct {
-			struct _Exp *type;
-			struct _Exp *name;
+			Exp *type;
+			Exp *name;
 		} fieldType;
 
-		// structExp
+		// structTypeExp
 		struct {
-			struct _Exp *fields;
+			Exp *fields;
 			int feildCount; 
 		} structType;
 	} node;

@@ -153,6 +153,16 @@ Smt *newDeclareSmt(Dcl *dcl) {
 	return s; 
 }
 
+Exp *newArrayLiteralExp(Exp *type, Exp *values, int valueCount) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = arrayLiteralExp;
+	e->node.arrayLiteral.type = type;
+	e->node.arrayLiteral.values = values;
+	e->node.arrayLiteral.valueCount = valueCount;
+
+	return e;
+}
+
 Exp *newArrayTypeExp(Exp *type, Exp *length) {
 	Exp *e = (Exp *)malloc(sizeof(Exp));
 	e->type = arrayTypeExp;

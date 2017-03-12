@@ -20,6 +20,9 @@ TEST(IrgenTest, CompileTypes) {
         {"float", LLVMFloatType()},
         {"f64", LLVMDoubleType()},
         {"f32", LLVMFloatType()},
+
+        {"[3]int", LLVMArrayType(LLVMInt64Type(), 3)},
+        {"[100]float", LLVMArrayType(LLVMFloatType(), 100)},
     };
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
@@ -218,6 +221,11 @@ TEST(IrgenTest, FunctionTests) {
             "proc test :: -> int { a := 0; for i := 0; i < 123; i++ { a += 1 }; return a }",
             { }, 123,
         },
+
+        // {
+        //     "proc test :: -> int { a := [3]int{0, 123, 321}; return a[1] }",
+        //     { }, 123,
+        // },
     };
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) { 

@@ -17,6 +17,11 @@ LLVMTypeRef CompileType(Exp *e) {
             if (strcmp(e->node.ident.name, "float") == 0) return LLVMFloatType();
             if (strcmp(e->node.ident.name, "f32") == 0) return LLVMFloatType();
             if (strcmp(e->node.ident.name, "f64") == 0) return LLVMDoubleType();
+        case arrayTypeExp: {
+            LLVMTypeRef elementType = CompileType(e->node.arrayType.type);
+            int length = atoi(e->node.arrayType.length->node.literal.value);
+            return LLVMArrayType(elementType, length);
+        }
         default:
             ASSERT(false, "Expected a type");
     }

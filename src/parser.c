@@ -136,6 +136,25 @@ void expectSemi(Parser *parser) {
 	ParserNext(parser);
 }
 
+Exp *ParseArrayLiteralExp(Parser *parser) {
+	Exp *type = ParseType(parser);
+	expect(parser, LBRACE);
+
+	Exp *values = (Exp *)malloc(0);
+	int valueCount = 0;
+	while(parser->tokens->type != RBRACE) {
+		valueCount++;
+		values = realloc(values, valueCount * sizeof(Exp));
+		Exp *exp = ParseExpression(parser, 0);
+		memcpy(values + valueCount - 1, exp, sizeof(Exp));
+		if(parser->tokens->type != RBRACE) expect(parser, COMMA);
+	}
+
+	expect(parser, RBRACE);
+
+	return newArrayLiteralExp(type, values, valueCount);
+}
+
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
 Exp *nud(Parser *parser, Token *token) {
 	switch (token->type) {
@@ -152,6 +171,10 @@ Exp *nud(Parser *parser, Token *token) {
 	case NOT:
 	case SUB:
 		return newUnaryExp(*token, ParseExpression(parser, 60));
+	
+	case LBRACK:
+		parser->tokens--;
+		return ParseArrayLiteralExp(parser);
 	}
 
 	return NULL;
@@ -230,21 +253,27 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 	return NULL;
 }
 
+Exp *ParseArrayType(Parser *parser) {
+	expect(parser, LBRACK);
+	Exp *length = ParseExpression(parser, 0);
+	expect(parser, RBRACK);
+	Exp *type = ParseType(parser);
+	return newArrayTypeExp(type, length);
+}
+
 Exp *ParseType(Parser *parser) {
-	Exp *type = ParseExpression(parser, 0);
-	switch (type->type) {
-	case identExp:
-		break;
-	case indexExp:
-		// type is array type so convert indexExp -> arrayTypeExp
-		type = newArrayTypeExp(type->node.index.exp,
-			type->node.index.index);
-		break;
+	switch (parser->tokens->type) {
+	// named type
+	case IDENT:
+		return ParseIdent(parser);
+	
+	// array type
+	case LBRACK:
+		return ParseArrayType(parser);
+	
 	default:
 		ASSERT(false, "Expecting a type");
 	}
-
-	return type;
 }
 
 // smtd parser the current token in the context of the start of a statement

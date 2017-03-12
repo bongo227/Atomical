@@ -293,7 +293,7 @@ TEST(ParserTest, ParseLongVaribleDeclare) {
 }
 
 TEST(ParserTest, ParseArrayType) {
-    char *src = "int[3]";
+    char *src = "[3]int";
     Parser *parser = NewParser(src, Lex(src));
     Exp *type = ParseType(parser);
 
@@ -366,4 +366,13 @@ TEST(ParserTest, ParseIncrement) {
     Smt *smt = ParseStatement(parser);
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
+}
+
+TEST(ParserTest, ParseArrayLiteralExpression) {
+    char *src = "[3]int{1, 2, 3}";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_EQ(arrayLiteralExp, exp->type);
+    ASSERT_EQ(3, exp->node.arrayLiteral.valueCount);
 }
