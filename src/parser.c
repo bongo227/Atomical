@@ -304,6 +304,28 @@ Smt *smtd(Parser *parser, Token *token) {
 
 			return newIfSmt(cond, block, elses);
 		}
+		// for loop
+		case FOR: {
+			parser->tokens++;
+
+			// parse index
+			Dcl *index = ParseDeclaration(parser);
+			ASSERT(index->type == varibleDcl, "Expected index of for loop to be a varible declaration");
+			expectSemi(parser);
+
+			// parse condition
+			Exp *cond = ParseExpression(parser, 0);
+			expectSemi(parser);
+
+			// parse increment
+			Smt *inc = ParseStatement(parser);
+			
+			// parse body
+			Smt *body = ParseStatement(parser);
+			ASSERT(body->type == blockSmt, "Expected block statement");
+
+			return newForSmt(index, cond, inc);
+		}
 		// varible declaration
 		case VAR: {
 			parser->tokens++;
@@ -356,6 +378,26 @@ Exp *ParseIdent(Parser *parser) {
 	return ident;
 }
 
+Dcl *ParseVar(Parser *parser) {
+	Exp *name;
+	Exp *type = NULL;
+	Exp *value;
+
+	if(parser->tokens->type == VAR) {
+		parser->tokens++;
+		name = ParseIdent(parser);
+		type = ParseType(parser);
+		expect(parser, ASSIGN);
+		value = ParseExpression(parser, 0);
+	} else {
+		name = ParseIdent(parser);
+		expect(parser, DEFINE);
+		value = ParseExpression(parser, 0);
+	}
+
+	return newVaribleDcl(name, type, value);
+}
+
 Dcl *ParseFunction(Parser *parser) {
 	expect(parser, PROC);
 	Exp *name = ParseIdent(parser); // function name
@@ -405,6 +447,16 @@ Dcl *ParseFunction(Parser *parser) {
 	InsertScope(parser, name->node.ident.name, obj);
 
 	return function;
+}
+
+Dcl *ParseDeclaration(Parser *parser) {
+	switch(parser->tokens->type) {
+		case PROC:
+			return ParseFunction(parser);
+		case VAR:
+		case IDENT:
+			return ParseVar(parser);
+	}
 }
 
 // Parses the next statement by calling smtd on the first token else handle

@@ -205,3 +205,13 @@ Exp *newCallExp(Exp *function, Exp *args, int argCount) {
 
 	return e;
 } 
+
+Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc) {
+	Smt *s = (Smt *)malloc(sizeof(Smt));
+	s->type = forSmt;
+	s->node.fors.index = index;
+	s->node.fors.cond = cond;
+	s->node.fors.inc = inc;
+
+	return s;
+}

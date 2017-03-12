@@ -347,3 +347,14 @@ TEST(ParserTest, ParseCallInCallExpression) {
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(1, exp->node.call.argCount);
 }
+
+TEST(ParserTest, ParseForLoop) {
+    char *src = "for i := 0; i < 10; i += 1 {}";
+    Parser *parser = NewParser(src, Lex(src));
+    Smt *smt = ParseStatement(parser);
+
+    ASSERT_EQ((int)forSmt, (int)smt->type);
+    ASSERT_EQ((int)varibleDcl, (int)smt->node.fors.index->type);
+    ASSERT_EQ((int)binaryExp, (int)smt->node.fors.cond->type);
+    ASSERT_EQ((int)assignmentSmt, (int)smt->node.fors.inc->type);
+}

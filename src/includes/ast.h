@@ -214,16 +214,24 @@ struct _Smt {
 
 		// blockSmt
 		struct {
-			struct _Smt *smts;
+			Smt *smts;
 			int count;
 		} block;
 
 		// ifSmt
 		struct {
 			Exp *cond;
-			struct _Smt *body;
-			struct _Smt *elses;
+			Smt *body;
+			Smt *elses;
 		} ifs;
+
+		// forSmt
+		struct {
+			Dcl *index;
+			Exp *cond;
+			Smt *inc;
+			Smt *body;
+		} fors;
 	} node;
 };
 
