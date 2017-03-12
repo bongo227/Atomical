@@ -1,13 +1,13 @@
 ### TODO
-- For loops
-- Arrays
-- Read files and writing executables
+- [x] For loops
+- [ ] Arrays
+- [ ] Read files and writing executables
 
-- strings
-- including other files
-- basic standard library
-- printing (varargs?)
+- [ ] strings
+- [ ] including other files
+- [ ] basic standard library
+- [ ] printing (varargs?)
 
-- structures
-- pointers
-- malloc / alloca / free
+- [ ] structures
+- [ ] pointers
+- [ ] malloc / alloca / free
