@@ -324,37 +324,28 @@ Smt *smtd(Parser *parser, Token *token) {
 			Smt *body = ParseStatement(parser);
 			ASSERT(body->type == blockSmt, "Expected block statement");
 
-			return newForSmt(index, cond, inc);
+			return newForSmt(index, cond, inc, body);
 		}
 		// varible declaration
 		case VAR: {
-			parser->tokens++;
-			
-			// parse declaration type
-			Exp *type = ParseType(parser);
+			return newDeclareSmt(ParseVar(parser));
+		}
+		// increment expression
+		case IDENT: {
+			Exp *ident = ParseIdent(parser);
 
-			// parse declaration name
-			ASSERT(parser->tokens->type == IDENT,
-				"Expected var to have name after type");
-			Exp *name = newIdentExp(parser->tokens->value);
-			ParserNext(parser);
-
-			expect(parser, ASSIGN);
-
-			// parse declaration value
-			Exp *value = ParseExpression(parser, 0);
-
-			Smt *smt = newDeclareSmt(newVaribleDcl(name, type, value));
-
-			// Added declaration to scope
-			Object *obj =(Object *)malloc(sizeof(Object));
-			obj->name = name->node.ident.name;
-			obj->node = smt->node.declare;
-			obj->type = varObj;
-			obj->typeInfo = NULL;
-			InsertScope(parser, name->node.ident.name, obj);
-
-			return smt;
+			switch(parser->tokens->type) {
+				case INC:
+					parser->tokens++;
+					return newBinaryAssignmentSmt(ident, ADD_ASSIGN, newIntLiteral("1"));
+				case DEC:
+					parser->tokens++;
+					return newBinaryAssignmentSmt(ident, SUB_ASSIGN, newIntLiteral("1"));
+				default:
+					// expression is assigment or declaration so let caller handle it
+					parser->tokens--; // go back to ident
+					return NULL;
+			}
 		}
 	}
 	return NULL;
@@ -385,8 +376,8 @@ Dcl *ParseVar(Parser *parser) {
 
 	if(parser->tokens->type == VAR) {
 		parser->tokens++;
-		name = ParseIdent(parser);
 		type = ParseType(parser);
+		name = ParseIdent(parser);
 		expect(parser, ASSIGN);
 		value = ParseExpression(parser, 0);
 	} else {
@@ -395,7 +386,17 @@ Dcl *ParseVar(Parser *parser) {
 		value = ParseExpression(parser, 0);
 	}
 
-	return newVaribleDcl(name, type, value);
+	Dcl *dcl = newVaribleDcl(name, type, value);
+
+	char *objName = name->node.ident.name;
+	Object *obj = (Object *)malloc(sizeof(Object));
+	obj->name = objName;
+	obj->node = dcl;
+	obj->type = varObj;
+	obj->typeInfo = NULL;
+	InsertScope(parser, objName, obj);
+
+	return dcl;
 }
 
 Dcl *ParseFunction(Parser *parser) {
