@@ -17,6 +17,11 @@ Exp *newLiteralExp(Token lit) {
 	return e;
 }
 
+Exp *newIntLiteral(char *n) {
+	Token t = {INT, 0, 0, n};
+	return newLiteralExp(t);
+}
+
 Exp *newBinaryExp(Exp *left, Token op, Exp *right) {
 	Exp *e = (Exp *)malloc(sizeof(Exp));
 	e->type = binaryExp;
@@ -206,12 +211,13 @@ Exp *newCallExp(Exp *function, Exp *args, int argCount) {
 	return e;
 } 
 
-Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc) {
+Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc, Smt *body) {
 	Smt *s = (Smt *)malloc(sizeof(Smt));
 	s->type = forSmt;
 	s->node.fors.index = index;
 	s->node.fors.cond = cond;
 	s->node.fors.inc = inc;
+	s->node.fors.body = body;
 
 	return s;
 }

@@ -357,4 +357,13 @@ TEST(ParserTest, ParseForLoop) {
     ASSERT_EQ((int)varibleDcl, (int)smt->node.fors.index->type);
     ASSERT_EQ((int)binaryExp, (int)smt->node.fors.cond->type);
     ASSERT_EQ((int)assignmentSmt, (int)smt->node.fors.inc->type);
+    ASSERT_EQ((int)blockSmt, (int)smt->node.fors.body->type);
+}
+
+TEST(ParserTest, ParseIncrement) {
+    char *src = "i++";
+    Parser *parser = NewParser(src, Lex(src));
+    Smt *smt = ParseStatement(parser);
+
+    ASSERT_EQ((int)assignmentSmt, (int)smt->type);
 }
