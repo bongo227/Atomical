@@ -109,6 +109,7 @@ void CompileReturn(Irgen *irgen, Smt *s) {
 LLVMValueRef GetAlloc(Exp *e) {
     switch(e->type) {
         case identExp: {
+            ASSERT(e->node.ident.obj != NULL, "Identifier doesnt have object");
             Dcl *dcl = (Dcl *)(e->node.ident.obj->node); // TODO: can node alway be Dcl
             return dcl->llvmValue;
         }
@@ -192,6 +193,35 @@ void CompileIf(Irgen *irgen, Smt *s) {
     CompileIfBranch(irgen, s, NULL, endBlock);
 }
 
+void CompileFor(Irgen *irgen, Smt *s) {
+    ASSERT(s->type == forSmt, "Expected for statement");
+
+    CompileDcl(irgen, s->node.fors.index);
+
+    // compile for body
+    LLVMBasicBlockRef block = LLVMAppendBasicBlock(irgen->function, "for");
+    LLVMBasicBlockRef parent = irgen->block;
+    // TODO: make a function for compiling a block
+    SetBlock(irgen, block);
+    CompileSmt(irgen, s->node.fors.body);
+    SetBlock(irgen, parent);
+
+    LLVMBasicBlockRef continueBlock = LLVMAppendBasicBlock(irgen->function, "endfor");
+
+    // branch into for loop
+    LLVMValueRef outerCond = CompileExp(irgen, s->node.fors.cond);
+    LLVMBuildCondBr(irgen->builder, outerCond, block, continueBlock);
+
+    // branch to loop or exit
+    SetBlock(irgen, block);
+    CompileSmt(irgen, s->node.fors.inc);
+    LLVMValueRef innerCond = CompileExp(irgen, s->node.fors.cond);
+    LLVMBuildCondBr(irgen->builder, innerCond, block, continueBlock);
+
+    // continue from continueBlock
+    SetBlock(irgen, continueBlock);
+}
+
 void CompileSmt(Irgen *irgen, Smt *s) {
     switch (s->type) {
         case blockSmt:
@@ -212,6 +242,10 @@ void CompileSmt(Irgen *irgen, Smt *s) {
         
         case ifSmt:
             CompileIf(irgen, s);
+            break;
+
+        case forSmt:
+            CompileFor(irgen, s);
             break;
         
         default:
@@ -410,23 +444,84 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
                 default:
                     ASSERT(false, "Cannot mod non float/int type");
             }
-        case XOR:
         case LSS:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFCmp(irgen->builder, LLVMRealULT, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildICmp(irgen->builder, LLVMIntSLT, left, right, name);
+                default:
+                    ASSERT(false, "Cannot less than non float/int type");
+            }
+
         case LEQ:
-        case SHL:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFCmp(irgen->builder, LLVMRealULE, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildICmp(irgen->builder, LLVMIntSLE, left, right, name);
+                default:
+                    ASSERT(false, "Cannot less than or equal non float/int type");
+            }
+
         case GTR:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFCmp(irgen->builder, LLVMRealUGT, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildICmp(irgen->builder, LLVMIntSGT, left, right, name);
+                default:
+                    ASSERT(false, "Cannot greater than non float/int type");
+            }
         case GEQ:
-        case SHR:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFCmp(irgen->builder, LLVMRealUGE, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildICmp(irgen->builder, LLVMIntSGE, left, right, name);
+                default:
+                    ASSERT(false, "Cannot greater than or equal non float/int type");
+            }
+
         case EQL:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFCmp(irgen->builder, LLVMRealUEQ, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildICmp(irgen->builder, LLVMIntEQ, left, right, name);
+                default:
+                    ASSERT(false, "Cannot equal non float/int type");
+            }
+
         case NEQ:
+            switch(nodeTypeKind) {
+                case LLVMFloatTypeKind:
+                case LLVMDoubleTypeKind:
+                    return LLVMBuildFCmp(irgen->builder, LLVMRealUNE, left, right, name);
+                case LLVMIntegerTypeKind:
+                    return LLVMBuildICmp(irgen->builder, LLVMIntNE, left, right, name);
+                default:
+                    ASSERT(false, "Cannot not equal non float/int type");
+            }
+
+        case LAND:
+        case LOR:
+        case XOR:
+        case SHL:
+        case SHR:
         case AND_NOT:
         case AND:
-        case LAND:
         case OR:
-        case LOR:
             ASSERT(false, "TODO");
+            break;
         default:
             ASSERT(false, "Unknown binary operator");
+            break;
     }
 }
 

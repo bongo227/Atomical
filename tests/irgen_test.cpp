@@ -212,7 +212,12 @@ TEST(IrgenTest, FunctionTests) {
         {
             "proc test :: -> int { if false { return 321 } else if false { return 23 } else if false { return 21; } else { return 123 } }",
             { }, 123,
-        }
+        },
+
+        {
+            "proc test :: -> int { a := 0; for i := 0; i < 123; i++ { a += 1 }; return a }",
+            { }, 123,
+        },
     };
 
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) { 
