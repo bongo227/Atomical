@@ -102,6 +102,8 @@ Smt *newBinaryAssignmentSmt(Exp *left, TokenType op, Exp *right) {
 			t.type = SHL;
 			right = newBinaryExp(left, t, right);
 			break;
+		default:
+			ASSERT(false, "Expected an assignment token");
 	}
 
 	e->node.assignment.right = right;

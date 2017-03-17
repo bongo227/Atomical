@@ -25,11 +25,16 @@ typedef struct {
 } Parser;
 
 Parser *NewParser(char *src, Token *tokens);
-Exp *ParseIdentToken(Parser *parser, Token *token);
-Exp *ParseIdent(Parser *parser);
-Dcl *ParseVar(Parser *parser);
 
-Exp *ParseType(Parser *parser);
 Exp *ParseExpression(Parser *parser, int rbp);
+Exp *ParseIdent(Parser *parser);
+Exp *ParseIdentToken(Parser *parser, Token *token);
+Exp *ParseType(Parser *parser);
+
 Smt *ParseStatement(Parser *parser);
+
 Dcl *ParseDeclaration(Parser *parser);
+Dcl *ParseVar(Parser *parser);
+Dcl *ParseFunction(Parser *parser);
+
+Object *FindScope(Parser *parser, char *name);

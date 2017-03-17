@@ -3,6 +3,8 @@
 Irgen *NewIrgen() {
 	Irgen *irgen = malloc(sizeof(Irgen));
     irgen->module = LLVMModuleCreateWithName("module");
+
+    return irgen;
 }
 
 LLVMTypeRef CompileType(Exp *e) {
@@ -304,7 +306,7 @@ LLVMValueRef Cast(Irgen *irgen, LLVMValueRef value, LLVMTypeRef type) {
     if(LLVMTypeOf(value) == type) return value;
 
     // create name base on value name + "_cast"
-    char *valueName = LLVMGetValueName(value);
+    char *valueName = (char *)LLVMGetValueName(value);
     char castName[(strlen(valueName) + 5) * sizeof(char)];
     strcpy(castName, valueName);
     strcpy(castName, "_cast");
@@ -391,8 +393,8 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
     LLVMTypeKind nodeTypeKind = LLVMGetTypeKind(nodeType);
 
     // build name
-    char *leftName = LLVMGetValueName(left);
-    char *rightName = LLVMGetValueName(right);
+    char *leftName = (char *)LLVMGetValueName(left);
+    char *rightName = (char *)LLVMGetValueName(right);
     char name[strlen(leftName) + 1 + strlen(rightName)];
     strcpy(name, leftName);
     strcpy(name, TokenName(e->node.binary.op.type));
@@ -550,7 +552,7 @@ LLVMValueRef CompileUnaryExp(Irgen *irgen, Exp *e) {
             return exp;
         case SUB: {
             // build name
-            char *expName = LLVMGetValueName(exp);
+            char *expName = (char *)LLVMGetValueName(exp);
             char *name = alloca(sizeof(char) * (strlen(expName) + 1));
             strcpy(name, "-");
             strcpy(name, expName);

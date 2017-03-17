@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
 struct tcase {
-    char *input;
+    const char *input;
     TokenType expectedType;
-    char *expectedValue;
+    const char *expectedValue;
 };
 
 TEST(LexerTest, Identifier) {
@@ -17,7 +17,7 @@ TEST(LexerTest, Identifier) {
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
 
-        Token *tokens = Lex(c.input);
+        Token *tokens = Lex((char *)c.input);
 
         ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
         ASSERT_STREQ(c.expectedValue, tokens[0].value);
@@ -40,7 +40,7 @@ TEST(LexerTest, IntegerNumbers) {
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
 
-        Token *tokens = Lex(c.input);
+        Token *tokens = Lex((char *)c.input);
 
         ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
         ASSERT_STREQ(c.expectedValue, tokens[0].value);
@@ -63,7 +63,7 @@ TEST(LexerTest, Strings) {
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
 
-        Token *tokens = Lex(c.input);
+        Token *tokens = Lex((char *)c.input);
 
         ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
         ASSERT_STREQ(c.expectedValue, tokens[0].value);
@@ -140,7 +140,7 @@ TEST(LexerTest, Symbols) {
     for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
         tcase c = cases[i];
 
-        Token *tokens = Lex(c.input);
+        Token *tokens = Lex((char *)c.input);
 
         ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
         ASSERT_STREQ(c.expectedValue, tokens[0].value);
@@ -149,7 +149,7 @@ TEST(LexerTest, Symbols) {
 }
 
 TEST(LexerTest, LineNumbers) {
-    Token *tokens = Lex("1\n2\n3");
+    Token *tokens = Lex((char *)"1\n2\n3");
     
     for (int i = 0; i < 3; i++) {
         ASSERT_EQ(i+1, tokens[i].line);	
@@ -157,7 +157,7 @@ TEST(LexerTest, LineNumbers) {
 }
 
 TEST(LexerTest, ColumnNumbers) {
-    Token *tokens = Lex("foo bar baz");
+    Token *tokens = Lex((char *)"foo bar baz");
 
     ASSERT_EQ(1, tokens[0].column);
     ASSERT_EQ(5, tokens[1].column);
@@ -165,6 +165,6 @@ TEST(LexerTest, ColumnNumbers) {
 }
 
 TEST(LexerTest, SemiColonInsertion) {
-    Token *tokens = Lex("foo\nbar");
+    Token *tokens = Lex((char *)"foo\nbar");
     ASSERT_STREQ(TokenName(SEMI), TokenName(tokens[1].type));
 }

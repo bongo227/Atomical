@@ -12,5 +12,6 @@ int main() {
 		8,
 		"Function with name \"%s\" already defined",
 		"add");
+	
 	return 0;
 }

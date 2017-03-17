@@ -1,6 +1,8 @@
 #pragma once
 
 #include "all.h"
+#include <string.h>
+#include <stdlib.h>
 
 typedef enum {
 	ILLEGAL,
@@ -104,4 +106,4 @@ typedef struct {
 
 Token *Lex(char *source);
 char *TokenName(TokenType type);
-char *GetLine(const char *src, int line);
+char *GetLine(char *src, int line);

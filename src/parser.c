@@ -113,8 +113,10 @@ int BindingPower(TokenType type) {
 	case LBRACK:
 	case LPAREN:
 		return 70;
+	// Unknow token
+	default:
+		return 0;
 	}
-	return 0;
 }
 
 // ParserNext moves the parser onto the next token
@@ -175,6 +177,9 @@ Exp *nud(Parser *parser, Token *token) {
 	case LBRACK:
 		parser->tokens--;
 		return ParseArrayLiteralExp(parser);
+
+	default:
+		ASSERT(false, "Expected a prefix token");
 	}
 
 	return NULL;
@@ -248,6 +253,8 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 		case DEFINE: {
 			return newBinaryExp(exp, *token, ParseExpression(parser, bp - 1));	
 		}
+		default:
+			ASSERT(false, "Expected an infix expression");
 	}
 
 	return NULL;
@@ -376,6 +383,8 @@ Smt *smtd(Parser *parser, Token *token) {
 					return NULL;
 			}
 		}
+		default:
+			ASSERT(false, "Expected a statement");
 	}
 	return NULL;
 }
@@ -486,6 +495,8 @@ Dcl *ParseDeclaration(Parser *parser) {
 		case VAR:
 		case IDENT:
 			return ParseVar(parser);
+		default:
+			ASSERT(false, "Expected a top level declaration");
 	}
 }
 
@@ -532,6 +543,8 @@ Smt *ParseStatement(Parser *parser) {
 			obj->typeInfo = NULL;
 			InsertScope(parser, name, obj);
 			break;
+		default:
+			ASSERT(false, "Expected an assignment operator");
 	}
 
 	// If statment is null, the next tokens dont start a valid statement

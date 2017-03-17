@@ -22,7 +22,7 @@ void verror(char *src, int line, int start, int end, char *msg, va_list args) {
     buff[9] = '\0';
 
     printf("\e[2m%5d|\e[0m ", line + 1);
-    printf("\e[91m%s\e[0m\n\n", buff); // skwiggles
+    printf("\e[91m%s\e[0m\n\n", buff);
 }
 
 void Error(char *src, int line, int start, int end, char *msg, ...) {

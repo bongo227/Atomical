@@ -1,25 +1,5 @@
 #include "includes/lexer.h"
 
-void printToken(Token *token) {
-	// TODO: finsh theses
-	switch (token->type) {
-		case IDENT:
-			printf("Token {\n\tType: IDENT\n\tLine: %d\n\tColumn: %d\n\tValue: \"%s\"\n}\n", 
-				token->line, token->column, token->value);
-			break;
-
-		case INT:
-			printf("Token {\n\tType: INT\n\tLine: %d\n\tColumn: %d\n\tValue: \"%s\"\n}\n", 
-				token->line, token->column, token->value);
-			break;
-		
-		case FLOAT:
-			printf("Token {\n\tType: FLOAT\n\tLine: %d\n\tColumn: %d\n\tValue: \"%s\"\n}\n",
-				token->line, token->column, token->value);
-			break;
-	}
-}
-
 // Removes spaces, newlines and tabs
 void clearWhitespace(Lexer *lexer) {
 	while (*lexer->source == ' ' ||
@@ -27,7 +7,7 @@ void clearWhitespace(Lexer *lexer) {
 		(*lexer->source == '\n' && !lexer->semi) ||
 		*lexer->source == '\r') {
 
-		*lexer->source++;
+		lexer->source++;
 		lexer->column++;
 	}
 }
@@ -39,8 +19,8 @@ bool isDigit(char *input) {
 
 // checks if the character is a letter a-z or A-Z
 bool isLetter(char *input) {
-	return *input >= 'a' && *input <= 'z' || 
-		*input >= 'A' && *input <= 'Z';
+	return (*input >= 'a' && *input <= 'z') || 
+		(*input >= 'A' && *input <= 'Z');
 }
 
 // returns the character as an integer
@@ -203,7 +183,9 @@ char *escape(char **input, char quote) {
 	case '5':
 	case '6':
 	case '7':
-		n, base, max = 3, 8, 255;
+		n = 3;
+		base = 8;
+		max = 255;
 		break;
 
 	// hex
@@ -211,7 +193,9 @@ char *escape(char **input, char quote) {
 		*esc++ = **input;
 		length++;
 		(*input)++;
-		n, base, max = 2, 16, 255;
+		n = 2;
+		base = 16;
+		max = 255;
 		break;
 
 	// small unicode
@@ -219,7 +203,9 @@ char *escape(char **input, char quote) {
 		*esc++ = **input;
 		length++;
 		(*input)++;
-		n, base, max = 4, 16, 0x0010FFFF;
+		n = 4;
+		base = 16;
+		max = 0x0010FFFF;
 		break;
 
 	// full unicode
@@ -227,7 +213,9 @@ char *escape(char **input, char quote) {
 		*esc++ = **input;
 		length++;
 		(*input)++;
-		n, base, max = 8, 16, 0x0010FFFF;
+		n = 8;
+		base = 16;
+		max = 0x0010FFFF;
 		break;
 
 	default:
@@ -251,7 +239,7 @@ char *escape(char **input, char quote) {
 	}
 
 	// check if unicode character is valid
-	if (x > max || 0xD800 <= x && x < 0xE000) {
+	if (x > max || (0xD800 <= x && x < 0xE000)) {
 		// invalid unicode code point
 	}
 
@@ -569,7 +557,8 @@ Token *Lex(char *source) {
 char *TokenName(TokenType type) {
 	switch(type) {
 		case ILLEGAL: return "illegal";
-		case IDENT: return "ident";
+		case END: return "[END]";
+		case IDENT: return "[ident]";
 		
 		case INT: return "[int]";
 		case FLOAT: return "[float]";
@@ -595,7 +584,9 @@ char *TokenName(TokenType type) {
 		case SWITCH: return "switch";
 		case TYPE: return "type";
 		case VAR: return "var";
-		
+		case DEFER: return "defer";
+
+		case DEFINE: return ":=";
 		case SEMI: return ";";
 		case COLON: return ":";
 		case DOUBLE_COLON: return "::";
@@ -623,14 +614,20 @@ char *TokenName(TokenType type) {
 		case REM_ASSIGN: return "%=";
 		case XOR: return "^";
 		case XOR_ASSIGN: return "^=";
+		case GTR: return ">";
+		case GEQ: return ">=";
 		case LSS: return "<";
 		case LEQ: return "<=";
 		case SHL: return "<<";
 		case SHL_ASSIGN: return "<<=";
+		case SHR: return ">>";
+		case SHR_ASSIGN: return ">>=";
 		case ASSIGN: return "=";
 		case EQL: return "==";
 		case NOT: return "!";
 		case NEQ: return "!=";
+		case AND: return "&";
+		case AND_ASSIGN: return "&=";
 		case AND_NOT: return "&^";
 		case AND_NOT_ASSIGN: return "&^=";
 		case LAND: return "&&";
@@ -642,22 +639,22 @@ char *TokenName(TokenType type) {
 	return "UNKOWN_NAME";
 }
 
-char *GetLine(const char *source, int line) {
+char *GetLine(char *source, int line) {
 	int currentLine = 1;
 
-	while(source != '\0') {
-		if (source++ == '\n') currentLine++;
+	while(*source != '\0') {
+		if (*(source++) == '\n') currentLine++;
 		
 		if (currentLine == line) {
 			// find the line length
 			int lineLength = 0;
-			while(source && source != '\n') {
+			while(*source && *source != '\n') {
 				source++;
 				lineLength++;
 			}
 
 			// copy the line to a buffer and return
-			char buff[lineLength+1];
+			char *buff = malloc((lineLength+1) * sizeof(char));
 			memcpy(buff, source - lineLength, lineLength);
 			buff[lineLength] = '\0';
 			return buff;

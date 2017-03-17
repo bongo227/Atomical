@@ -4,11 +4,13 @@
 #include <stdarg.h>
 
 // src project
-#include "../src/error.c"
-#include "../src/lexer.c"
-#include "../src/ast.c"
-#include "../src/parser.c"
-#include "../src/irgen.c"
+extern "C" {
+    #include "../src/includes/error.h"
+    #include "../src/includes/lexer.h"
+    #include "../src/includes/ast.h"
+    #include "../src/includes/parser.h"
+    #include "../src/includes/irgen.h"
+}
 
 void vlog(const char *format, va_list argp) {
     printf("\e[32m[          ]\e[0m   \e[2m");

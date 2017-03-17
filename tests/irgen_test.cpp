@@ -6,7 +6,7 @@
 
 TEST(IrgenTest, CompileTypes) {
     struct tcase {
-        char *src;
+        const char *src;
         LLVMTypeRef expectedType;
     };
 
@@ -29,7 +29,7 @@ TEST(IrgenTest, CompileTypes) {
         tcase c = cases[i];
         log("Compiling %s type", c.src);
 
-        Parser *parser = NewParser(c.src, Lex(c.src));
+        Parser *parser = NewParser((char *)c.src, Lex((char *)c.src));
         Exp *e = ParseType(parser);
         Irgen *irgen = NewIrgen();
         LLVMTypeRef type = CompileType(e);
@@ -40,9 +40,9 @@ TEST(IrgenTest, CompileTypes) {
 
 TEST(IrgenTest, CompileLiterals) {
     struct tcase {
-        char *src;
+        const char *src;
         LLVMTypeRef expectedType;
-        char *expectedValue;
+        const char *expectedValue;
     };
 
     tcase cases[] = {
@@ -56,7 +56,7 @@ TEST(IrgenTest, CompileLiterals) {
         tcase c = cases[i];
         log("Compiling %s to %s", c.src, c.expectedValue);
 
-        Parser *parser = NewParser(c.src, Lex(c.src));
+        Parser *parser = NewParser((char *)c.src, Lex((char *)c.src));
         Exp *e = ParseExpression(parser, 0);
         Irgen *irgen = NewIrgen();
         LLVMValueRef value = CompileLiteralExp(irgen, e);
@@ -69,7 +69,7 @@ TEST(IrgenTest, CompileLiterals) {
 
 TEST(IrgenTest, CastValues) {
     struct tcase {
-        char *testName;
+        const char *testName;
         LLVMValueRef value;
         LLVMTypeRef cast;
     };
@@ -123,9 +123,9 @@ LLVMGenericValueRef runLLVMFunction(
     int paramCount, 
     LLVMGenericValueRef *params) {
 
-    // create an execution engine
+    // create an execution engine   
     LLVMExecutionEngineRef engine;
-    char *error = NULL;
+    char *error = (char *)NULL;
 
     # if 0
         // initialize jit
@@ -151,7 +151,7 @@ LLVMGenericValueRef runLLVMFunction(
 
 TEST(IrgenTest, FunctionTests) {
     struct tcase {
-        char *src;    
+        const char *src;    
         LLVMGenericValueRef params[3];
         int out;
     };
@@ -236,7 +236,7 @@ TEST(IrgenTest, FunctionTests) {
         while(c.params[paramCount] != NULL) paramCount++;
 
         // generate function
-        Parser *parser = NewParser(c.src, Lex(c.src));
+        Parser *parser = NewParser((char *)c.src, Lex((char *)c.src));
         Dcl *d = ParseFunction(parser);
         Irgen *irgen = NewIrgen();
         LLVMValueRef function = CompileFunction(irgen, d);
@@ -244,7 +244,7 @@ TEST(IrgenTest, FunctionTests) {
         // LLVMDumpModule(irgen->module);
 
         // check for errors in module
-        char *error = NULL;
+        char *error = (char *)NULL;
         LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
         LLVMDisposeMessage(error);
 
@@ -258,10 +258,10 @@ TEST(IrgenTest, FunctionTests) {
 }
 
 TEST(IrgenTest, CallTest) {
-    char *src = "proc add :: int a, int b -> int { return a + b }\n"
+    const char *src = "proc add :: int a, int b -> int { return a + b }\n"
                 "proc test :: -> int { return add(120, 3) }";
 
-    Parser *parser = NewParser(src, Lex(src));
+    Parser *parser = NewParser((char *)src, Lex((char *)src));
     Dcl *addDcl = ParseFunction(parser);
     Dcl *testDcl = ParseFunction(parser);
     
@@ -272,12 +272,12 @@ TEST(IrgenTest, CallTest) {
     // LLVMDumpModule(irgen->module);
 
     // check for errors in module
-    char *error = NULL;
+    char *error = (char *)NULL;
     LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
     LLVMDisposeMessage(error);
 
     // run the function
-    LLVMGenericValueRef res = runLLVMFunction(irgen, testFunction, 0, NULL);
+    LLVMGenericValueRef res = runLLVMFunction(irgen, testFunction, 0, (LLVMGenericValueRef *)NULL);
     ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), 123);
 
     // dispose of builder
