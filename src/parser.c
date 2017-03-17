@@ -138,23 +138,39 @@ void expectSemi(Parser *parser) {
 	ParserNext(parser);
 }
 
-Exp *ParseArrayLiteralExp(Parser *parser) {
-	Exp *type = ParseType(parser);
-	expect(parser, LBRACE);
+// Parses key value expressions in the form "expression:expression" or "expression"
+Exp *ParseKeyValueExp(Parser *parser) {
+	Exp *keyOrVal = ParseExpression(parser, 0);
+	Exp *key = NULL;
+	Exp *value = NULL;
+	
+	if (parser->tokens->type == COLON) {
+		// Key/value belongs to structure expression
+		parser->tokens++;
+		key = keyOrVal;
+		value = ParseExpression(parser, 0);
+	} else {
+		// Key/value belongs to array expression
+		value = keyOrVal;
+	}
 
-	Exp *values = (Exp *)malloc(0);
-	int valueCount = 0;
+	return newKeyValueExp(key, value);
+}
+
+Exp *ParseKeyValueListExp(Parser *parser) {
+	int keyCount = 0;
+	Exp *values = malloc(0);
+
 	while(parser->tokens->type != RBRACE) {
-		valueCount++;
-		values = realloc(values, valueCount * sizeof(Exp));
-		Exp *exp = ParseExpression(parser, 0);
-		memcpy(values + valueCount - 1, exp, sizeof(Exp));
+		keyCount++;
+		values = realloc(values, keyCount * sizeof(Exp));
+		Exp *keyValue = ParseKeyValueExp(parser);
+		memcpy(values + keyCount - 1, keyValue, sizeof(Exp));
+		
 		if(parser->tokens->type != RBRACE) expect(parser, COMMA);
 	}
 
-	expect(parser, RBRACE);
-
-	return newArrayLiteralExp(type, values, valueCount);
+	return newKeyValueListExp(values, keyCount);
 }
 
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
@@ -173,10 +189,9 @@ Exp *nud(Parser *parser, Token *token) {
 	case NOT:
 	case SUB:
 		return newUnaryExp(*token, ParseExpression(parser, 60));
-	
-	case LBRACK:
-		parser->tokens--;
-		return ParseArrayLiteralExp(parser);
+
+	case LBRACE:
+		return ParseKeyValueListExp(parser);
 
 	default:
 		ASSERT(false, "Expected a prefix token");

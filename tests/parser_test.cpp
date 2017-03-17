@@ -368,11 +368,42 @@ TEST(ParserTest, ParseIncrement) {
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
 }
 
-TEST(ParserTest, ParseArrayLiteralExpression) {
-    const char *src = "[3]int{1, 2, 3}";
+TEST(ParserTest, ParseKeyValueList) {
+    const char *src = "{a: 1, b: 2}";
     Parser *parser = NewParser((char *)src, Lex((char *)src));
     Exp *exp = ParseExpression(parser, 0);
 
-    ASSERT_EQ(arrayLiteralExp, exp->type);
-    ASSERT_EQ(3, exp->node.arrayLiteral.valueCount);
+    ASSERT_EQ((int)keyValueListExp, (int)exp->type);
+    ASSERT_EQ(2, exp->node.keyValueList.keyCount);
+    ASSERT_STREQ("a", exp->node.keyValueList.keyValues[0].node.keyValue.key->node.ident.name);
+    ASSERT_STREQ("b", exp->node.keyValueList.keyValues[1].node.keyValue.key->node.ident.name);
 }
+
+TEST(ParserTest, ParseEmptyKeyValueList) {
+    char *src = (char *)"{}";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+    
+    ASSERT_EQ((int)keyValueListExp, (int)exp->type);
+    ASSERT_EQ(0, exp->node.keyValueList.keyCount);
+}
+
+// TODO: create a ParseExpression which takes in a src so we can make
+// these 3 lines into 1.
+TEST(ParserTest, ParseNullKeyValueList) {
+    char *src = (char *)"{1, 2, 3}";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+    
+    ASSERT_EQ((int)keyValueListExp, (int)exp->type);
+    ASSERT_EQ(3, exp->node.keyValueList.keyCount);
+}
+
+// TEST(ParserTest, ParseArrayLiteralExpression) {
+//     const char *src = "[3]int{1, 2, 3}";
+//     Parser *parser = NewParser((char *)src, Lex((char *)src));
+//     Exp *exp = ParseExpression(parser, 0);
+
+//     ASSERT_EQ(arrayLiteralExp, exp->type);
+//     ASSERT_EQ(3, exp->node.arrayLiteral.valueCount);
+// }

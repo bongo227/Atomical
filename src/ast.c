@@ -155,16 +155,6 @@ Smt *newDeclareSmt(Dcl *dcl) {
 	return s; 
 }
 
-Exp *newArrayLiteralExp(Exp *type, Exp *values, int valueCount) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
-	e->type = arrayLiteralExp;
-	e->node.arrayLiteral.type = type;
-	e->node.arrayLiteral.values = values;
-	e->node.arrayLiteral.valueCount = valueCount;
-
-	return e;
-}
-
 Exp *newArrayTypeExp(Exp *type, Exp *length) {
 	Exp *e = (Exp *)malloc(sizeof(Exp));
 	e->type = arrayTypeExp;
@@ -232,4 +222,23 @@ Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc, Smt *body) {
 	s->node.fors.body = body;
 
 	return s;
+}
+
+// TODO: remove casts on malloc
+Exp *newKeyValueExp(Exp *key, Exp *value) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = keyValueExp;
+	e->node.keyValue.key = key;
+	e->node.keyValue.value = value;
+
+	return e;
+}
+
+Exp *newKeyValueListExp(Exp *values, int keyCount) {
+	Exp *e = (Exp *)malloc(sizeof(Exp));
+	e->type = keyValueListExp;
+	e->node.keyValueList.keyValues = values;
+	e->node.keyValueList.keyCount = keyCount;
+
+	return e;
 }

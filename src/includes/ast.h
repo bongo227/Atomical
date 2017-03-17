@@ -45,7 +45,9 @@ typedef enum {
 	starExp,
 	binaryExp,
 	unaryExp,
-	arrayLiteralExp,
+	keyValueExp,
+	keyValueListExp,
+	aggregateExp,
 	arrayTypeExp,
 	fieldTypeExp,
 	structTypeExp,
@@ -106,12 +108,23 @@ struct _Exp {
 			Exp *right;
 		} binary;
 
-		// arrayLiteralExp
+		// keyValueExp
 		struct {
-			Exp *type;
-			Exp *values;
-			int valueCount;
-		} arrayLiteral;
+			Exp *key;
+			Exp *value;
+		} keyValue;
+
+		// keyValueListExp
+		struct {
+			Exp *keyValues;
+			int keyCount;
+		} keyValueList;
+
+		// aggregateExp
+		struct {
+			Exp *type; // array or struct type
+			Exp *list; // keyValueListExp
+		} aggregateExp;
 
 		// arrayTypeExp
 		struct {
