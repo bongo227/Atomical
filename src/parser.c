@@ -104,6 +104,7 @@ int BindingPower(TokenType type) {
 		return 40;
 	case MUL:
 	case QUO:
+	case REM:
 		return 50;
 	// Special unary
 	case NOT:
@@ -228,6 +229,7 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 		case SUB:
 		case MUL:
 		case QUO:
+		case REM:
 		case EQL:
 		case NEQ:
 		case GTR:
@@ -485,7 +487,6 @@ Dcl *ParseFunction(Parser *parser) {
 		void *dest = memcpy(args + argCount - 1, arg, sizeof(Dcl));
 		
 	}
-
 	// insert arguments into scope
 	for (int i = 0; i < argCount; i++) {
 		// insert into scope
@@ -496,23 +497,23 @@ Dcl *ParseFunction(Parser *parser) {
 		obj->typeInfo = NULL;
 		InsertScope(parser, obj->name, obj);
 	}
-
 	expect(parser, ARROW);
-
 	Exp *returnType = ParseType(parser);
-	Smt *body = ParseStatement(parser);
-
-	if(parser->tokens->type == SEMI) parser->tokens++;
-
-	Dcl* function = newFunctionDcl(name, args, argCount, returnType, body);
 
 	// insert function into scope
+	Dcl* function = newFunctionDcl(name, args, argCount, returnType, NULL);
 	Object *obj = (Object *)malloc(sizeof(Object));
 	obj->name = name->node.ident.name;
 	obj->node = function;
 	obj->type = funcObj;
 	obj->typeInfo = NULL;
 	InsertScope(parser, name->node.ident.name, obj);
+	
+	// parse body
+	Smt *body = ParseStatement(parser);
+	function->node.function.body = body;
+
+	if(parser->tokens->type == SEMI) parser->tokens++;
 
 	return function;
 }

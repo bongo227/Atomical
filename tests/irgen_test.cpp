@@ -89,45 +89,42 @@ LLVMGenericValueRef runLLVMFunction(
     return res;
 }
 
-#define _TEST_FUNC(src, params, paramCount, out) {                                      \
-    /* generate function */                                                             \
-    Parser *parser = NewParser(src, Lex(src));                                          \
-    Dcl *d = ParseFunction(parser);                                                     \
-    Irgen *irgen = NewIrgen();                                                          \
-    LLVMValueRef function = CompileFunction(irgen, d);                                  \
-                                                                                        \
-    /* LLVMDumpModule(irgen->module); */                                                \
-                                                                                        \
-    /* check for errors in module */                                                    \
-    char *error = (char *)NULL;                                                         \
-    LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);                    \
-    LLVMDisposeMessage(error);                                                          \
-                                                                                        \
-    /* run the function */                                                              \
-    LLVMGenericValueRef res = runLLVMFunction(irgen, function, paramCount, params);     \
-    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), out);                                 \
-                                                                                        \
-    /* dispose of builder */                                                            \
-    LLVMDisposeBuilder(irgen->builder);                                                 \
-}                                                                                       \
+void _TEST_FUNC(char *src, LLVMGenericValueRef *params, int paramCount, int out) {
+    /* generate function */
+    Parser *parser = NewParser(src, Lex(src));
+    Dcl *d = ParseFunction(parser);
+    Irgen *irgen = NewIrgen();
+    LLVMValueRef function = CompileFunction(irgen, d);
 
-#define TEST_FUNC_0(name, src, out) TEST(IrgenTest, name) {                     \
-    LLVMGenericValueRef *params = NULL;                                         \
-    char *source = (char *)src;                                                         \
-    _TEST_FUNC(source, params, 0, out)                                          \
-}                                                                               \
+    // LLVMDumpModule(irgen->module);
 
-#define TEST_FUNC_1(name, src, param1, out) TEST(IrgenTest, name) {             \
-    LLVMGenericValueRef params[1] = { param1 };                                 \
-    char *source = (char *)src;                                                 \
-    _TEST_FUNC(source, params, 1, out)                                          \
-}                                                                               \
+    /* check for errors in module */
+    char *error = (char *)NULL;
+    LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
+    LLVMDisposeMessage(error);
 
-#define TEST_FUNC_2(name, src, param1, param2, out) TEST(IrgenTest, name) {     \
-    LLVMGenericValueRef params[2] = { param1, param2 };                         \
-    char *source = (char *)src;                                                 \
-    _TEST_FUNC(source, params, 2, out)                                          \
-}                                                                               \
+    /* run the function */
+    LLVMGenericValueRef res = runLLVMFunction(irgen, function, paramCount, params);
+    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), out);
+
+    /* dispose of builder */
+    LLVMDisposeBuilder(irgen->builder);
+}
+
+void TEST_FUNC_0(const char *src, int out) {
+    LLVMGenericValueRef *params = NULL;
+    _TEST_FUNC((char *)src, params, 0, out);
+}
+
+void TEST_FUNC_1(const char *src, LLVMGenericValueRef param1, int out) {
+    LLVMGenericValueRef params[1] = { param1 };
+    _TEST_FUNC((char *)src, params, 1, out);
+}
+
+void TEST_FUNC_2(const char *src, LLVMGenericValueRef param1, LLVMGenericValueRef param2, int out) {
+    LLVMGenericValueRef params[2] = { param1, param2 };
+    _TEST_FUNC((char *)src, params, 2, out);
+}
 
 char *loadTest(std::string name) {
     // build path to the file
@@ -156,20 +153,95 @@ char *loadTest(std::string name) {
     return buffer;
 }
 
-TEST_FUNC_0(CompileFunctionLiteral, loadTest("literal.fur"), 123)
-TEST_FUNC_0(CompileFunctionBinaryInt, loadTest("binaryInt.fur"), 123)
-TEST_FUNC_0(CompileFunctionBinaryFloat, loadTest("binaryFloat.fur"), 123)
-TEST_FUNC_0(CompileFunctionLongVar, loadTest("longVar.fur"), 123)
-TEST_FUNC_0(CompileFunctionShortVar, loadTest("shortVar.fur"), 123)
-TEST_FUNC_0(CompileFunctionIf, loadTest("if.fur"), 123)
-TEST_FUNC_0(CompileFunctionIfElse, loadTest("ifElse.fur"), 123)
-TEST_FUNC_0(CompileFunctionIfElseIfElse, loadTest("ifElseIfElse.fur"), 123)
-TEST_FUNC_0(CompileFunctionIfElseIfElseIfElse, loadTest("ifElseIfElseIfElse.fur"), 123)
-TEST_FUNC_0(CompileFunctionFor, loadTest("for.fur"), 123)
-TEST_FUNC_0(CompileFunctionArrayInit, loadTest("arrayInit.fur"), 123);
-TEST_FUNC_2(CompileFunctionAdd, loadTest("add.fur"), intArg(100), intArg(23), 123)
-TEST_FUNC_1(CompileFunctionUnary, loadTest("unary.fur"), intArg(-123), 123) 
-TEST_FUNC_1(CompileFunctionReassignArg, loadTest("reassignArg.fur"), intArg(321), 123)
+TEST(IrgenTest, CompileFunctionLiteral){ 
+    TEST_FUNC_0(
+        loadTest("literal.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionBinaryInt){ 
+    TEST_FUNC_0(
+        loadTest("binaryInt.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionBinaryFloat){ 
+    TEST_FUNC_0(
+        loadTest("binaryFloat.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionLongVar){ 
+    TEST_FUNC_0(
+        loadTest("longVar.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionShortVar){ 
+    TEST_FUNC_0(
+        loadTest("shortVar.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionIf){ 
+    TEST_FUNC_0(
+        loadTest("if.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionIfElse){ 
+    TEST_FUNC_0(
+        loadTest("ifElse.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionIfElseIfElse){ 
+    TEST_FUNC_0(
+        loadTest("ifElseIfElse.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionIfElseIfElseIfElse){ 
+    TEST_FUNC_0(
+        loadTest("ifElseIfElseIfElse.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionFor){ 
+    TEST_FUNC_0(
+        loadTest("for.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionArrayInit){ 
+    TEST_FUNC_0(
+        loadTest("arrayInit.fur"), 
+        123);
+}
+
+TEST(IrgenTest, CompileFunctionAdd){ 
+    TEST_FUNC_2(
+        loadTest("add.fur"), 
+        intArg(100), intArg(23), 123);
+}
+
+TEST(IrgenTest, CompileFunctionUnary){ 
+    TEST_FUNC_1(
+        loadTest("unary.fur"), 
+        intArg(-123), 123); 
+}
+
+TEST(IrgenTest, CompileFunctionReassignArg){ 
+    TEST_FUNC_1(
+        loadTest("reassignArg.fur"), 
+        intArg(321), 123);
+}
+
+TEST(IrgenTest, CompileFunctionGCD){ 
+    TEST_FUNC_2(
+        loadTest("gcd.fur"), 
+        intArg(54), intArg(24), 6);
+}
 
 TEST(IrgenTest, CallTest) {
     const char *src = "proc add :: int a, int b -> int { return a + b }\n"
@@ -197,4 +269,3 @@ TEST(IrgenTest, CallTest) {
     // dispose of builder
     LLVMDisposeBuilder(irgen->builder);
 }
-

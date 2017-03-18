@@ -19,5 +19,6 @@ extern "C" {
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
+    // ::testing::GTEST_FLAG(filter) = "*GCD";
     return RUN_ALL_TESTS();
 }
