@@ -113,12 +113,19 @@ void CompileReturn(Irgen *irgen, Smt *s) {
 }
 
 // Gets the allocation for an expression
-LLVMValueRef GetAlloc(Exp *e) {
+LLVMValueRef GetAlloc(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case identExp: {
             ASSERT(e->node.ident.obj != NULL, "Identifier doesnt have object");
             Dcl *dcl = (Dcl *)(e->node.ident.obj->node); // TODO: can node alway be Dcl
             return dcl->llvmValue;
+        }
+        case indexExp: {
+            LLVMValueRef alloc = GetAlloc(irgen, e->node.index.exp);
+            LLVMValueRef index = CompileExp(irgen, e->node.index.index);
+            LLVMValueRef indices[1] = { index };
+            LLVMValueRef arrayAlloc = LLVMBuildGEP(irgen->builder, alloc, indices, 1, "tmp");
+            return arrayAlloc;
         }
         default:
             ASSERT(false, "Cannot get alloc on unknown expression");
@@ -128,7 +135,7 @@ LLVMValueRef GetAlloc(Exp *e) {
 void CompileAssignment(Irgen *irgen, Smt *s) {
     ASSERT(s->type == assignmentSmt, "Expected an assignment statement");
 
-    LLVMValueRef alloc = GetAlloc(s->node.assignment.left);
+    LLVMValueRef alloc = GetAlloc(irgen, s->node.assignment.left);
     LLVMValueRef exp = CompileExp(irgen, s->node.assignment.right);
     LLVMBuildStore(irgen->builder, exp, alloc);
 }
@@ -260,6 +267,8 @@ void CompileSmt(Irgen *irgen, Smt *s) {
     }
 }
 
+
+
 void CompileVarible(Irgen *irgen, Dcl *d) {
     // get argument node
     char *varName = d->node.varible.name->node.ident.name; //TODO: make this a char * not Exp *
@@ -276,17 +285,23 @@ void CompileVarible(Irgen *irgen, Dcl *d) {
         varType = LLVMTypeOf(exp);
     }
 
-    // allocate space for varible
-    LLVMValueRef varAlloc = LLVMBuildAlloca(
-        irgen->builder, 
-        varType, 
-        varName);
+    LLVMValueRef varAlloc;
+    if (d->node.varible.value->type == arrayExp) {
+        varAlloc = exp;
+    } else {
+        // allocate space for varible
+        varAlloc = LLVMBuildAlloca(
+            irgen->builder, 
+            varType, 
+            varName);
+            
+        // store argument in allocated space
+        LLVMBuildStore(irgen->builder, exp, varAlloc);
+    }
         
     // store alloc in node
     d->llvmValue = varAlloc;
 
-    // store argument in allocated space
-    LLVMBuildStore(irgen->builder, exp, varAlloc);
 }
 
 void CompileDcl(Irgen *irgen, Dcl *d) {
@@ -539,7 +554,7 @@ LLVMValueRef CompileIdentExp(Irgen *irgen, Exp *e) {
     if(strcmp(ident, "true") == 0) return LLVMConstInt(LLVMInt1Type(), 1, false);
     if(strcmp(ident, "false") == 0) return LLVMConstInt(LLVMInt1Type(), 0, false);
 
-    LLVMValueRef alloc = GetAlloc(e);
+    LLVMValueRef alloc = GetAlloc(irgen, e);
     return LLVMBuildLoad(irgen->builder, alloc, e->node.ident.name);
 }
 
@@ -581,7 +596,7 @@ LLVMValueRef CompileUnaryExp(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileCallExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == callExp, "Expected call expression");
     
-    LLVMValueRef function = GetAlloc(e->node.call.function);
+    LLVMValueRef function = GetAlloc(irgen, e->node.call.function);
 
     // compile arguments
     int argCount = e->node.call.argCount;
@@ -592,6 +607,54 @@ LLVMValueRef CompileCallExp(Irgen *irgen, Exp *e) {
 
     return LLVMBuildCall(irgen->builder, function, args, argCount, "tmp");
 } 
+
+LLVMValueRef CompileArrayExp(Irgen *irgen, Exp *e) {
+    assert(e->type == arrayExp);
+
+    int valueCount = e->node.array.valueCount;
+    bool isFloat = false;
+    LLVMValueRef *values = alloca(valueCount * sizeof(LLVMValueRef));
+    for (int i = 0; i < valueCount; i++) {
+        values[i] = CompileExp(irgen, e->node.array.values + i);
+        if (LLVMGetTypeKind(LLVMTypeOf(values[i])) == LLVMFloatTypeKind) {
+            isFloat = true;
+        }
+    }
+
+    LLVMTypeRef castType = isFloat ? LLVMFloatType() : LLVMInt64Type();
+   
+    LLVMValueRef arrayAlloc = LLVMBuildArrayAlloca(
+        irgen->builder, 
+        castType,
+        LLVMConstInt(LLVMInt64Type(), valueCount, false),
+        "tmp");
+
+    for (int i = 0; i < valueCount; i++) {
+        values[i] = Cast(irgen, values[i], castType);
+        
+        LLVMValueRef indices[1] = { LLVMConstInt(LLVMInt64Type(), i, false) };
+        LLVMValueRef indexAlloc = LLVMBuildGEP(
+            irgen->builder,
+            arrayAlloc,
+            indices,
+            1,
+            "tmp");
+
+        LLVMBuildStore(
+            irgen->builder,
+            values[i],
+            indexAlloc);
+    }
+
+    return arrayAlloc;
+}
+
+LLVMValueRef CompileIndexExp(Irgen *irgen, Exp *e) {
+    assert(e->type == indexExp);
+
+    LLVMValueRef alloc = GetAlloc(irgen, e);
+    return LLVMBuildLoad(irgen->builder, alloc, "tmp");
+}
 
 LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
     switch(e->type) {
@@ -605,6 +668,10 @@ LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
             return CompileIdentExp(irgen, e);
         case callExp:
             return CompileCallExp(irgen, e); 
+        case indexExp:
+            return CompileIndexExp(irgen, e);
+        case arrayExp:
+            return CompileArrayExp(irgen, e);
         default:
             ASSERT(false, "Unknow expression type");
     }

@@ -242,3 +242,21 @@ Exp *newKeyValueListExp(Exp *values, int keyCount) {
 
 	return e;
 }
+
+Exp *newStructExp(Exp *type, Exp *list) {
+	Exp *e = malloc(sizeof(Exp));
+	e->type = structValueExp;
+	e->node.structValue.type = type;
+	e->node.structValue.list = list;
+
+	return e;
+}
+
+Exp *newArrayExp(Exp *values, int valueCount) {
+	Exp *e = malloc(sizeof(Exp));
+	e->type = arrayExp;
+	e->node.array.values = values;
+	e->node.array.valueCount = valueCount;
+
+	return e;
+}

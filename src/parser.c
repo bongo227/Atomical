@@ -173,6 +173,21 @@ Exp *ParseKeyValueListExp(Parser *parser) {
 	return newKeyValueListExp(values, keyCount);
 }
 
+Exp *ParseArrayExp(Parser *parser) {
+	int valueCount = 0;
+	Exp *values = malloc(0);
+	while(parser->tokens->type != RBRACK) {
+		values = realloc(values, (++valueCount) * sizeof(Exp));
+		Exp *value = ParseExpression(parser, 0);
+		memcpy(values + valueCount - 1, value, sizeof(Exp));
+		if (parser->tokens->type != RBRACK) expect(parser, COMMA);
+	}
+
+	expect(parser, RBRACK);
+
+	return newArrayExp(values, valueCount);
+}
+
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
 Exp *nud(Parser *parser, Token *token) {
 	switch (token->type) {
@@ -192,6 +207,9 @@ Exp *nud(Parser *parser, Token *token) {
 
 	case LBRACE:
 		return ParseKeyValueListExp(parser);
+
+	case LBRACK:
+		return ParseArrayExp(parser);
 
 	default:
 		ASSERT(false, "Expected a prefix token");
@@ -228,7 +246,13 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 		case LBRACK: {
 			Exp *index = ParseExpression(parser, 0);
 			expect(parser, RBRACK);
+			
 			return newIndexExp(exp, index);
+		}
+
+		// array/struct expression
+		case LBRACE: {
+			printf("LBrace!");
 		}
 
 		// call expression
@@ -275,27 +299,17 @@ Exp *led(Parser *parser, Token *token, Exp *exp) {
 	return NULL;
 }
 
-Exp *ParseArrayType(Parser *parser) {
-	expect(parser, LBRACK);
-	Exp *length = ParseExpression(parser, 0);
-	expect(parser, RBRACK);
-	Exp *type = ParseType(parser);
-	return newArrayTypeExp(type, length);
-}
-
 Exp *ParseType(Parser *parser) {
-	switch (parser->tokens->type) {
-	// named type
-	case IDENT:
-		return ParseIdent(parser);
-	
-	// array type
-	case LBRACK:
-		return ParseArrayType(parser);
-	
-	default:
-		ASSERT(false, "Expecting a type");
+	Exp *ident = ParseIdent(parser);
+	if(parser->tokens->type == LBRACK) {
+		// Type is an array type
+		parser->tokens++;
+		Exp *length = ParseExpression(parser, 0);
+		expect(parser, RBRACK);
+		return newArrayTypeExp(ident, length);
 	}
+
+	return ident;
 }
 
 // smtd parser the current token in the context of the start of a statement

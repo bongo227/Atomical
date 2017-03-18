@@ -47,7 +47,8 @@ typedef enum {
 	unaryExp,
 	keyValueExp,
 	keyValueListExp,
-	aggregateExp,
+	structValueExp,
+	arrayExp,
 	arrayTypeExp,
 	fieldTypeExp,
 	structTypeExp,
@@ -120,11 +121,17 @@ struct _Exp {
 			int keyCount;
 		} keyValueList;
 
-		// aggregateExp
+		// structValueExp
 		struct {
 			Exp *type; // array or struct type
 			Exp *list; // keyValueListExp
-		} aggregateExp;
+		} structValue;
+
+		// arrayExp
+		struct {
+			Exp *values;
+			int valueCount;
+		} array;
 
 		// arrayTypeExp
 		struct {

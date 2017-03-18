@@ -22,8 +22,8 @@ TEST_TYPE(CompileTypeFloat, "float", LLVMFloatType())
 TEST_TYPE(CompileTypeF64, "f64", LLVMDoubleType())
 TEST_TYPE(CompileTypeF32, "f32", LLVMFloatType())
 
-TEST_TYPE(CompileTypeIntArray, "[3]int", LLVMArrayType(LLVMInt64Type(), 3))
-TEST_TYPE(CompileTypeFloatArray, "[100]float", LLVMArrayType(LLVMFloatType(), 100))
+TEST_TYPE(CompileTypeIntArray, "int[3]", LLVMArrayType(LLVMInt64Type(), 3))
+TEST_TYPE(CompileTypeFloatArray, "float[100]", LLVMArrayType(LLVMFloatType(), 100))
 
 #define TEST_LITERAL(name, src, expectedType, expectedValue) TEST(IrgenTest, name) {    \
     Parser *parser = NewParser((char *)src, Lex((char *)src));                          \
@@ -136,6 +136,7 @@ TEST_FUNC_0(CompileFunctionIfElse, "proc test :: -> int { if true { return 123 }
 TEST_FUNC_0(CompileFunctionIfElseIfElse, "proc test :: -> int { if false { return 321 } else if true { return 123 } else { return 0 } }", 123)
 TEST_FUNC_0(CompileFunctionIfElseIfElseIfElse, "proc test :: -> int { if false { return 321 } else if false { return 23 } else if false { return 21; } else { return 123 } }", 123)
 TEST_FUNC_0(CompileFunctionFor, "proc test :: -> int { a := 0; for i := 0; i < 123; i++ { a += 1 }; return a }", 123)
+TEST_FUNC_0(CompileFunctionArrayInit, "proc test :: -> int { a := [100, 20, 3]; return a[0] + a[1] + a[2] }", 123);
 
 TEST_FUNC_2(CompileFunctionAdd, "proc test :: int a, int b -> int { return a + b }", intArg(100), intArg(23), 123)
 TEST_FUNC_1(CompileFunctionUnary, "proc test :: int n -> int { return -n }", intArg(-123), 123) 

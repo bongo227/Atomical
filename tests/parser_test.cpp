@@ -293,7 +293,7 @@ TEST(ParserTest, ParseLongVaribleDeclare) {
 }
 
 TEST(ParserTest, ParseArrayType) {
-    const char *src = "[3]int";
+    const char *src = "int[3]";
     Parser *parser = NewParser((char *)src, Lex((char *)src));
     Exp *type = ParseType(parser);
 
@@ -397,6 +397,15 @@ TEST(ParserTest, ParseNullKeyValueList) {
     
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(3, exp->node.keyValueList.keyCount);
+}
+
+TEST(ParserTest, ParseArrayExpression) {
+    char *src = (char *)"[1, 2, 3]";
+    Parser *parser = NewParser(src, Lex(src));
+    Exp *exp = ParseExpression(parser, 0);
+
+    ASSERT_EQ((int)arrayExp, (int)exp->type);
+    ASSERT_EQ(3, exp->node.array.valueCount);
 }
 
 // TEST(ParserTest, ParseArrayLiteralExpression) {
