@@ -1,0 +1,3 @@
+proc test :: -> int {
+    return 120 + 3
+}

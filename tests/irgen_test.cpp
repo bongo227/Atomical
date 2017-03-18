@@ -91,7 +91,7 @@ LLVMGenericValueRef runLLVMFunction(
 
 #define _TEST_FUNC(src, params, paramCount, out) {                                      \
     /* generate function */                                                             \
-    Parser *parser = NewParser((char *)src, Lex((char *)src));                          \
+    Parser *parser = NewParser(src, Lex(src));                                          \
     Dcl *d = ParseFunction(parser);                                                     \
     Irgen *irgen = NewIrgen();                                                          \
     LLVMValueRef function = CompileFunction(irgen, d);                                  \
@@ -113,34 +113,63 @@ LLVMGenericValueRef runLLVMFunction(
 
 #define TEST_FUNC_0(name, src, out) TEST(IrgenTest, name) {                     \
     LLVMGenericValueRef *params = NULL;                                         \
-    _TEST_FUNC(src, params, 0, out)                                             \
+    char *source = (char *)src;                                                         \
+    _TEST_FUNC(source, params, 0, out)                                          \
 }                                                                               \
 
 #define TEST_FUNC_1(name, src, param1, out) TEST(IrgenTest, name) {             \
     LLVMGenericValueRef params[1] = { param1 };                                 \
-    _TEST_FUNC(src, params, 1, out)                                             \
+    char *source = (char *)src;                                                 \
+    _TEST_FUNC(source, params, 1, out)                                          \
 }                                                                               \
 
 #define TEST_FUNC_2(name, src, param1, param2, out) TEST(IrgenTest, name) {     \
     LLVMGenericValueRef params[2] = { param1, param2 };                         \
-    _TEST_FUNC(src, params, 2, out)                                             \
+    char *source = (char *)src;                                                 \
+    _TEST_FUNC(source, params, 2, out)                                          \
 }                                                                               \
 
-TEST_FUNC_0(CompileFunctionLiteral, "proc test :: -> int { return 123 }", 123)
-TEST_FUNC_0(CompileFunctionBinaryInt, "proc test :: -> int { return 121 + 2 }", 123)
-TEST_FUNC_0(CompileFunctionBinaryFloat, "proc test :: -> int { return 130.75 - 7.75 }", 123)
-TEST_FUNC_0(CompileFunctionLongVar, "proc test :: -> int { var int a = 123; return a }", 123)
-TEST_FUNC_0(CompileFunctionShortVar, "proc test :: -> int { a := 123; return a }", 123)
-TEST_FUNC_0(CompileFunctionIf, "proc test :: -> int { if true { return 123 }; return 321 }", 123)
-TEST_FUNC_0(CompileFunctionIfElse, "proc test :: -> int { if true { return 123 } else { return 321 } }", 123)
-TEST_FUNC_0(CompileFunctionIfElseIfElse, "proc test :: -> int { if false { return 321 } else if true { return 123 } else { return 0 } }", 123)
-TEST_FUNC_0(CompileFunctionIfElseIfElseIfElse, "proc test :: -> int { if false { return 321 } else if false { return 23 } else if false { return 21; } else { return 123 } }", 123)
-TEST_FUNC_0(CompileFunctionFor, "proc test :: -> int { a := 0; for i := 0; i < 123; i++ { a += 1 }; return a }", 123)
-TEST_FUNC_0(CompileFunctionArrayInit, "proc test :: -> int { a := [100, 20, 3]; return a[0] + a[1] + a[2] }", 123);
+char *loadTest(std::string name) {
+    // build path to the file
+    char *cname = (char *)name.c_str();
+    char *pre = (char *)"../tests/tests/";
+    int pathLen = strlen(pre) + strlen(cname) + 1;
+    char *path = alloca(pathLen);
+    sprintf(path, "%s%s", pre, cname);
+    // printf("Path: %s\n", path);
+    
+    // open file
+    FILE *f = fopen(path, "rb");
+    assert(f != NULL);
 
-TEST_FUNC_2(CompileFunctionAdd, "proc test :: int a, int b -> int { return a + b }", intArg(100), intArg(23), 123)
-TEST_FUNC_1(CompileFunctionUnary, "proc test :: int n -> int { return -n }", intArg(-123), 123) 
-TEST_FUNC_1(CompileFunctionReassignArg, "proc test :: int n -> int { n = 123; return n }", intArg(321), 123)
+    // get the length of the file
+    fseek(f, 0, SEEK_END);
+    long length = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    // read file into buffer
+    char *buffer = (char *)malloc(length + 1);
+    fread(buffer, 1, length, f);
+    fclose(f);
+    buffer[length] = '\0';
+    
+    return buffer;
+}
+
+TEST_FUNC_0(CompileFunctionLiteral, loadTest("literal.fur"), 123)
+TEST_FUNC_0(CompileFunctionBinaryInt, loadTest("binaryInt.fur"), 123)
+TEST_FUNC_0(CompileFunctionBinaryFloat, loadTest("binaryFloat.fur"), 123)
+TEST_FUNC_0(CompileFunctionLongVar, loadTest("longVar.fur"), 123)
+TEST_FUNC_0(CompileFunctionShortVar, loadTest("shortVar.fur"), 123)
+TEST_FUNC_0(CompileFunctionIf, loadTest("if.fur"), 123)
+TEST_FUNC_0(CompileFunctionIfElse, loadTest("ifElse.fur"), 123)
+TEST_FUNC_0(CompileFunctionIfElseIfElse, loadTest("ifElseIfElse.fur"), 123)
+TEST_FUNC_0(CompileFunctionIfElseIfElseIfElse, loadTest("ifElseIfElseIfElse.fur"), 123)
+TEST_FUNC_0(CompileFunctionFor, loadTest("for.fur"), 123)
+TEST_FUNC_0(CompileFunctionArrayInit, loadTest("arrayInit.fur"), 123);
+TEST_FUNC_2(CompileFunctionAdd, loadTest("add.fur"), intArg(100), intArg(23), 123)
+TEST_FUNC_1(CompileFunctionUnary, loadTest("unary.fur"), intArg(-123), 123) 
+TEST_FUNC_1(CompileFunctionReassignArg, loadTest("reassignArg.fur"), intArg(321), 123)
 
 TEST(IrgenTest, CallTest) {
     const char *src = "proc add :: int a, int b -> int { return a + b }\n"

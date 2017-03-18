@@ -1,0 +1,4 @@
+proc test :: -> int {
+    var int a = 123
+    return a
+}

@@ -1,0 +1,9 @@
+proc test :: -> int {
+    if false {
+        return 321
+    } else if true {
+        return 123
+    } else {
+        return 0
+    }
+}
