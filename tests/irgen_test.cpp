@@ -222,25 +222,36 @@ TEST(IrgenTest, CompileFunctionArrayInit){
 TEST(IrgenTest, CompileFunctionAdd){ 
     TEST_FUNC_2(
         loadTest("add.fur"), 
-        intArg(100), intArg(23), 123);
+        intArg(100), intArg(23), 
+        123);
 }
 
 TEST(IrgenTest, CompileFunctionUnary){ 
     TEST_FUNC_1(
         loadTest("unary.fur"), 
-        intArg(-123), 123); 
+        intArg(-123), 
+        123); 
 }
 
 TEST(IrgenTest, CompileFunctionReassignArg){ 
     TEST_FUNC_1(
         loadTest("reassignArg.fur"), 
-        intArg(321), 123);
+        intArg(321), 
+        123);
 }
 
 TEST(IrgenTest, CompileFunctionGCD){ 
     TEST_FUNC_2(
         loadTest("gcd.fur"), 
-        intArg(54), intArg(24), 6);
+        intArg(1529), intArg(14039), 
+        139);
+}
+
+TEST(IrgenTest, CompileFunctionFibbonanci) {
+    TEST_FUNC_1(
+        loadTest("fibbonanci.fur"),
+        intArg(12),
+        144);
 }
 
 TEST(IrgenTest, CallTest) {
