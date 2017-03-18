@@ -598,3 +598,19 @@ Exp *ParseExpression(Parser *parser, int rbp) {
 	}
 	return left;
 }
+
+File *ParseFile(Parser *parser) {
+	Dcl **dcls = malloc(0);
+	int dclCount = 0;
+	while(parser->tokens->type != END) {
+		Dcl *d = ParseDeclaration(parser);
+		dcls = realloc(dcls, ++dclCount * sizeof(Dcl *));
+		memcpy(dcls + dclCount - 1, &d, sizeof(Dcl *));
+	}
+
+	File *f = malloc(sizeof(File));
+	f->dcls = dcls;
+	f->dclCount = dclCount;
+
+	return f;
+}

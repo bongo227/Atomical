@@ -92,9 +92,14 @@ LLVMGenericValueRef runLLVMFunction(
 void _TEST_FUNC(char *src, LLVMGenericValueRef *params, int paramCount, int out) {
     /* generate function */
     Parser *parser = NewParser(src, Lex(src));
-    Dcl *d = ParseFunction(parser);
+    // Dcl *d = ParseFunction(parser);
+    File *f = ParseFile(parser);
     Irgen *irgen = NewIrgen();
-    LLVMValueRef function = CompileFunction(irgen, d);
+    
+    LLVMValueRef function;
+    for (int i = 0; i < f->dclCount; i++) {
+        function = CompileFunction(irgen, f->dcls[i]);
+    }
 
     // LLVMDumpModule(irgen->module);
 
@@ -229,8 +234,7 @@ TEST(IrgenTest, CompileFunctionAdd){
 TEST(IrgenTest, CompileFunctionUnary){ 
     TEST_FUNC_1(
         loadTest("unary.fur"), 
-        intArg(-123), 
-        123); 
+        intArg(-123), 123); 
 }
 
 TEST(IrgenTest, CompileFunctionReassignArg){ 
@@ -254,29 +258,8 @@ TEST(IrgenTest, CompileFunctionFibbonanci) {
         144);
 }
 
-TEST(IrgenTest, CallTest) {
-    const char *src = "proc add :: int a, int b -> int { return a + b }\n"
-                "proc test :: -> int { return add(120, 3) }";
-
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Dcl *addDcl = ParseFunction(parser);
-    Dcl *testDcl = ParseFunction(parser);
-    
-    Irgen *irgen = NewIrgen();
-    LLVMValueRef addFunction = CompileFunction(irgen, addDcl);
-    LLVMValueRef testFunction = CompileFunction(irgen, testDcl);
-
-    // LLVMDumpModule(irgen->module);
-
-    // check for errors in module
-    char *error = (char *)NULL;
-    LLVMVerifyModule(irgen->module, LLVMPrintMessageAction, &error);
-    LLVMDisposeMessage(error);
-
-    // run the function
-    LLVMGenericValueRef res = runLLVMFunction(irgen, testFunction, 0, (LLVMGenericValueRef *)NULL);
-    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), 123);
-
-    // dispose of builder
-    LLVMDisposeBuilder(irgen->builder);
-}
+TEST(Irgen, CompileFunctionCall) {
+    TEST_FUNC_0(
+        loadTest("call.fur"),
+        123);
+} 

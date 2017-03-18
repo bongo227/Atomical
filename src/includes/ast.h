@@ -12,6 +12,11 @@ typedef struct _Dcl Dcl;
 struct _Smt;
 typedef struct _Smt Smt;
 
+typedef struct {
+	Dcl **dcls;
+	int dclCount;
+} File;
+
 typedef enum {
 	badObj,
 	pkgObj,

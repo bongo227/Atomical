@@ -25,6 +25,7 @@ typedef struct {
 } Parser;
 
 Parser *NewParser(char *src, Token *tokens);
+File *ParseFile(Parser *parser);
 
 Exp *ParseExpression(Parser *parser, int rbp);
 Exp *ParseIdent(Parser *parser);
