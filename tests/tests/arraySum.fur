@@ -7,7 +7,7 @@ proc sum :: int[3] nums -> int {
     return s
 }
 
-proc test :: -> int {
+proc main :: -> int {
     a := [100, 20, 3]
     return sum(a)
 }

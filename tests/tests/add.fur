@@ -1,3 +1,7 @@
-proc test :: int a, int b -> int {
+proc add :: int a, int b -> int {
     return a + b
+}
+
+proc main :: -> int {
+    return add(120, 3)
 }

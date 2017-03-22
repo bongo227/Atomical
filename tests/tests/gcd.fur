@@ -5,3 +5,7 @@ proc gcd :: int a, int b -> int {
     
     return gcd(b, a % b)
 }
+
+proc main :: -> int {
+    return gcd(1529, 14039)
+}

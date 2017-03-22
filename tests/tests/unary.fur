@@ -1,3 +1,7 @@
-proc test :: int n -> int {
+proc neg :: int n -> int {
     return -n
+}
+
+proc main :: -> int {
+    return neg(-123)
 }

@@ -14,11 +14,11 @@ proc sort :: int[5] items -> int[5] {
     return items
 }
 
-proc test :: -> int {
+proc main :: -> int {
     a := [54, 2, 42, 5, 6]
     a = sort(a)
 
-    if a[2] == 6 {
+    if a[0] < a[1] < a[2] < a[3] < a[4] < a[5] {
         return 123
     }
     

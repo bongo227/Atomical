@@ -58,11 +58,7 @@ LLVMGenericValueRef intArg(int n) {
     return LLVMCreateGenericValueOfInt(LLVMInt64Type(), n, false);
 }
 
-LLVMGenericValueRef runLLVMFunction(
-    Irgen *irgen, 
-    LLVMValueRef function, 
-    int paramCount, 
-    LLVMGenericValueRef *params) {
+LLVMGenericValueRef runLLVMModule(Irgen *irgen) {
 
     // create an execution engine   
     LLVMExecutionEngineRef engine;
@@ -83,25 +79,26 @@ LLVMGenericValueRef runLLVMFunction(
     assert(LLVMCreateExecutionEngineForModule(&engine, irgen->module, &error) == 0);
     assert(error == NULL);
 
-    LLVMGenericValueRef res = LLVMRunFunction(engine, function, paramCount, params);
+    LLVMValueRef mainFunc; 
+    LLVMFindFunction(engine, "main", &mainFunc);
+
+    int res = LLVMRunFunctionAsMain(engine, mainFunc, NULL, NULL, NULL);
 
     LLVMDisposeExecutionEngine(engine);
     return res;
 }
 
-void _TEST_FUNC(char *src, LLVMGenericValueRef *params, int paramCount, int out) {
-    /* generate function */
+void TEST_MODULE(char *src, int out) {
+    /* generate module */
     Parser *parser = NewParser(src, Lex(src));
-    // Dcl *d = ParseFunction(parser);
     File *f = ParseFile(parser);
     Irgen *irgen = NewIrgen();
     
-    LLVMValueRef function;
     for (int i = 0; i < f->dclCount; i++) {
-        function = CompileFunction(irgen, f->dcls[i]);
+        CompileFunction(irgen, f->dcls[i]);
     }
 
-    LLVMDumpModule(irgen->module);
+    // LLVMDumpModule(irgen->module);
 
     /* check for errors in module */
     char *error = (char *)NULL;
@@ -109,26 +106,11 @@ void _TEST_FUNC(char *src, LLVMGenericValueRef *params, int paramCount, int out)
     LLVMDisposeMessage(error);
 
     /* run the function */
-    LLVMGenericValueRef res = runLLVMFunction(irgen, function, paramCount, params);
-    ASSERT_EQ(out, (int)LLVMGenericValueToInt(res, 0));
+    int res = runLLVMModule(irgen);
+    ASSERT_EQ(out, res);
 
     /* dispose of builder */
     LLVMDisposeBuilder(irgen->builder);
-}
-
-void TEST_FUNC_0(const char *src, int out) {
-    LLVMGenericValueRef *params = NULL;
-    _TEST_FUNC((char *)src, params, 0, out);
-}
-
-void TEST_FUNC_1(const char *src, LLVMGenericValueRef param1, int out) {
-    LLVMGenericValueRef params[1] = { param1 };
-    _TEST_FUNC((char *)src, params, 1, out);
-}
-
-void TEST_FUNC_2(const char *src, LLVMGenericValueRef param1, LLVMGenericValueRef param2, int out) {
-    LLVMGenericValueRef params[2] = { param1, param2 };
-    _TEST_FUNC((char *)src, params, 2, out);
 }
 
 char *loadTest(std::string name) {
@@ -159,121 +141,77 @@ char *loadTest(std::string name) {
 }
 
 TEST(IrgenTest, CompileFunctionLiteral){ 
-    TEST_FUNC_0(
-        loadTest("literal.fur"), 
-        123);
+    TEST_MODULE(loadTest("literal.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionBinaryInt){ 
-    TEST_FUNC_0(
-        loadTest("binaryInt.fur"), 
-        123);
+    TEST_MODULE(loadTest("binaryInt.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionBinaryFloat){ 
-    TEST_FUNC_0(
-        loadTest("binaryFloat.fur"), 
-        123);
+    TEST_MODULE(loadTest("binaryFloat.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionLongVar){ 
-    TEST_FUNC_0(
-        loadTest("longVar.fur"), 
-        123);
+    TEST_MODULE(loadTest("longVar.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionShortVar){ 
-    TEST_FUNC_0(
-        loadTest("shortVar.fur"), 
-        123);
+    TEST_MODULE(loadTest("shortVar.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionIf){ 
-    TEST_FUNC_0(
-        loadTest("if.fur"), 
-        123);
+    TEST_MODULE(loadTest("if.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionIfElse){ 
-    TEST_FUNC_0(
-        loadTest("ifElse.fur"), 
-        123);
+    TEST_MODULE(loadTest("ifElse.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionIfElseIfElse){ 
-    TEST_FUNC_0(
-        loadTest("ifElseIfElse.fur"), 
-        123);
+    TEST_MODULE(loadTest("ifElseIfElse.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionIfElseIfElseIfElse){ 
-    TEST_FUNC_0(
-        loadTest("ifElseIfElseIfElse.fur"), 
-        123);
+    TEST_MODULE(loadTest("ifElseIfElseIfElse.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionFor){ 
-    TEST_FUNC_0(
-        loadTest("for.fur"), 
-        123);
+    TEST_MODULE(loadTest("for.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionArrayInit){ 
-    TEST_FUNC_0(
-        loadTest("arrayInit.fur"), 
-        123);
+    TEST_MODULE(loadTest("arrayInit.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionAdd){ 
-    TEST_FUNC_2(
-        loadTest("add.fur"), 
-        intArg(100), intArg(23), 
-        123);
+    TEST_MODULE(loadTest("add.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionUnary){ 
-    TEST_FUNC_1(
-        loadTest("unary.fur"), 
-        intArg(-123), 123); 
+    TEST_MODULE(loadTest("unary.fur"), 123); 
 }
 
 TEST(IrgenTest, CompileFunctionReassignArg){ 
-    TEST_FUNC_1(
-        loadTest("reassignArg.fur"), 
-        intArg(321), 
-        123);
+    TEST_MODULE(loadTest("reassignArg.fur"), 123);
 }
 
 TEST(IrgenTest, CompileFunctionGCD){ 
-    TEST_FUNC_2(
-        loadTest("gcd.fur"), 
-        intArg(1529), intArg(14039), 
-        139);
+    TEST_MODULE(loadTest("gcd.fur"), 139);
 }
 
 TEST(IrgenTest, CompileFunctionFibbonanci) {
-    TEST_FUNC_1(
-        loadTest("fibbonanci.fur"),
-        intArg(12),
-        144);
+    TEST_MODULE(loadTest("fibbonanci.fur"), 144);
 }
 
-TEST(Irgen, CompileFunctionCall) {
-    TEST_FUNC_0(
-        loadTest("call.fur"),
-        123);
-} 
-
-TEST(Irgen, CompileFunctionArraySum) {
-    TEST_FUNC_0(loadTest("arraySum.fur"), 123);
+TEST(IrgenTest, CompileFunctionArraySum) {
+    TEST_MODULE(loadTest("arraySum.fur"), 123);
 }
 
-TEST(Irgen, CompileFunctionNestedFor) {
-    TEST_FUNC_0(loadTest("nestedFor.fur"), 123);
+TEST(IrgenTest, CompileFunctionNestedFor) {
+    TEST_MODULE(loadTest("nestedFor.fur"), 123);
 }
 
-TEST(Irgen, CompileFunctionBubblesort) {
-    TEST_FUNC_0(
-        loadTest("bubblesort.fur"),
-        123);
+TEST(IrgenTest, CompileFunctionBubblesort) {
+    TEST_MODULE(loadTest("bubblesort.fur"), 123);
 }

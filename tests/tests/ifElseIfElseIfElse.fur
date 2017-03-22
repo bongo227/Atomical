@@ -1,4 +1,4 @@
-proc test :: -> int {
+proc main :: -> int {
     if false {
         return 321
     } else if false {
