@@ -123,8 +123,24 @@ LLVMValueRef GetAlloc(Irgen *irgen, Exp *e) {
         case indexExp: {
             LLVMValueRef alloc = GetAlloc(irgen, e->node.index.exp);
             LLVMValueRef index = CompileExp(irgen, e->node.index.index);
-            LLVMValueRef indices[1] = { index };
-            LLVMValueRef arrayAlloc = LLVMBuildGEP(irgen->builder, alloc, indices, 1, "tmp");
+            // need to check if alloc is point or not, if it is then add 0
+            // else do NOT add 0!
+            
+            LLVMValueRef arrayAlloc;
+            LLVMTypeRef allocType = LLVMTypeOf(alloc);
+            if(*LLVMPrintTypeToString(allocType) == '[') {
+                // TODO: this is super dumb, think of a better way to do this
+                LLVMValueRef indices[] = { 
+                    LLVMConstInt(LLVMInt64Type(), 0, false), 
+                    index, 
+                };
+                arrayAlloc = LLVMBuildGEP(irgen->builder, alloc, indices, 2, "tmp");
+            } else {
+                LLVMValueRef indices[] = { 
+                    index,
+                };
+                arrayAlloc = LLVMBuildGEP(irgen->builder, alloc, indices, 1, "tmp");
+            }
             return arrayAlloc;
         }
         default:
@@ -218,6 +234,7 @@ void CompileFor(Irgen *irgen, Smt *s) {
     // TODO: make a function for compiling a block
     SetBlock(irgen, block);
     CompileSmt(irgen, s->node.fors.body);
+    LLVMBasicBlockRef outBlock = irgen->block;
     SetBlock(irgen, parent);
 
     LLVMBasicBlockRef continueBlock = LLVMAppendBasicBlock(irgen->function, "endfor");
@@ -227,7 +244,7 @@ void CompileFor(Irgen *irgen, Smt *s) {
     LLVMBuildCondBr(irgen->builder, outerCond, block, continueBlock);
 
     // branch to loop or exit
-    SetBlock(irgen, block);
+    SetBlock(irgen, outBlock);
     CompileSmt(irgen, s->node.fors.inc);
     LLVMValueRef innerCond = CompileExp(irgen, s->node.fors.cond);
     LLVMBuildCondBr(irgen->builder, innerCond, block, continueBlock);
@@ -622,22 +639,25 @@ LLVMValueRef CompileArrayExp(Irgen *irgen, Exp *e) {
     }
 
     LLVMTypeRef castType = isFloat ? LLVMFloatType() : LLVMInt64Type();
-   
-    LLVMValueRef arrayAlloc = LLVMBuildArrayAlloca(
+    LLVMTypeRef arrayType = LLVMArrayType(castType, valueCount);
+
+    LLVMValueRef arrayAlloc = LLVMBuildAlloca(
         irgen->builder, 
-        castType,
-        LLVMConstInt(LLVMInt64Type(), valueCount, false),
+        arrayType,
         "tmp");
 
     for (int i = 0; i < valueCount; i++) {
         values[i] = Cast(irgen, values[i], castType);
         
-        LLVMValueRef indices[1] = { LLVMConstInt(LLVMInt64Type(), i, false) };
+        LLVMValueRef indices[2] = { 
+            LLVMConstInt(LLVMInt64Type(), 0, false),
+            LLVMConstInt(LLVMInt64Type(), i, false), 
+        };
         LLVMValueRef indexAlloc = LLVMBuildGEP(
             irgen->builder,
             arrayAlloc,
             indices,
-            1,
+            sizeof(indices) / sizeof(LLVMValueRef),
             "tmp");
 
         LLVMBuildStore(
