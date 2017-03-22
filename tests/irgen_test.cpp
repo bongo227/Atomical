@@ -68,8 +68,8 @@ LLVMGenericValueRef runLLVMFunction(
     LLVMExecutionEngineRef engine;
     char *error = (char *)NULL;
 
-    # if 0
-        // initialize jit
+    # if 1
+        // Initialize jit
         LLVMLinkInMCJIT();
     # else
         // Initialize intepreter
@@ -101,7 +101,7 @@ void _TEST_FUNC(char *src, LLVMGenericValueRef *params, int paramCount, int out)
         function = CompileFunction(irgen, f->dcls[i]);
     }
 
-    // LLVMDumpModule(irgen->module);
+    LLVMDumpModule(irgen->module);
 
     /* check for errors in module */
     char *error = (char *)NULL;
@@ -110,7 +110,7 @@ void _TEST_FUNC(char *src, LLVMGenericValueRef *params, int paramCount, int out)
 
     /* run the function */
     LLVMGenericValueRef res = runLLVMFunction(irgen, function, paramCount, params);
-    ASSERT_EQ((int)LLVMGenericValueToInt(res, 0), out);
+    ASSERT_EQ(out, (int)LLVMGenericValueToInt(res, 0));
 
     /* dispose of builder */
     LLVMDisposeBuilder(irgen->builder);
@@ -263,3 +263,17 @@ TEST(Irgen, CompileFunctionCall) {
         loadTest("call.fur"),
         123);
 } 
+
+TEST(Irgen, CompileFunctionArraySum) {
+    TEST_FUNC_0(loadTest("arraySum.fur"), 123);
+}
+
+TEST(Irgen, CompileFunctionNestedFor) {
+    TEST_FUNC_0(loadTest("nestedFor.fur"), 123);
+}
+
+TEST(Irgen, CompileFunctionBubblesort) {
+    TEST_FUNC_0(
+        loadTest("bubblesort.fur"),
+        123);
+}
