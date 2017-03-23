@@ -176,7 +176,7 @@ struct _Dcl {
 	union {
 		// functionDcl
 		struct {
-			Exp *name;
+			char *name;
 			struct _Dcl *args;
 			int argCount;
 			Exp *returnType;
@@ -186,12 +186,12 @@ struct _Dcl {
 		// argumentDcl
 		struct {
 			Exp *type;
-			Exp *name;
+			char *name; 
 		} argument;
 
 		// varibleDcl
 		struct {
-			Exp *name;
+			char *name;
 			Exp *type;
 			Exp *value;
 		} varible;
@@ -200,9 +200,9 @@ struct _Dcl {
 
 typedef struct _Dcl Dcl;
 
-Dcl *newArgumentDcl(Exp *type, Exp *name);
-Dcl *newVaribleDcl(Exp *name, Exp *type, Exp *value);
-Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *body);
+Dcl *newArgumentDcl(Exp *type, char *name);
+Dcl *newVaribleDcl(char *name, Exp *type, Exp *value);
+Dcl *newFunctionDcl(char *name, Dcl *args, int argCount, Exp *returnType, Smt *body);
 
 typedef enum {
 	declareSmt,

@@ -284,7 +284,8 @@ TEST(ParserTest, ParseLongVaribleDeclare) {
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
     ASSERT_EQ((int)varibleDcl, (int)smt->node.declare->type);
-    ASSERT_EQ((int)identExp, (int)smt->node.declare->node.varible.name->type);
+    ASSERT_STREQ("a", smt->node.declare->node.varible.name);
+    ASSERT_EQ((int)identExp, (int)smt->node.declare->node.varible.type->type);
     ASSERT_STREQ("int", smt->node.declare->node.varible.type->node.ident.name);
 
     Object *obj = FindScope(parser, (char *)"a");

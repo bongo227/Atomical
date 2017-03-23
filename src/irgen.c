@@ -48,7 +48,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     // add function to module
     irgen->function = LLVMAddFunction(
         irgen->module, 
-        d->node.function.name->node.ident.name,
+        d->node.function.name,
         functionType);
 
     // add function to node
@@ -64,7 +64,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     for (int i = 0; i < argCount; i++) {
         // get argument node
         Dcl *argNode = d->node.function.args + i;
-        char *argName = argNode->node.argument.name->node.ident.name;
+        char *argName = argNode->node.argument.name;
 
         // allocate space for argument
         LLVMValueRef argAlloc = LLVMBuildAlloca(
@@ -294,7 +294,7 @@ void CompileSmt(Irgen *irgen, Smt *s) {
 
 void CompileVarible(Irgen *irgen, Dcl *d) {
     // get argument node
-    char *varName = d->node.varible.name->node.ident.name; //TODO: make this a char * not Exp *
+    char *varName = d->node.varible.name;
 
     // compile expression
     LLVMValueRef exp = CompileExp(irgen, d->node.varible.value);

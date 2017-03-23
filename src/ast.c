@@ -137,7 +137,7 @@ Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
 	return s;
 }
 
-Dcl *newVaribleDcl(Exp *name, Exp *type, Exp *value) {
+Dcl *newVaribleDcl(char *name, Exp *type, Exp *value) {
 	Dcl *d = malloc(sizeof(Dcl));
 	d->type = varibleDcl;
 	d->node.varible.name = name;
@@ -182,7 +182,7 @@ Exp *newStructTypeExp(Exp *fields, int count) {
 	return e;
 }
 
-Dcl *newArgumentDcl(Exp *type, Exp *name) {
+Dcl *newArgumentDcl(Exp *type, char *name) {
 	Dcl *d = malloc(sizeof(Dcl));
 	d->type = argumentDcl;
 	d->node.argument.type = type;
@@ -191,7 +191,7 @@ Dcl *newArgumentDcl(Exp *type, Exp *name) {
 	return d;
 }
 
-Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *body) {
+Dcl *newFunctionDcl(char *name, Dcl *args, int argCount, Exp *returnType, Smt *body) {
 	Dcl *d = malloc(sizeof(Dcl));
 	d->type = functionDcl;
 	d->node.function.name = name;

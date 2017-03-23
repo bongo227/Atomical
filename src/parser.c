@@ -126,10 +126,11 @@ void ParserNext(Parser *parser) {
 }
 
 // expect asserts that the token is of type type, if true parser advances
-void expect(Parser *parser, TokenType type) {
-	// TODO: create TokenType -> string
-	ASSERT(parser->tokens->type == type, "Expect failed");
+Token *expect(Parser *parser, TokenType type) {
+	Token *token = parser->tokens;
+	assert(token->type == type);
 	ParserNext(parser);
+	return token;
 }
 
 // expectSemi expects a semicolon
@@ -439,37 +440,38 @@ Exp *ParseIdent(Parser *parser) {
 }
 
 Dcl *ParseVar(Parser *parser) {
-	Exp *name;
+	char *name;
 	Exp *type = NULL;
 	Exp *value;
 
 	if(parser->tokens->type == VAR) {
 		parser->tokens++;
 		type = ParseType(parser);
-		name = ParseIdent(parser);
+		name = expect(parser, IDENT)->value;
+		// name = ParseIdent(parser);
 		expect(parser, ASSIGN);
 		value = ParseExpression(parser, 0);
 	} else {
-		name = ParseIdent(parser);
+		name = expect(parser, IDENT)->value;
+		// name = ParseIdent(parser);
 		expect(parser, DEFINE);
 		value = ParseExpression(parser, 0);
 	}
 
 	Dcl *dcl = newVaribleDcl(name, type, value);
 
-	char *objName = name->node.ident.name;
 	Object *obj = (Object *)malloc(sizeof(Object));
-	obj->name = objName;
+	obj->name = name;
 	obj->node = dcl;
 	obj->type = varObj;
-	InsertScope(parser, objName, obj);
+	InsertScope(parser, name, obj);
 
 	return dcl;
 }
 
 Dcl *ParseFunction(Parser *parser) {
 	expect(parser, PROC);
-	Exp *name = ParseIdent(parser); // function name
+	char *name = expect(parser, IDENT)->value; // function name
 	expect(parser, DOUBLE_COLON);
 
 	// parse arguments
@@ -481,30 +483,32 @@ Dcl *ParseFunction(Parser *parser) {
 
 		// Construct argument
 		Exp *type = ParseType(parser); // arg type
-		Exp *name = ParseIdent(parser); // arg name
+		char *name = expect(parser, IDENT)->value; // arg name
 		Dcl *arg = newArgumentDcl(type, name);
 		void *dest = memcpy(args + argCount - 1, arg, sizeof(Dcl));
 		
 	}
+
 	// insert arguments into scope
 	for (int i = 0; i < argCount; i++) {
 		// insert into scope
 		Object *obj = (Object *)malloc(sizeof(Object));
-		obj->name = args[i].node.argument.name->node.ident.name;
+		obj->name = args[i].node.argument.name;
 		obj->node = args + i;
 		obj->type = argObj;
 		InsertScope(parser, obj->name, obj);
 	}
+	
 	expect(parser, ARROW);
 	Exp *returnType = ParseType(parser);
 
 	// insert function into scope
 	Dcl* function = newFunctionDcl(name, args, argCount, returnType, NULL);
 	Object *obj = (Object *)malloc(sizeof(Object));
-	obj->name = name->node.ident.name;
+	obj->name = name;
 	obj->node = function;
 	obj->type = funcObj;
-	InsertScope(parser, name->node.ident.name, obj);
+	InsertScope(parser, name, obj);
 	
 	// parse body
 	Smt *body = ParseStatement(parser);
@@ -559,10 +563,10 @@ Smt *ParseStatement(Parser *parser) {
 			ASSERT(left->type == identExp, 
 				"Expected left hand side of declare to be identifier");
 
-			smt = newDeclareSmt(newVaribleDcl(left, NULL, right));
+			char *name = left->node.ident.name;
+			smt = newDeclareSmt(newVaribleDcl(name, NULL, right));
 			
 			// Added declaration to scope
-			char *name = left->node.ident.name;
 			Object *obj =(Object *)malloc(sizeof(Object));
 			obj->name = name;
 			obj->node = smt->node.declare;
