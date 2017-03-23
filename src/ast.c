@@ -1,7 +1,7 @@
 #include "includes/ast.h"
 
 Exp *newIdentExp(char *ident) {
-    Exp *e = (Exp *)malloc(sizeof(Exp));
+    Exp *e = malloc(sizeof(Exp));
     e->type = identExp;
     e->node.ident.name = ident;
     e->node.ident.obj = NULL;
@@ -10,7 +10,7 @@ Exp *newIdentExp(char *ident) {
 }
 
 Exp *newLiteralExp(Token lit) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = literalExp;
 	e->node.literal = lit;
 
@@ -23,7 +23,7 @@ Exp *newIntLiteral(char *n) {
 }
 
 Exp *newBinaryExp(Exp *left, Token op, Exp *right) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = binaryExp;
 	e->node.binary.left = left;
 	e->node.binary.op = op;
@@ -33,7 +33,7 @@ Exp *newBinaryExp(Exp *left, Token op, Exp *right) {
 }
 
 Exp *newSelectorExp(Exp *exp, Exp* selector) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = selectorExp;
 	e->node.selector.exp = exp;
 	e->node.selector.selector = selector;
@@ -42,7 +42,7 @@ Exp *newSelectorExp(Exp *exp, Exp* selector) {
 }
 
 Exp *newIndexExp(Exp *exp, Exp *index) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = indexExp;
 	e->node.index.exp = exp;
 	e->node.index.index = index;
@@ -51,7 +51,7 @@ Exp *newIndexExp(Exp *exp, Exp *index) {
 }
 
 Exp *newUnaryExp(Token op, Exp *right) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = unaryExp;
 	e->node.unary.op = op;
 	e->node.unary.right = right;
@@ -60,7 +60,7 @@ Exp *newUnaryExp(Token op, Exp *right) {
 }
 
 Smt *newAssignmentSmt(Exp *left, Exp *right) {
-	Smt *s = (Smt *)malloc(sizeof(Smt));
+	Smt *s = malloc(sizeof(Smt));
 	s->type = assignmentSmt;
 	s->node.assignment.left = left;
 	s->node.assignment.right = right;
@@ -69,7 +69,7 @@ Smt *newAssignmentSmt(Exp *left, Exp *right) {
 }
 
 Smt *newBinaryAssignmentSmt(Exp *left, TokenType op, Exp *right) {
-	Smt *e = (Smt *)malloc(sizeof(Smt));
+	Smt *e = malloc(sizeof(Smt));
 	e->type = assignmentSmt;
 	e->node.assignment.left = left;
 	
@@ -111,7 +111,7 @@ Smt *newBinaryAssignmentSmt(Exp *left, TokenType op, Exp *right) {
 }
 
 Smt *newReturnSmt(Exp *result) {
-	Smt *s = (Smt *)malloc(sizeof(Smt));
+	Smt *s = malloc(sizeof(Smt));
 	s->type = returnSmt;
 	s->node.ret.result = result;
 	
@@ -119,7 +119,7 @@ Smt *newReturnSmt(Exp *result) {
 }
 
 Smt *newBlockSmt(Smt *smts, int smtCount) {
-	Smt *s = (Smt *)malloc(sizeof(Smt));
+	Smt *s = malloc(sizeof(Smt));
 	s->type = blockSmt;
 	s->node.block.smts = smts;
 	s->node.block.count = smtCount;
@@ -128,7 +128,7 @@ Smt *newBlockSmt(Smt *smts, int smtCount) {
 }
 
 Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
-	Smt *s = (Smt *)malloc(sizeof(Smt));
+	Smt *s = malloc(sizeof(Smt));
 	s->type = ifSmt;
 	s->node.ifs.cond = cond;
 	s->node.ifs.body = body;
@@ -138,7 +138,7 @@ Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
 }
 
 Dcl *newVaribleDcl(Exp *name, Exp *type, Exp *value) {
-	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
+	Dcl *d = malloc(sizeof(Dcl));
 	d->type = varibleDcl;
 	d->node.varible.name = name;
 	d->node.varible.type = type;
@@ -148,7 +148,7 @@ Dcl *newVaribleDcl(Exp *name, Exp *type, Exp *value) {
 }
 
 Smt *newDeclareSmt(Dcl *dcl) {
-	Smt *s = (Smt *)malloc(sizeof(Smt));
+	Smt *s = malloc(sizeof(Smt));
 	s->type = declareSmt;
 	s->node.declare = dcl;
 
@@ -156,7 +156,7 @@ Smt *newDeclareSmt(Dcl *dcl) {
 }
 
 Exp *newArrayTypeExp(Exp *type, Exp *length) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = arrayTypeExp;
 	e->node.arrayType.type = type;
 	e->node.arrayType.length = length;
@@ -165,7 +165,7 @@ Exp *newArrayTypeExp(Exp *type, Exp *length) {
 }
 
 Exp *newFieldTypeExp(Exp *type, Exp *name) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = fieldTypeExp;
 	e->node.fieldType.type = type;
 	e->node.fieldType.name = name;
@@ -174,7 +174,7 @@ Exp *newFieldTypeExp(Exp *type, Exp *name) {
 }
 
 Exp *newStructTypeExp(Exp *fields, int count) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = structTypeExp;
 	e->node.structType.fields = fields;
 	e->node.structType.feildCount = count;
@@ -183,7 +183,7 @@ Exp *newStructTypeExp(Exp *fields, int count) {
 }
 
 Dcl *newArgumentDcl(Exp *type, Exp *name) {
-	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
+	Dcl *d = malloc(sizeof(Dcl));
 	d->type = argumentDcl;
 	d->node.argument.type = type;
 	d->node.argument.name = name;
@@ -192,7 +192,7 @@ Dcl *newArgumentDcl(Exp *type, Exp *name) {
 }
 
 Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *body) {
-	Dcl *d = (Dcl *)malloc(sizeof(Dcl));
+	Dcl *d = malloc(sizeof(Dcl));
 	d->type = functionDcl;
 	d->node.function.name = name;
 	d->node.function.args = args;
@@ -204,7 +204,7 @@ Dcl *newFunctionDcl(Exp *name, Dcl *args, int argCount, Exp *returnType, Smt *bo
 }
 
 Exp *newCallExp(Exp *function, Exp *args, int argCount) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = callExp;
 	e->node.call.function = function;
 	e->node.call.args = args;
@@ -214,7 +214,7 @@ Exp *newCallExp(Exp *function, Exp *args, int argCount) {
 } 
 
 Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc, Smt *body) {
-	Smt *s = (Smt *)malloc(sizeof(Smt));
+	Smt *s = malloc(sizeof(Smt));
 	s->type = forSmt;
 	s->node.fors.index = index;
 	s->node.fors.cond = cond;
@@ -224,9 +224,8 @@ Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc, Smt *body) {
 	return s;
 }
 
-// TODO: remove casts on malloc
 Exp *newKeyValueExp(Exp *key, Exp *value) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = keyValueExp;
 	e->node.keyValue.key = key;
 	e->node.keyValue.value = value;
@@ -235,7 +234,7 @@ Exp *newKeyValueExp(Exp *key, Exp *value) {
 }
 
 Exp *newKeyValueListExp(Exp *values, int keyCount) {
-	Exp *e = (Exp *)malloc(sizeof(Exp));
+	Exp *e = malloc(sizeof(Exp));
 	e->type = keyValueListExp;
 	e->node.keyValueList.keyValues = values;
 	e->node.keyValueList.keyCount = keyCount;

@@ -144,14 +144,17 @@ set(CMAKE_BUILD_TYPE Debug)
 # Compiler executable
 add_executable(fur ../src/main.c)
 target_link_libraries(fur ${LLVM_LIBS})
-target_compile_options(fur PRIVATE "-Werror -std=c11")
+target_compile_options(fur PRIVATE "-Werror")
+target_compile_options(fur PRIVATE "-std=c11")
 
 # Compiler library
 add_library(furlib ../src/lib.c)
 target_link_libraries(furlib ${LLVM_LIBS})
-target_compile_options(furlib PRIVATE "-Werror" "-std=c11")
+target_compile_options(furlib PRIVATE "-Werror")
+target_compile_options(furlib PRIVATE "-std=c11")
 
 # Test executable 
 add_executable(fur_tests ../tests/test.cpp)
 target_link_libraries(fur_tests ${GTEST_LIBRARIES} pthread ${LLVM_LIBS} furlib)
 target_compile_options(fur_tests PRIVATE "-fpermissive") # required by GTEST
+target_compile_options(fur_tests PRIVATE "-Werror")

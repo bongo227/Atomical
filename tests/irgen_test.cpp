@@ -58,7 +58,7 @@ LLVMGenericValueRef intArg(int n) {
     return LLVMCreateGenericValueOfInt(LLVMInt64Type(), n, false);
 }
 
-LLVMGenericValueRef runLLVMModule(Irgen *irgen) {
+int runLLVMModule(Irgen *irgen) {
 
     // create an execution engine   
     LLVMExecutionEngineRef engine;
@@ -82,7 +82,7 @@ LLVMGenericValueRef runLLVMModule(Irgen *irgen) {
     LLVMValueRef mainFunc; 
     LLVMFindFunction(engine, "main", &mainFunc);
 
-    int res = LLVMRunFunctionAsMain(engine, mainFunc, NULL, NULL, NULL);
+    int res = LLVMRunFunctionAsMain(engine, mainFunc, 0, nullptr, nullptr);
 
     LLVMDisposeExecutionEngine(engine);
     return res;
