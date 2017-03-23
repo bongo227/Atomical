@@ -91,6 +91,13 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     return irgen->function;
 }
 
+// Sets the current block to the given basic block.
+void SetBlock(Irgen *irgen, LLVMBasicBlockRef block) {
+    irgen->block = block;
+    LLVMPositionBuilderAtEnd(irgen->builder, block);
+}
+
+// Compiles a block in the current basic block.
 void CompileBlock(Irgen *irgen, Smt *s) {
     ASSERT(s->type == blockSmt, "Expected block statment");
     
@@ -98,6 +105,23 @@ void CompileBlock(Irgen *irgen, Smt *s) {
     for (int i = 0; i < s->node.block.count; i++) {
         CompileSmt(irgen, &s->node.block.smts[i]);
     }
+}
+
+// Compiles a block at the given basic block.
+LLVMBasicBlockRef CompileBlockAt(Irgen *irgen, Smt *s, LLVMBasicBlockRef block) {
+    assert(s->type == blockSmt);
+    
+    // Move to target block
+    LLVMBasicBlockRef parent = irgen->block;
+    SetBlock(irgen, block);
+    
+    CompileBlock(irgen, s);
+    
+    // Restore parent block
+    LLVMBasicBlockRef outBlock = irgen->block;
+    SetBlock(irgen, parent);
+
+    return outBlock;
 }
 
 void CompileReturn(Irgen *irgen, Smt *s) {
@@ -145,22 +169,20 @@ void CompileAssignment(Irgen *irgen, Smt *s) {
     LLVMBuildStore(irgen->builder, exp, alloc);
 }
 
-void SetBlock(Irgen *irgen, LLVMBasicBlockRef block) {
-    irgen->block = block;
-    LLVMPositionBuilderAtEnd(irgen->builder, block);
-}
-
 void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlockRef endBlock) {
     ASSERT(s->type == ifSmt, "Expected if statement");
     
     Exp *cond = s->node.ifs.cond;
     if (cond == NULL) {
+        assert(block != NULL);
+        
         // Compile else block and exit
-        SetBlock(irgen, block);
-        CompileBlock(irgen, s->node.ifs.body);
-        if (LLVMGetBasicBlockTerminator(block) == NULL) {
+        LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->node.ifs.body, block);
+        SetBlock(irgen, outBlock);
+        if (LLVMGetBasicBlockTerminator(outBlock) == NULL) {
             // block is not terminated so continue execution from end block
             LLVMBuildBr(irgen->builder, endBlock);
+            SetBlock(irgen, endBlock);
         }
 
         return;
@@ -185,15 +207,15 @@ void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlo
     }
 
     // compile if block
-    SetBlock(irgen, block);
-    CompileBlock(irgen, s->node.ifs.body);
-    if (LLVMGetBasicBlockTerminator(block) == NULL) {
+    LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->node.ifs.body, block);
+    if (LLVMGetBasicBlockTerminator(outBlock) == NULL) {
         // block is not terminated so continue execution from end block
+        SetBlock(irgen, outBlock);
         LLVMBuildBr(irgen->builder, endBlock);
+        SetBlock(irgen, parent);
     }
     
     // Add the conditional branch
-    SetBlock(irgen, parent);
     LLVMValueRef condition = CompileExp(irgen, cond);
     LLVMBuildCondBr(irgen->builder, condition, block, falseBlock);
 
@@ -215,21 +237,16 @@ void CompileIf(Irgen *irgen, Smt *s) {
 void CompileFor(Irgen *irgen, Smt *s) {
     ASSERT(s->type == forSmt, "Expected for statement");
 
+    // Compile loop varible
     CompileDcl(irgen, s->node.fors.index);
 
     // compile for body
     LLVMBasicBlockRef block = LLVMAppendBasicBlock(irgen->function, "for");
-    LLVMBasicBlockRef parent = irgen->block;
-    // TODO: make a function for compiling a block
-    SetBlock(irgen, block);
-    CompileSmt(irgen, s->node.fors.body);
-    LLVMBasicBlockRef outBlock = irgen->block;
-    SetBlock(irgen, parent);
-
-    LLVMBasicBlockRef continueBlock = LLVMAppendBasicBlock(irgen->function, "endfor");
+    LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->node.fors.body, block);
 
     // branch into for loop
     LLVMValueRef outerCond = CompileExp(irgen, s->node.fors.cond);
+    LLVMBasicBlockRef continueBlock = LLVMAppendBasicBlock(irgen->function, "endfor");
     LLVMBuildCondBr(irgen->builder, outerCond, block, continueBlock);
 
     // branch to loop or exit
