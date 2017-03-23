@@ -117,7 +117,7 @@ LLVMValueRef GetAlloc(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case identExp: {
             ASSERT(e->node.ident.obj != NULL, "Identifier doesnt have object");
-            Dcl *dcl = (Dcl *)(e->node.ident.obj->node); // TODO: can node alway be Dcl
+            Dcl *dcl = e->node.ident.obj->node;
             return dcl->llvmValue;
         }
         case indexExp: {

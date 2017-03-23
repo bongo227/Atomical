@@ -32,7 +32,7 @@ typedef enum {
 typedef struct {
 	ObjectType type;
 	char *name;
-	void *node;
+	Dcl *node;
 } Object;
 
 typedef enum {
@@ -185,7 +185,6 @@ struct _Dcl {
 
 		// argumentDcl
 		struct {
-			// TODO: name should be char *
 			Exp *type;
 			Exp *name;
 		} argument;
