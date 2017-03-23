@@ -1,65 +1,64 @@
-// TEST(ParserTest, ScopeEnter) {
-//     Parser *parser = NewParser("", NULL);
-//     Scope *outer = parser->scope;
-//     ASSERT_EQ(outer->outer, NULL);
-//     EnterScope(parser);
-//     ASSERT_TRUE(outer == parser->scope->outer);
-// }
+TEST(ParserTest, ScopeEnter) {
+    parser *p = new_parser(NULL);
+    scope *outer = p->scope;
+    ASSERT_EQ(outer->outer, NULL);
+    parser_enter_scope(p);
+    ASSERT_TRUE(outer == p->scope->outer);
+}
 
-// TEST(ParserTest, ScopeExit) {
-//     Parser *parser = NewParser("", NULL);
-//     Scope *outer = parser->scope;
-//     EnterScope(parser);
-//     ExitScope(parser);
-//     ASSERT_TRUE(outer == parser->scope);
-// }
+TEST(ParserTest, ScopeExit) {
+    parser *p = new_parser(NULL);
+    scope *outer = p->scope;
+    parser_enter_scope(p);
+    parser_exit_scope(p);
+    ASSERT_TRUE(outer == p->scope);
+}
 
-// TEST(ParserTest, ScopeInsert) {
-//     Parser *parser = NewParser("", NULL);
-//     Object *obj = (Object *)malloc(sizeof(Object));
-//     obj->type = badObj;
-//     obj->name = (char *)"test";
-//     obj->node = (char *)"nodevalue";
-//     obj->typeInfo = NULL;
-//     bool inserted = InsertScope(parser, (char *)"test", obj);
-//     ASSERT_TRUE(inserted);
+TEST(ParserTest, ScopeInsert) {
+    parser *p = new_parser(NULL);
+    Object *obj = (Object *)malloc(sizeof(Object));
+    obj->type = badObj;
+    obj->name = (char *)"test";
+    obj->node = newArgumentDcl(NULL, (char *)"test_name");
+    bool inserted = parser_insert_scope(p, (char *)"test", obj);
+    ASSERT_TRUE(inserted);
 
-//     ScopeObject *found;
-//     HASH_FIND_STR((ScopeObject *)parser->scope->objects, (char *)"test", found);
-//     ASSERT_STREQ(obj->name, found->obj->name);
-//     ASSERT_STREQ((char *)obj->node, (char *)found->obj->node);			
+    scope_object *found;
+    HASH_FIND_STR((scope_object *)p->scope->objects, (char *)"test", found);
+    ASSERT_STREQ(obj->name, found->obj->name);
+    ASSERT_STREQ(obj->node->node.argument.name, 
+        (char *)found->obj->node->node.argument.name);			
 
-//     inserted = InsertScope(parser, (char *)"test", obj);
-//     ASSERT_FALSE(inserted);
-// }
+    inserted = parser_insert_scope(p, (char *)"test", obj);
+    ASSERT_FALSE(inserted);
+}
 
-// TEST(ParserTest, ScopeFind) {
-//     Parser *parser = NewParser((char *)NULL, (Token *)NULL);
-//     Object *obj = (Object *)malloc(sizeof(Object));
-//     obj->type = badObj;
-//     obj->name = (char *)"test";
-//     obj->node = NULL;
-//     obj->typeInfo = NULL;
-//     InsertScope(parser, (char *)"test", obj);
+TEST(ParserTest, ScopeFind) {
+    parser *p = new_parser(NULL);
+    Object *obj = (Object *)malloc(sizeof(Object));
+    obj->type = badObj;
+    obj->name = (char *)"test";
+    obj->node = NULL;
+    parser_insert_scope(p, (char *)"test", obj);
 
-//     // Enter and exit some scopes
-//     EnterScope(parser);
-//     EnterScope(parser);
-//     ExitScope(parser);
-//     EnterScope(parser);
-//     ExitScope(parser);
+    // Enter and exit some scopes
+    parser_enter_scope(p);
+    parser_enter_scope(p);
+    parser_exit_scope(p);
+    parser_enter_scope(p);
+    parser_exit_scope(p);
 
-//     Object *found = FindScope(parser, (char *)"test");
-//     ASSERT_EQ(obj->name, found->name); // pointer should be same
+    Object *found = parser_find_scope(p, (char *)"test");
+    ASSERT_EQ(obj->name, found->name); // pointer should be same
 
-//     found = FindScope(parser, (char *)"not here");
-//     ASSERT_EQ(found, NULL);
-// }
+    found = parser_find_scope(p, (char *)"not here");
+    ASSERT_EQ(found, NULL);
+}
 
 TEST(ParserTest, ParseLiteralExpression) {
     const char *src = "123";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_FALSE(exp == NULL);
     ASSERT_EQ((int)literalExp, (int)exp->type);
@@ -68,8 +67,8 @@ TEST(ParserTest, ParseLiteralExpression) {
 
 TEST(ParserTest, ParseIdentExpression) {
     const char *src = "test";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)identExp, (int)exp->type);
     ASSERT_STREQ("test", exp->node.ident.name);
@@ -77,8 +76,8 @@ TEST(ParserTest, ParseIdentExpression) {
 
 TEST(ParserTest, ParseIdentExpressionWithNumber) {
     const char *src = "test123";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)identExp, (int)exp->type);
     ASSERT_STREQ("test123", exp->node.ident.name);
@@ -86,16 +85,16 @@ TEST(ParserTest, ParseIdentExpressionWithNumber) {
 
 TEST(ParserTest, ParseBinaryExpression) {
     const char *src = "a + b";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseBidmasBinaryExpression) {
     const char *src = "a + b * c";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
     ASSERT_EQ((int)ADD, (int)exp->node.binary.op.type);
@@ -104,8 +103,8 @@ TEST(ParserTest, ParseBidmasBinaryExpression) {
 
 TEST(ParserTest, ParseSelectorExpression) {
     const char *src = "a.b";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)selectorExp, (int)exp->type);
     ASSERT_STREQ((char *)"a", exp->node.selector.exp->node.ident.name);
@@ -114,8 +113,8 @@ TEST(ParserTest, ParseSelectorExpression) {
 
 TEST(ParserTest, ParseDoubleSelectorExpression) {
     const char *src = "a.b.c";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)selectorExp, (int)exp->type);
     ASSERT_EQ((int)selectorExp, (int)exp->node.selector.exp->type);
@@ -126,16 +125,16 @@ TEST(ParserTest, ParseDoubleSelectorExpression) {
 
 TEST(ParserTest, ParseIndexExpression) {
     const char *src = "test[1]";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)indexExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseRightAssociativeBinaryOperators) {
     const char *src = "a || b || c";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
     ASSERT_EQ((int)binaryExp, (int)exp->node.binary.right->type);
@@ -143,32 +142,32 @@ TEST(ParserTest, ParseRightAssociativeBinaryOperators) {
 
 TEST(ParserTest, ParseUnaryExpression) {
     const char *src = "!a";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
     
     ASSERT_EQ((int)unaryExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseUnaryMinuxExpression) {
     const char *src = "-a";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)unaryExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseAssignmentOperator) {
     const char *src = "a = b";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
 }
 
 TEST(ParserTest, ParseAddAssigmentOperator) {
     const char *src = "a += b";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
     ASSERT_EQ((int)binaryExp, (int)smt->node.assignment.right->type);
@@ -179,16 +178,16 @@ TEST(ParserTest, ParseAddAssigmentOperator) {
 
 TEST(ParserTest, ParseReturnStatment) {
     const char *src = "return a";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)returnSmt, (int)smt->type);
 }
 
 TEST(ParserTest, ParseBlockStatment) {
     const char *src = "{\nreturn test\n}";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
     ASSERT_EQ(1, smt->node.block.count);
@@ -197,8 +196,8 @@ TEST(ParserTest, ParseBlockStatment) {
 
 TEST(ParserTest, ParserBlockSingleLine) {
     const char *src = "{ return test }";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
     ASSERT_EQ(1, smt->node.block.count);
@@ -207,8 +206,8 @@ TEST(ParserTest, ParserBlockSingleLine) {
 
 TEST(ParserTest, ParserLongBlockSingleLine) {
     const char *src = "{ a = 1; b = 2; return test }";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
     ASSERT_EQ(3, smt->node.block.count);
@@ -216,8 +215,8 @@ TEST(ParserTest, ParserLongBlockSingleLine) {
 
 TEST(ParserTest, ParseIfStatment) {
     const char *src = "if true {\nreturn false\n}";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
     ASSERT_EQ((int)identExp, (int)smt->node.ifs.cond->type);
@@ -227,8 +226,8 @@ TEST(ParserTest, ParseIfStatment) {
 
 TEST(ParserTest, ParseIfElseStatement) {
     const char *src = "if true { return 123 } else { return 321 }";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
     ASSERT_EQ((int)identExp, (int)smt->node.ifs.cond->type);
@@ -244,8 +243,8 @@ TEST(ParserTest, ParseIfElseStatement) {
 
 TEST(ParserTest, ParseIfElseIfElseStatment) {
     const char *src = "if false { return 321 } else if true { return 123 } else { return 0 }";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
     ASSERT_EQ((int)identExp, (int)smt->node.ifs.cond->type);
@@ -267,20 +266,20 @@ TEST(ParserTest, ParseIfElseIfElseStatment) {
 
 TEST(ParserTest, ParserShortVaribleDeclare) {
     const char *src = "a := 10";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
     ASSERT_EQ((int)varibleDcl, (int)smt->node.declare->type);
 
-    Object *obj = FindScope(parser, (char *)"a");
+    Object *obj = parser_find_scope(p, (char *)"a");
     ASSERT_TRUE(obj->node == smt->node.declare);
 }
 
 TEST(ParserTest, ParseLongVaribleDeclare) {
     const char *src = "var int a = 10";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
     ASSERT_EQ((int)varibleDcl, (int)smt->node.declare->type);
@@ -288,30 +287,30 @@ TEST(ParserTest, ParseLongVaribleDeclare) {
     ASSERT_EQ((int)identExp, (int)smt->node.declare->node.varible.type->type);
     ASSERT_STREQ("int", smt->node.declare->node.varible.type->node.ident.name);
 
-    Object *obj = FindScope(parser, (char *)"a");
+    Object *obj = parser_find_scope(p, (char *)"a");
     ASSERT_NE(obj, NULL);
     ASSERT_TRUE(obj->node == smt->node.declare);
 }
 
 TEST(ParserTest, ParseArrayType) {
     const char *src = "int[3]";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *type = ParseType(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *type = parse_type(p);
 
     ASSERT_EQ((int)arrayTypeExp, (int)type->type);
 }
 
 TEST(ParserTest, ParseFunctionDefinition) {
     const char *src = "proc test :: int a, int b -> int {\nreturn a + b\n}";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Dcl *dcl = ParseFunction(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Dcl *dcl = parse_function_dcl(p);
 
     ASSERT_EQ((int)functionDcl, (int)dcl->type);
     ASSERT_EQ(2, (int)dcl->node.function.argCount);
     ASSERT_EQ((int)identExp, (int)dcl->node.function.returnType->type);
 
-    Object *obja = FindScope(parser, (char *)"a");
-    Object *objb = FindScope(parser, (char *)"b");
+    Object *obja = parser_find_scope(p, (char *)"a");
+    Object *objb = parser_find_scope(p, (char *)"b");
     
     ASSERT_NE(obja, NULL);
     ASSERT_NE(objb, NULL);
@@ -322,8 +321,8 @@ TEST(ParserTest, ParseFunctionDefinition) {
 
 TEST(ParserTest, ParseEmptyCallExpression) {
     const char *src = "test()";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(0, exp->node.call.argCount);
@@ -331,8 +330,8 @@ TEST(ParserTest, ParseEmptyCallExpression) {
 
 TEST(ParserTest, ParseCallExpression) {
     const char *src = "test(1, test)";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(2, exp->node.call.argCount);
@@ -342,8 +341,8 @@ TEST(ParserTest, ParseCallExpression) {
 
 TEST(ParserTest, ParseCallInCallExpression) {
     const char *src = "test(test())";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(1, exp->node.call.argCount);
@@ -351,8 +350,8 @@ TEST(ParserTest, ParseCallInCallExpression) {
 
 TEST(ParserTest, ParseForLoop) {
     const char *src = "for i := 0; i < 10; i += 1 {}";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)forSmt, (int)smt->type);
     ASSERT_EQ((int)varibleDcl, (int)smt->node.fors.index->type);
@@ -363,16 +362,16 @@ TEST(ParserTest, ParseForLoop) {
 
 TEST(ParserTest, ParseIncrement) {
     const char *src = "i++";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Smt *smt = ParseStatement(parser);
+    parser *p = new_parser(Lex((char *)src));
+    Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
 }
 
 TEST(ParserTest, ParseKeyValueList) {
     const char *src = "{a: 1, b: 2}";
-    Parser *parser = NewParser((char *)src, Lex((char *)src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex((char *)src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(2, exp->node.keyValueList.keyCount);
@@ -382,19 +381,19 @@ TEST(ParserTest, ParseKeyValueList) {
 
 TEST(ParserTest, ParseEmptyKeyValueList) {
     char *src = (char *)"{}";
-    Parser *parser = NewParser(src, Lex(src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex(src));
+    Exp *exp = parse_expression(p, 0);
     
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(0, exp->node.keyValueList.keyCount);
 }
 
-// TODO: create a ParseExpression which takes in a src so we can make
+// TODO: create a parse_expression which takes in a src so we can make
 // these 3 lines into 1.
 TEST(ParserTest, ParseNullKeyValueList) {
     char *src = (char *)"{1, 2, 3}";
-    Parser *parser = NewParser(src, Lex(src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex(src));
+    Exp *exp = parse_expression(p, 0);
     
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(3, exp->node.keyValueList.keyCount);
@@ -402,18 +401,9 @@ TEST(ParserTest, ParseNullKeyValueList) {
 
 TEST(ParserTest, ParseArrayExpression) {
     char *src = (char *)"[1, 2, 3]";
-    Parser *parser = NewParser(src, Lex(src));
-    Exp *exp = ParseExpression(parser, 0);
+    parser *p = new_parser(Lex(src));
+    Exp *exp = parse_expression(p, 0);
 
     ASSERT_EQ((int)arrayExp, (int)exp->type);
     ASSERT_EQ(3, exp->node.array.valueCount);
 }
-
-// TEST(ParserTest, ParseArrayLiteralExpression) {
-//     const char *src = "[3]int{1, 2, 3}";
-//     Parser *parser = NewParser((char *)src, Lex((char *)src));
-//     Exp *exp = ParseExpression(parser, 0);
-
-//     ASSERT_EQ(arrayLiteralExp, exp->type);
-//     ASSERT_EQ(3, exp->node.arrayLiteral.valueCount);
-// }

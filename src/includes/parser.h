@@ -7,35 +7,53 @@ typedef struct {
 	char *name;
 	Object *obj;
 	UT_hash_handle hh;
-} ScopeObject;
+} scope_object;
 
-struct _Scope {
-	struct _Scope *outer;
-	ScopeObject *objects;
+struct _scope {
+	struct _scope *outer;
+	scope_object *objects;
 };
-
-typedef struct _Scope Scope;
+typedef struct _scope scope;
 
 typedef struct {
-	char *src;
-	Scope *scope;
+	scope *scope;
     Token *tokens;
-    int expLevel; // >= 0 when inside expression
-    bool rhs; // true if parser is parsing right hand side
-} Parser;
+} parser;
 
-Parser *NewParser(char *src, Token *tokens);
-File *ParseFile(Parser *parser);
+// Parser interface
+parser *new_parser(Token *tokens);
+File *parse_file(parser *parser);
 
-Exp *ParseExpression(Parser *parser, int rbp);
-Exp *ParseIdent(Parser *parser);
-Exp *ParseIdentToken(Parser *parser, Token *token);
-Exp *ParseType(Parser *parser);
+// Scope
+scope *parser_new_scope(scope *outer);
+void parser_enter_scope(parser *parser);
+void parser_exit_scope(parser *parser);
+bool parser_insert_scope(parser *parser, char *name, Object *object);
+Object *parser_find_scope(parser *parser, char *name);
 
-Smt *ParseStatement(Parser *parser);
+int get_binding_power(TokenType type); // TODO: move this somewhere approprite
 
-Dcl *ParseDeclaration(Parser *parser);
-Dcl *ParseVar(Parser *parser);
-Dcl *ParseFunction(Parser *parser);
+// Helpers
+void parser_next(parser *parser);
+Token *parser_expect(parser *parser, TokenType type);
+void parser_expect_semi(parser *parser);
 
-Object *FindScope(Parser *parser, char *name);
+// Declarations
+Dcl *parse_declaration(parser *parser);
+Dcl *parse_function_dcl(parser *parser);
+Dcl *parse_variable_dcl(parser *parser);
+
+// Statements
+Smt *parse_statement(parser *parser);
+Smt *smtd(parser *p, Token *token);
+
+// Expressions
+Exp *parse_expression(parser *parser, int rbp);
+Exp *nud(parser *parser, Token *token);
+Exp *led(parser *parser, Token *token, Exp *exp);
+Exp *parse_key_value_exp(parser *parser);
+Exp *parse_key_value_list_exp(parser *parser);
+Exp *parse_array_exp(parser *parser);
+Exp *parse_type(parser *parser);
+Exp *parse_ident_exp_from_token(parser *parser, Token *token);
+Exp *parse_ident_exp(parser *parser);

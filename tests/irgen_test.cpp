@@ -5,8 +5,8 @@
 #include <llvm-c/BitWriter.h>
 
 #define TEST_TYPE(name, src, expectedType) TEST(IrgenTest, name){       \
-    Parser *parser = NewParser((char *)src, Lex((char *)src));          \
-    Exp *e = ParseType(parser);                                         \
+    parser *p = new_parser(Lex((char *)src));                           \
+    Exp *e = parse_type(p);                                             \
     Irgen *irgen = NewIrgen();                                          \
     LLVMTypeRef type = CompileType(e);                                  \
     ASSERT_TRUE(type == expectedType);                                  \
@@ -25,9 +25,10 @@ TEST_TYPE(CompileTypeF32, "f32", LLVMFloatType())
 TEST_TYPE(CompileTypeIntArray, "int[3]", LLVMArrayType(LLVMInt64Type(), 3))
 TEST_TYPE(CompileTypeFloatArray, "float[100]", LLVMArrayType(LLVMFloatType(), 100))
 
+// TOOD: remove replace parse_expression
 #define TEST_LITERAL(name, src, expectedType, expectedValue) TEST(IrgenTest, name) {    \
-    Parser *parser = NewParser((char *)src, Lex((char *)src));                          \
-    Exp *e = ParseExpression(parser, 0);                                                \
+    parser *p = new_parser(Lex((char *)src));                                           \
+    Exp *e = parse_expression(p, 0);                                                    \
     Irgen *irgen = NewIrgen();                                                          \
     LLVMValueRef value = CompileLiteralExp(irgen, e);                                   \
     ASSERT_TRUE(LLVMIsConstant(value));                                                 \
@@ -90,8 +91,8 @@ int runLLVMModule(Irgen *irgen) {
 
 void TEST_MODULE(char *src, int out) {
     /* generate module */
-    Parser *parser = NewParser(src, Lex(src));
-    File *f = ParseFile(parser);
+    parser *p = new_parser(Lex(src));
+    File *f = parse_file(p);
     Irgen *irgen = NewIrgen();
     
     for (int i = 0; i < f->dclCount; i++) {
