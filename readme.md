@@ -1,6 +1,6 @@
 ### TODO
 - [x] For loops
-- [ ] Arrays
+- [x] Arrays
 - [ ] Read files and writing executables
 
 - [ ] strings
