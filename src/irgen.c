@@ -117,31 +117,20 @@ LLVMValueRef GetAlloc(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case identExp: {
             ASSERT(e->node.ident.obj != NULL, "Identifier doesnt have object");
+            
             Dcl *dcl = e->node.ident.obj->node;
             return dcl->llvmValue;
         }
         case indexExp: {
+            // Get the allocation of the expression
             LLVMValueRef alloc = GetAlloc(irgen, e->node.index.exp);
-            LLVMValueRef index = CompileExp(irgen, e->node.index.index);
-            // need to check if alloc is point or not, if it is then add 0
-            // else do NOT add 0!
             
-            LLVMValueRef arrayAlloc;
-            LLVMTypeRef allocType = LLVMTypeOf(alloc);
-            if(*LLVMPrintTypeToString(allocType) == '[') {
-                // TODO: this is super dumb, think of a better way to do this
-                LLVMValueRef indices[] = { 
-                    LLVMConstInt(LLVMInt64Type(), 0, false), 
-                    index, 
-                };
-                arrayAlloc = LLVMBuildGEP(irgen->builder, alloc, indices, 2, "tmp");
-            } else {
-                LLVMValueRef indices[] = { 
-                    index,
-                };
-                arrayAlloc = LLVMBuildGEP(irgen->builder, alloc, indices, 1, "tmp");
-            }
-            return arrayAlloc;
+            // Get the element at the index
+            LLVMValueRef index = CompileExp(irgen, e->node.index.index);
+            LLVMValueRef zero = LLVMConstInt(LLVMInt64Type(), 0, false);
+            LLVMValueRef indices[] = { zero, index };
+            
+            return LLVMBuildGEP(irgen->builder, alloc, indices, 2, "tmp");
         }
         default:
             ASSERT(false, "Cannot get alloc on unknown expression");
