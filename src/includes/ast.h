@@ -33,7 +33,6 @@ typedef struct {
 	ObjectType type;
 	char *name;
 	void *node;
-	void *typeInfo; // TODO: can we remove this?
 } Object;
 
 typedef enum {

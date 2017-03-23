@@ -462,7 +462,6 @@ Dcl *ParseVar(Parser *parser) {
 	obj->name = objName;
 	obj->node = dcl;
 	obj->type = varObj;
-	obj->typeInfo = NULL;
 	InsertScope(parser, objName, obj);
 
 	return dcl;
@@ -494,7 +493,6 @@ Dcl *ParseFunction(Parser *parser) {
 		obj->name = args[i].node.argument.name->node.ident.name;
 		obj->node = args + i;
 		obj->type = argObj;
-		obj->typeInfo = NULL;
 		InsertScope(parser, obj->name, obj);
 	}
 	expect(parser, ARROW);
@@ -506,7 +504,6 @@ Dcl *ParseFunction(Parser *parser) {
 	obj->name = name->node.ident.name;
 	obj->node = function;
 	obj->type = funcObj;
-	obj->typeInfo = NULL;
 	InsertScope(parser, name->node.ident.name, obj);
 	
 	// parse body
@@ -570,7 +567,6 @@ Smt *ParseStatement(Parser *parser) {
 			obj->name = name;
 			obj->node = smt->node.declare;
 			obj->type = varObj;
-			obj->typeInfo = NULL;
 			InsertScope(parser, name, obj);
 			break;
 		default:
