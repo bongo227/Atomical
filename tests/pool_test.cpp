@@ -105,6 +105,8 @@ TEST(PoolTest, ReusePool) {
     ASSERT_EQ(2, pool_count(int_pool));
 
     int *e4 = (int *)pool_get(int_pool);
+    ASSERT_EQ(*e3, *e4);
+    
     int v4 = 4;
     memcpy(e4, &v4, sizeof(int));
 
