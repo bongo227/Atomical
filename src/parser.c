@@ -273,13 +273,13 @@ Smt *parse_statement(parser *p) {
 		case REM_ASSIGN:
 		case OR_ASSIGN:
 		case SHL_ASSIGN:
-			smt = newBinaryAssignmentSmt(p->ast, left, op.type, right);
+			smt = new_binary_assignment_smt(p->ast, left, op.type, right);
 			break;
 		case DEFINE:
 			assert(left->type == identExp);
 
 			char *name = left->ident.name;
-			smt = newDeclareSmt(newVaribleDcl(name, NULL, right));
+			smt = new_declare_smt(p->ast, newVaribleDcl(name, NULL, right));
 			
 			// Added declaration to scope
 			Object *obj =(Object *)malloc(sizeof(Object));
@@ -306,7 +306,7 @@ Smt *smtd(parser *p, Token *token) {
 		// return statement
 		case RETURN: {
 			p->tokens++;
-			Smt *s = newReturnSmt(parse_expression(p, 0));
+			Smt *s = new_ret_smt(p->ast, parse_expression(p, 0));
 			return s; 
 		}
 		// block statement
@@ -326,7 +326,7 @@ Smt *smtd(parser *p, Token *token) {
 			}
 			smts = realloc(smts, sizeof(Smt) * smtCount);
 
-			Smt *s = newBlockSmt(smts, smtCount);
+			Smt *s = new_block_smt(p->ast, smts, smtCount);
 
 			parser_expect(p, RBRACE);
 
@@ -351,11 +351,11 @@ Smt *smtd(parser *p, Token *token) {
 					elses = parse_statement(p);
 				} else {
 					// final else statment only has a body
-					elses = newIfSmt(NULL, parse_statement(p), NULL);
+					elses = new_if_smt(p->ast, NULL, parse_statement(p), NULL);
 				}
 			}
 
-			return newIfSmt(cond, block, elses);
+			return new_if_smt(p->ast, cond, block, elses);
 		}
 		// for loop
 		case FOR: {
@@ -377,11 +377,11 @@ Smt *smtd(parser *p, Token *token) {
 			Smt *body = parse_statement(p);
 			assert(body->type == blockSmt);
 
-			return newForSmt(index, cond, inc, body);
+			return new_for_smt(p->ast, index, cond, inc, body);
 		}
 		// varible declaration
 		case VAR: {
-			return newDeclareSmt(parse_variable_dcl(p));
+			return new_declare_smt(p->ast, parse_variable_dcl(p));
 		}
 		// increment expression
 		case IDENT: {
@@ -390,10 +390,10 @@ Smt *smtd(parser *p, Token *token) {
 			switch(p->tokens->type) {
 				case INC:
 					p->tokens++;
-					return newBinaryAssignmentSmt(p->ast, ident, ADD_ASSIGN, newIntLiteral(p->ast, "1"));
+					return new_binary_assignment_smt(p->ast, ident, ADD_ASSIGN, newIntLiteral(p->ast, "1"));
 				case DEC:
 					p->tokens++;
-					return newBinaryAssignmentSmt(p->ast, ident, SUB_ASSIGN, newIntLiteral(p->ast, "1"));
+					return new_binary_assignment_smt(p->ast, ident, SUB_ASSIGN, newIntLiteral(p->ast, "1"));
 				default:
 					// expression is assigment or declaration so let caller handle it
 					p->tokens--; // go back to ident

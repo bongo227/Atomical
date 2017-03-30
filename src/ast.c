@@ -161,14 +161,22 @@ Exp *new_struct_type_exp(ast_unit *ast, Exp *fields, int count) {
 	return e;
 }
 
-// TODO: remove this
+// TODO: consider remove this
 Exp *newIntLiteral(ast_unit *ast, char *value) {
 	Token t = {INT, 0, 0, value};
 	return new_literal_exp(ast, t);
 }
 
-Smt *newAssignmentSmt(Exp *left, Exp *right) {
-	Smt *s = malloc(sizeof(Smt));
+Smt *new_declare_smt(ast_unit *ast, Dcl *dcl) {
+	Smt *s = pool_get(ast->smt_pool);
+	s->type = declareSmt;
+	s->declare = dcl;
+
+	return s; 
+}
+
+Smt *new_assignment_smt(ast_unit *ast, Exp *left, Exp *right) {
+	Smt *s = pool_get(ast->smt_pool);
 	s->type = assignmentSmt;
 	s->assignment.left = left;
 	s->assignment.right = right;
@@ -176,8 +184,8 @@ Smt *newAssignmentSmt(Exp *left, Exp *right) {
 	return s;
 }
 
-Smt *newBinaryAssignmentSmt(ast_unit *ast, Exp *left, TokenType op, Exp *right) {
-	Smt *e = malloc(sizeof(Smt));
+Smt *new_binary_assignment_smt(ast_unit *ast, Exp *left, TokenType op, Exp *right) {
+	Smt *e = pool_get(ast->smt_pool);
 	e->type = assignmentSmt;
 	e->assignment.left = left;
 	
@@ -213,16 +221,16 @@ Smt *newBinaryAssignmentSmt(ast_unit *ast, Exp *left, TokenType op, Exp *right) 
 	return e; 
 }
 
-Smt *newReturnSmt(Exp *result) {
-	Smt *s = malloc(sizeof(Smt));
+Smt *new_ret_smt(ast_unit *ast, Exp *result) {
+	Smt *s = pool_get(ast->smt_pool);
 	s->type = returnSmt;
 	s->ret.result = result;
 	
 	return s;
 }
 
-Smt *newBlockSmt(Smt *smts, int smtCount) {
-	Smt *s = malloc(sizeof(Smt));
+Smt *new_block_smt(ast_unit *ast, Smt *smts, int smtCount) {
+	Smt *s = pool_get(ast->smt_pool);
 	s->type = blockSmt;
 	s->block.smts = smts;
 	s->block.count = smtCount;
@@ -230,12 +238,23 @@ Smt *newBlockSmt(Smt *smts, int smtCount) {
 	return s; 
 }
 
-Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses) {
-	Smt *s = malloc(sizeof(Smt));
+Smt *new_if_smt(ast_unit *ast, Exp *cond, Smt *body, Smt *elses) {
+	Smt *s = pool_get(ast->smt_pool);
 	s->type = ifSmt;
 	s->ifs.cond = cond;
 	s->ifs.body = body;
 	s->ifs.elses = elses;
+
+	return s;
+}
+
+Smt *new_for_smt(ast_unit *ast, Dcl *index, Exp *cond, Smt *inc, Smt *body) {
+	Smt *s = pool_get(ast->smt_pool);
+	s->type = forSmt;
+	s->fors.index = index;
+	s->fors.cond = cond;
+	s->fors.inc = inc;
+	s->fors.body = body;
 
 	return s;
 }
@@ -250,13 +269,7 @@ Dcl *newVaribleDcl(char *name, Exp *type, Exp *value) {
 	return d;
 }
 
-Smt *newDeclareSmt(Dcl *dcl) {
-	Smt *s = malloc(sizeof(Smt));
-	s->type = declareSmt;
-	s->declare = dcl;
 
-	return s; 
-}
 
 Dcl *newArgumentDcl(Exp *type, char *name) {
 	Dcl *d = malloc(sizeof(Dcl));
@@ -278,17 +291,3 @@ Dcl *newFunctionDcl(char *name, Dcl *args, int argCount, Exp *returnType, Smt *b
 
 	return d;
 }
-
- 
-
-Smt *newForSmt(Dcl *index, Exp *cond, Smt *inc, Smt *body) {
-	Smt *s = malloc(sizeof(Smt));
-	s->type = forSmt;
-	s->fors.index = index;
-	s->fors.cond = cond;
-	s->fors.inc = inc;
-	s->fors.body = body;
-
-	return s;
-}
-

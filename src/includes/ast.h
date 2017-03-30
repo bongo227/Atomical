@@ -158,47 +158,21 @@ typedef enum {
 struct _Smt {
 	SmtType type;
 	union {
-		// declareSmt
-		Dcl *declare;
-		
-		// assignmentSmt
-		struct {
-			Exp *left;
-			Exp *right;
-		} assignment;
-
-		// returnSmt
-		struct {
-			Exp *result;
-		} ret;
-
-		// blockSmt
-		struct {
-			Smt *smts;
-			int count;
-		} block;
-
-		// ifSmt
-		struct {
-			Exp *cond;
-			Smt *body;
-			Smt *elses;
-		} ifs;
-
-		// forSmt
-		struct {
-			Dcl *index;
-			Exp *cond;
-			Smt *inc;
-			Smt *body;
-		} fors;
+		Dcl *													declare;
+		struct { Exp *left; Exp *right; } 						assignment;
+		struct { Exp *result; } 								ret;
+		struct { Smt *smts; int count; } 						block;
+		struct { Exp *cond; Smt *body; Smt *elses; } 			ifs;
+		struct { Dcl *index; Exp *cond; Smt *inc; Smt *body; } 	fors;
 	};
 };
 
 typedef struct _Smt Smt;
 
-Smt *newReturnSmt(Exp *result);
-Smt *newBlockSmt(Smt *smts, int smtCount);
-Smt *newIfSmt(Exp *cond, Smt *body, Smt *elses);
-Smt *newDeclareSmt(Dcl *dcl);
-Smt *newBinaryAssignmentSmt(ast_unit *ast, Exp *left, TokenType op, Exp *right);
+Smt *new_declare_smt(ast_unit *ast, Dcl *dcl);
+Smt *new_assignment_smt(ast_unit *ast, Exp *left, Exp *right);
+Smt *new_binary_assignment_smt(ast_unit *ast, Exp *left, TokenType op, Exp *right);
+Smt *new_ret_smt(ast_unit *ast, Exp *result);
+Smt *new_block_smt(ast_unit *ast, Smt *smts, int smtCount);
+Smt *new_if_smt(ast_unit *ast, Exp *cond, Smt *body, Smt *elses);
+Smt *new_for_smt(ast_unit *ast, Dcl *index, Exp *cond, Smt *inc, Smt *body);
