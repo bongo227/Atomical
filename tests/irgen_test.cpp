@@ -92,7 +92,7 @@ int runLLVMModule(Irgen *irgen) {
 void TEST_MODULE(char *src, int out) {
     /* generate module */
     parser *p = new_parser(Lex(src));
-    File *f = parse_file(p);
+    ast_unit *f = parse_file(p);
     Irgen *irgen = NewIrgen();
     
     for (int i = 0; i < f->dclCount; i++) {

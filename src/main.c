@@ -1,5 +1,6 @@
 #include "error.c"
 #include "lexer.c"
+#include "pool.c"
 #include "ast.c"
 #include "parser.c"
 #include "irgen.c"

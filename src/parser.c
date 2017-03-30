@@ -5,12 +5,12 @@ parser *new_parser(Token *tokens) {
 	parser *p = (parser *)malloc(sizeof(parser));
 	p->tokens = tokens;
 	p->scope = parser_new_scope(NULL);
-	
+	p->ast = new_ast_unit();
 	return p;
 }
 
 // parse_file creates an abstract sytax tree from the tokens in parser 
-File *parse_file(parser *p) {
+ast_unit *parse_file(parser *p) {
 	Dcl **dcls = malloc(0);
 	int dclCount = 0;
 	while(p->tokens->type != END) {
@@ -19,7 +19,7 @@ File *parse_file(parser *p) {
 		memcpy(dcls + dclCount - 1, &d, sizeof(Dcl *));
 	}
 
-	File *f = malloc(sizeof(File));
+	ast_unit *f = malloc(sizeof(ast_unit));
 	f->dcls = dcls;
 	f->dclCount = dclCount;
 
@@ -191,7 +191,7 @@ Dcl *parse_function_dcl(parser *p) {
 	for (int i = 0; i < argCount; i++) {
 		// insert into scope
 		Object *obj = (Object *)malloc(sizeof(Object));
-		obj->name = args[i].node.argument.name;
+		obj->name = args[i].argument.name;
 		obj->node = args + i;
 		obj->type = argObj;
 		parser_insert_scope(p, obj->name, obj);
@@ -210,7 +210,7 @@ Dcl *parse_function_dcl(parser *p) {
 	
 	// parse body
 	Smt *body = parse_statement(p);
-	function->node.function.body = body;
+	function->function.body = body;
 
 	if(p->tokens->type == SEMI) p->tokens++;
 
@@ -261,9 +261,9 @@ Smt *parse_statement(parser *p) {
 	// Expected assigment/declation statement
 	assert(exp->type == binaryExp); 
 	
-	Exp *left = exp->node.binary.left;
-	Exp *right = exp->node.binary.right;
-	Token op = exp->node.binary.op;
+	Exp *left = exp->binary.left;
+	Exp *right = exp->binary.right;
+	Token op = exp->binary.op;
 
 	switch(op.type) {
 		case ASSIGN:
@@ -273,18 +273,18 @@ Smt *parse_statement(parser *p) {
 		case REM_ASSIGN:
 		case OR_ASSIGN:
 		case SHL_ASSIGN:
-			smt = newBinaryAssignmentSmt(left, op.type, right);
+			smt = newBinaryAssignmentSmt(p->ast, left, op.type, right);
 			break;
 		case DEFINE:
 			assert(left->type == identExp);
 
-			char *name = left->node.ident.name;
+			char *name = left->ident.name;
 			smt = newDeclareSmt(newVaribleDcl(name, NULL, right));
 			
 			// Added declaration to scope
 			Object *obj =(Object *)malloc(sizeof(Object));
 			obj->name = name;
-			obj->node = smt->node.declare;
+			obj->node = smt->declare;
 			obj->type = varObj;
 			parser_insert_scope(p, name, obj);
 			break;
@@ -296,7 +296,7 @@ Smt *parse_statement(parser *p) {
 	// If statment is null, the next tokens dont start a valid statement
 	assert(smt != NULL);
 
-	free(exp);
+	// TODO: free exp
 	return smt;
 }
 
@@ -390,10 +390,10 @@ Smt *smtd(parser *p, Token *token) {
 			switch(p->tokens->type) {
 				case INC:
 					p->tokens++;
-					return newBinaryAssignmentSmt(ident, ADD_ASSIGN, newIntLiteral("1"));
+					return newBinaryAssignmentSmt(p->ast, ident, ADD_ASSIGN, newIntLiteral(p->ast, "1"));
 				case DEC:
 					p->tokens++;
-					return newBinaryAssignmentSmt(ident, SUB_ASSIGN, newIntLiteral("1"));
+					return newBinaryAssignmentSmt(p->ast, ident, SUB_ASSIGN, newIntLiteral(p->ast, "1"));
 				default:
 					// expression is assigment or declaration so let caller handle it
 					p->tokens--; // go back to ident
@@ -433,11 +433,11 @@ Exp *nud(parser *p, Token *token) {
 	case HEX:
 	case OCTAL:
 	case STRING:
-		return newLiteralExp(*token);
+		return new_literal_exp(p->ast, *token);
 
 	case NOT:
 	case SUB:
-		return newUnaryExp(*token, parse_expression(p, 60));
+		return new_unary_exp(p->ast, *token, parse_expression(p, 60));
 
 	case LBRACE:
 		return parse_key_value_list_exp(p);
@@ -470,12 +470,12 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		case LSS:
 		case GEQ:
 		case LEQ: {
-			return newBinaryExp(exp, *token, parse_expression(p, bp));
+			return new_binary_exp(p->ast, exp, *token, parse_expression(p, bp));
 		}
 
 		// selector expression
 		case PERIOD: {
-			return newSelectorExp(exp, parse_expression(p, bp));
+			return new_selector_exp(p->ast, exp, parse_expression(p, bp));
 		}
 
 		// index expression
@@ -483,7 +483,7 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 			Exp *index = parse_expression(p, 0);
 			parser_expect(p, RBRACK);
 			
-			return newIndexExp(exp, index);
+			return new_index_exp(p->ast, exp, index);
 		}
 
 		// array/struct expression
@@ -510,7 +510,7 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 			}
 			parser_expect(p, RPAREN);
 
-			return newCallExp(exp, args, argCount);
+			return new_call_exp(p->ast, exp, args, argCount);
 		}
 
 		// right associative binary expression or assignments
@@ -526,7 +526,7 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		case OR_ASSIGN:
 		case SHL_ASSIGN: 
 		case DEFINE: {
-			return newBinaryExp(exp, *token, parse_expression(p, bp - 1));	
+			return new_binary_exp(p->ast, exp, *token, parse_expression(p, bp - 1));	
 		}
 		default:
 			// Expected an infix expression
@@ -552,7 +552,7 @@ Exp *parse_key_value_exp(parser *p) {
 		value = keyOrVal;
 	}
 
-	return newKeyValueExp(key, value);
+	return new_key_value_exp(p->ast, key, value);
 }
 
 Exp *parse_key_value_list_exp(parser *p) {
@@ -568,7 +568,7 @@ Exp *parse_key_value_list_exp(parser *p) {
 		if(p->tokens->type != RBRACE) parser_expect(p, COMMA);
 	}
 
-	return newKeyValueListExp(values, keyCount);
+	return new_key_value_list_exp(p->ast, values, keyCount);
 }
 
 Exp *parse_array_exp(parser *p) {
@@ -583,7 +583,7 @@ Exp *parse_array_exp(parser *p) {
 
 	parser_expect(p, RBRACK);
 
-	return newArrayExp(values, valueCount);
+	return new_array_exp(p->ast, values, valueCount);
 }
 
 Exp *parse_type(parser *p) {
@@ -593,7 +593,7 @@ Exp *parse_type(parser *p) {
 		p->tokens++;
 		Exp *length = parse_expression(p, 0);
 		parser_expect(p, RBRACK);
-		return newArrayTypeExp(ident, length);
+		return new_array_type_exp(p->ast, ident, length);
 	}
 
 	return ident;
@@ -603,10 +603,10 @@ Exp *parse_ident_exp_from_token(parser *p, Token *token) {
 	assert(token->type == IDENT);
 	
 	char *name = token->value;
-	Exp *ident = newIdentExp(name);
+	Exp *ident = new_ident_exp(p->ast, name);
 	
 	Object *obj = parser_find_scope(p, name);
-	ident->node.ident.obj = obj;
+	ident->ident.obj = obj;
 	return ident;
 }
 

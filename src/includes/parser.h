@@ -18,11 +18,12 @@ typedef struct _scope scope;
 typedef struct {
 	scope *scope;
     Token *tokens;
+	ast_unit *ast;
 } parser;
 
 // Parser interface
 parser *new_parser(Token *tokens);
-File *parse_file(parser *parser);
+ast_unit *parse_file(parser *parser);
 
 // Scope
 scope *parser_new_scope(scope *outer);

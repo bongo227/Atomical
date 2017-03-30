@@ -1,3 +1,5 @@
+#pragma once
+
 struct pool_element;
 typedef struct pool_element pool_element;
 

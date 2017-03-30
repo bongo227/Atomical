@@ -10,18 +10,18 @@ Irgen *NewIrgen() {
 LLVMTypeRef CompileType(Exp *e) {
     switch(e->type) {
         case identExp:
-            if (strcmp(e->node.ident.name, "int") == 0) return LLVMInt64Type();
-            if (strcmp(e->node.ident.name, "i64") == 0) return LLVMInt64Type();
-            if (strcmp(e->node.ident.name, "i32") == 0) return LLVMInt32Type();
-            if (strcmp(e->node.ident.name, "i16") == 0) return LLVMInt16Type();
-            if (strcmp(e->node.ident.name, "i8") == 0) return LLVMInt8Type();
+            if (strcmp(e->ident.name, "int") == 0) return LLVMInt64Type();
+            if (strcmp(e->ident.name, "i64") == 0) return LLVMInt64Type();
+            if (strcmp(e->ident.name, "i32") == 0) return LLVMInt32Type();
+            if (strcmp(e->ident.name, "i16") == 0) return LLVMInt16Type();
+            if (strcmp(e->ident.name, "i8") == 0) return LLVMInt8Type();
 
-            if (strcmp(e->node.ident.name, "float") == 0) return LLVMFloatType();
-            if (strcmp(e->node.ident.name, "f32") == 0) return LLVMFloatType();
-            if (strcmp(e->node.ident.name, "f64") == 0) return LLVMDoubleType();
+            if (strcmp(e->ident.name, "float") == 0) return LLVMFloatType();
+            if (strcmp(e->ident.name, "f32") == 0) return LLVMFloatType();
+            if (strcmp(e->ident.name, "f64") == 0) return LLVMDoubleType();
         case arrayTypeExp: {
-            LLVMTypeRef elementType = CompileType(e->node.arrayType.type);
-            int length = atoi(e->node.arrayType.length->node.literal.value);
+            LLVMTypeRef elementType = CompileType(e->arrayType.type);
+            int length = atoi(e->arrayType.length->literal.value);
             return LLVMArrayType(elementType, length);
         }
         default:
@@ -33,14 +33,14 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     ASSERT(d->type == functionDcl, "Expected function declaration");
     
     // compile argument types
-    int argCount = d->node.function.argCount;
+    int argCount = d->function.argCount;
     LLVMTypeRef *argTypes = malloc(argCount * sizeof(LLVMTypeRef));
     for (int i = 0; i < argCount; i++) {
-        argTypes[i] = CompileType(d->node.function.args[i].node.argument.type);
+        argTypes[i] = CompileType(d->function.args[i].argument.type);
     }
 
     // compile return type
-    LLVMTypeRef returnType = CompileType(d->node.function.returnType);
+    LLVMTypeRef returnType = CompileType(d->function.returnType);
 
     // make function type
     LLVMTypeRef functionType = LLVMFunctionType(returnType, argTypes, argCount, 0); 
@@ -48,7 +48,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     // add function to module
     irgen->function = LLVMAddFunction(
         irgen->module, 
-        d->node.function.name,
+        d->function.name,
         functionType);
 
     // add function to node
@@ -63,8 +63,8 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
     // allocate arguments in entry block
     for (int i = 0; i < argCount; i++) {
         // get argument node
-        Dcl *argNode = d->node.function.args + i;
-        char *argName = argNode->node.argument.name;
+        Dcl *argNode = d->function.args + i;
+        char *argName = argNode->argument.name;
 
         // allocate space for argument
         LLVMValueRef argAlloc = LLVMBuildAlloca(
@@ -80,7 +80,7 @@ LLVMValueRef CompileFunction(Irgen *irgen, Dcl *d) {
         LLVMBuildStore(irgen->builder, argValue, argAlloc);
     }
 
-    CompileBlock(irgen, d->node.function.body);
+    CompileBlock(irgen, d->function.body);
 
     // remove last block if empty
     if (LLVMGetFirstInstruction(irgen->block) == NULL) {
@@ -102,8 +102,8 @@ void CompileBlock(Irgen *irgen, Smt *s) {
     ASSERT(s->type == blockSmt, "Expected block statment");
     
     // Compile all statements in block
-    for (int i = 0; i < s->node.block.count; i++) {
-        CompileSmt(irgen, &s->node.block.smts[i]);
+    for (int i = 0; i < s->block.count; i++) {
+        CompileSmt(irgen, &s->block.smts[i]);
     }
 }
 
@@ -133,24 +133,24 @@ void CompileReturn(Irgen *irgen, Smt *s) {
     // build return instruction
     LLVMBuildRet(
         irgen->builder, 
-        Cast(irgen, CompileExp(irgen, s->node.ret.result), returnType));
+        Cast(irgen, CompileExp(irgen, s->ret.result), returnType));
 }
 
 // Gets the allocation for an expression
 LLVMValueRef GetAlloc(Irgen *irgen, Exp *e) {
     switch(e->type) {
         case identExp: {
-            ASSERT(e->node.ident.obj != NULL, "Identifier doesnt have object");
+            ASSERT(e->ident.obj != NULL, "Identifier doesnt have object");
             
-            Dcl *dcl = e->node.ident.obj->node;
+            Dcl *dcl = e->ident.obj->node;
             return dcl->llvmValue;
         }
         case indexExp: {
             // Get the allocation of the expression
-            LLVMValueRef alloc = GetAlloc(irgen, e->node.index.exp);
+            LLVMValueRef alloc = GetAlloc(irgen, e->index.exp);
             
             // Get the element at the index
-            LLVMValueRef index = CompileExp(irgen, e->node.index.index);
+            LLVMValueRef index = CompileExp(irgen, e->index.index);
             LLVMValueRef zero = LLVMConstInt(LLVMInt64Type(), 0, false);
             LLVMValueRef indices[] = { zero, index };
             
@@ -164,20 +164,20 @@ LLVMValueRef GetAlloc(Irgen *irgen, Exp *e) {
 void CompileAssignment(Irgen *irgen, Smt *s) {
     ASSERT(s->type == assignmentSmt, "Expected an assignment statement");
 
-    LLVMValueRef alloc = GetAlloc(irgen, s->node.assignment.left);
-    LLVMValueRef exp = CompileExp(irgen, s->node.assignment.right);
+    LLVMValueRef alloc = GetAlloc(irgen, s->assignment.left);
+    LLVMValueRef exp = CompileExp(irgen, s->assignment.right);
     LLVMBuildStore(irgen->builder, exp, alloc);
 }
 
 void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlockRef endBlock) {
     ASSERT(s->type == ifSmt, "Expected if statement");
     
-    Exp *cond = s->node.ifs.cond;
+    Exp *cond = s->ifs.cond;
     if (cond == NULL) {
         assert(block != NULL);
         
         // Compile else block and exit
-        LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->node.ifs.body, block);
+        LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->ifs.body, block);
         SetBlock(irgen, outBlock);
         if (LLVMGetBasicBlockTerminator(outBlock) == NULL) {
             // block is not terminated so continue execution from end block
@@ -200,14 +200,14 @@ void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlo
     
     // falseBlock is either the next else/elseif block or block to conitue execution
     LLVMBasicBlockRef falseBlock;
-    if (s->node.ifs.elses != NULL) {
+    if (s->ifs.elses != NULL) {
         falseBlock = LLVMAppendBasicBlock(irgen->function, "else");
     } else {
         falseBlock = endBlock;
     }
 
     // compile if block
-    LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->node.ifs.body, block);
+    LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->ifs.body, block);
     if (LLVMGetBasicBlockTerminator(outBlock) == NULL) {
         // block is not terminated so continue execution from end block
         SetBlock(irgen, outBlock);
@@ -221,8 +221,8 @@ void CompileIfBranch(Irgen *irgen, Smt *s, LLVMBasicBlockRef block, LLVMBasicBlo
 
     // if their is a chaining elseif/else set its parent to the falseBlock
     SetBlock(irgen, falseBlock);
-    if(s->node.ifs.elses != NULL) {
-        CompileIfBranch(irgen, s->node.ifs.elses, falseBlock, endBlock);
+    if(s->ifs.elses != NULL) {
+        CompileIfBranch(irgen, s->ifs.elses, falseBlock, endBlock);
     }
 
     // continue execution from the endBlock
@@ -238,21 +238,21 @@ void CompileFor(Irgen *irgen, Smt *s) {
     ASSERT(s->type == forSmt, "Expected for statement");
 
     // Compile loop varible
-    CompileDcl(irgen, s->node.fors.index);
+    CompileDcl(irgen, s->fors.index);
 
     // compile for body
     LLVMBasicBlockRef block = LLVMAppendBasicBlock(irgen->function, "for");
-    LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->node.fors.body, block);
+    LLVMBasicBlockRef outBlock = CompileBlockAt(irgen, s->fors.body, block);
 
     // branch into for loop
-    LLVMValueRef outerCond = CompileExp(irgen, s->node.fors.cond);
+    LLVMValueRef outerCond = CompileExp(irgen, s->fors.cond);
     LLVMBasicBlockRef continueBlock = LLVMAppendBasicBlock(irgen->function, "endfor");
     LLVMBuildCondBr(irgen->builder, outerCond, block, continueBlock);
 
     // branch to loop or exit
     SetBlock(irgen, outBlock);
-    CompileSmt(irgen, s->node.fors.inc);
-    LLVMValueRef innerCond = CompileExp(irgen, s->node.fors.cond);
+    CompileSmt(irgen, s->fors.inc);
+    LLVMValueRef innerCond = CompileExp(irgen, s->fors.cond);
     LLVMBuildCondBr(irgen->builder, innerCond, block, continueBlock);
 
     // continue from continueBlock
@@ -274,7 +274,7 @@ void CompileSmt(Irgen *irgen, Smt *s) {
             break;
         
         case declareSmt:
-            CompileDcl(irgen, s->node.declare);
+            CompileDcl(irgen, s->declare);
             break;
         
         case ifSmt:
@@ -294,22 +294,22 @@ void CompileSmt(Irgen *irgen, Smt *s) {
 
 void CompileVarible(Irgen *irgen, Dcl *d) {
     // get argument node
-    char *varName = d->node.varible.name;
+    char *varName = d->varible.name;
 
     // compile expression
-    LLVMValueRef exp = CompileExp(irgen, d->node.varible.value);
+    LLVMValueRef exp = CompileExp(irgen, d->varible.value);
 
     // get the type of the varible declaration
     LLVMTypeRef varType;
-    if (d->node.varible.type != NULL) {
-        varType = CompileType(d->node.varible.type);
+    if (d->varible.type != NULL) {
+        varType = CompileType(d->varible.type);
         exp = Cast(irgen, exp, varType);
     } else {
         varType = LLVMTypeOf(exp);
     }
 
     LLVMValueRef varAlloc;
-    if (d->node.varible.value->type == arrayExp) {
+    if (d->varible.value->type == arrayExp) {
         varAlloc = exp;
     } else {
         // allocate space for varible
@@ -383,15 +383,15 @@ LLVMValueRef Cast(Irgen *irgen, LLVMValueRef value, LLVMTypeRef type) {
 LLVMValueRef CompileLiteralExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == literalExp, "Expected literal expression");
     
-    switch (e->node.literal.type) {
+    switch (e->literal.type) {
         case INT:
-            return LLVMConstIntOfString(LLVMInt64Type(), e->node.literal.value, 10);
+            return LLVMConstIntOfString(LLVMInt64Type(), e->literal.value, 10);
         case FLOAT:
-            return LLVMConstRealOfString(LLVMFloatType(), e->node.literal.value);
+            return LLVMConstRealOfString(LLVMFloatType(), e->literal.value);
         case HEX:
-            return LLVMConstIntOfString(LLVMInt64Type(), e->node.literal.value, 16);
+            return LLVMConstIntOfString(LLVMInt64Type(), e->literal.value, 16);
         case OCTAL:
-            return LLVMConstIntOfString(LLVMInt64Type(), e->node.literal.value, 8);
+            return LLVMConstIntOfString(LLVMInt64Type(), e->literal.value, 8);
         case STRING:
             ASSERT(false, "TODO: implement strings");
         default:
@@ -402,8 +402,8 @@ LLVMValueRef CompileLiteralExp(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == binaryExp, "Expected binary expression");
 
-    LLVMValueRef left = CompileExp(irgen, e->node.binary.left);
-    LLVMValueRef right = CompileExp(irgen, e->node.binary.right);
+    LLVMValueRef left = CompileExp(irgen, e->binary.left);
+    LLVMValueRef right = CompileExp(irgen, e->binary.right);
 
     LLVMTypeRef leftType = LLVMTypeOf(left);
     LLVMTypeRef rightType = LLVMTypeOf(right);
@@ -435,10 +435,10 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
     char *rightName = (char *)LLVMGetValueName(right);
     char name[strlen(leftName) + 1 + strlen(rightName)];
     strcpy(name, leftName);
-    strcpy(name, TokenName(e->node.binary.op.type));
+    strcpy(name, TokenName(e->binary.op.type));
     strcpy(name, rightName);
 
-    switch (e->node.binary.op.type) {
+    switch (e->binary.op.type) {
         case ADD:
             switch(nodeTypeKind) {
                 case LLVMFloatTypeKind:
@@ -573,19 +573,19 @@ LLVMValueRef CompileBinaryExp(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileIdentExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == identExp, "Expected identifier expression");
 
-    char *ident = e->node.ident.name;
+    char *ident = e->ident.name;
     if(strcmp(ident, "true") == 0) return LLVMConstInt(LLVMInt1Type(), 1, false);
     if(strcmp(ident, "false") == 0) return LLVMConstInt(LLVMInt1Type(), 0, false);
 
     LLVMValueRef alloc = GetAlloc(irgen, e);
-    return LLVMBuildLoad(irgen->builder, alloc, e->node.ident.name);
+    return LLVMBuildLoad(irgen->builder, alloc, e->ident.name);
 }
 
 LLVMValueRef CompileUnaryExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == unaryExp, "Expected unary expression");
 
-    LLVMValueRef exp = CompileExp(irgen, e->node.unary.right);
-    switch(e->node.unary.op.type) {
+    LLVMValueRef exp = CompileExp(irgen, e->unary.right);
+    switch(e->unary.op.type) {
         case ADD:
             return exp;
         case SUB: {
@@ -619,13 +619,13 @@ LLVMValueRef CompileUnaryExp(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileCallExp(Irgen *irgen, Exp *e) {
     ASSERT(e->type == callExp, "Expected call expression");
     
-    LLVMValueRef function = GetAlloc(irgen, e->node.call.function);
+    LLVMValueRef function = GetAlloc(irgen, e->call.function);
 
     // compile arguments
-    int argCount = e->node.call.argCount;
+    int argCount = e->call.argCount;
     LLVMValueRef *args = malloc(argCount * sizeof(LLVMValueRef));
     for(int i = 0; i < argCount; i++) {
-        args[i] = CompileExp(irgen, e->node.call.args + i);
+        args[i] = CompileExp(irgen, e->call.args + i);
     }
 
     return LLVMBuildCall(irgen->builder, function, args, argCount, "tmp");
@@ -634,11 +634,11 @@ LLVMValueRef CompileCallExp(Irgen *irgen, Exp *e) {
 LLVMValueRef CompileArrayExp(Irgen *irgen, Exp *e) {
     assert(e->type == arrayExp);
 
-    int valueCount = e->node.array.valueCount;
+    int valueCount = e->array.valueCount;
     bool isFloat = false;
     LLVMValueRef *values = alloca(valueCount * sizeof(LLVMValueRef));
     for (int i = 0; i < valueCount; i++) {
-        values[i] = CompileExp(irgen, e->node.array.values + i);
+        values[i] = CompileExp(irgen, e->array.values + i);
         if (LLVMGetTypeKind(LLVMTypeOf(values[i])) == LLVMFloatTypeKind) {
             isFloat = true;
         }
