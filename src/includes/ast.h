@@ -4,14 +4,14 @@
 #include "pool.h"
 #include <llvm-c/Core.h>
 
-struct _Exp;
-typedef struct _Exp Exp;
+struct Exp;
+typedef struct Exp Exp;
 
-struct _Dcl;
-typedef struct _Dcl Dcl;
+struct Dcl;
+typedef struct Dcl Dcl;
 
-struct _Smt;
-typedef struct _Smt Smt;
+struct Smt;
+typedef struct Smt Smt;
 
 typedef struct {
 	pool *dcl_pool;
@@ -33,13 +33,67 @@ typedef enum {
 	funcObj,
 } ObjectType;
 
-// Object 
-// An object represents a named construct such as a constant, type, varible, function.
+// Object represents a named construct such as a constant, type, varible, function.
 typedef struct {
 	ObjectType type;
 	char *name;
 	Dcl *node;
 } Object;
+
+// ============ Declarations ============
+
+typedef enum {
+	functionDcl,
+	argumentDcl,
+	varibleDcl,
+} DclType;
+
+struct Dcl {
+	DclType type;
+	LLVMValueRef llvmValue;
+	union {
+		struct { char *name; Exp *type; Exp *value; } 									varible;
+		struct { Exp *type; char *name; } 												argument;
+		struct { char *name; Dcl *args; int argCount; Exp *returnType; Smt *body; } 	function;
+	};
+};
+
+Dcl *new_varible_dcl(ast_unit *ast, char *name, Exp *type, Exp *value);
+Dcl *new_argument_dcl(ast_unit *ast, Exp *type, char *name);
+Dcl *new_function_dcl(ast_unit *ast, char *name, Dcl *args, int argCount, Exp *returnType, Smt *body);
+
+// ============ Statements ============
+
+typedef enum {
+	declareSmt,
+	assignmentSmt,
+	returnSmt,
+	blockSmt,
+	ifSmt,
+	forSmt,
+} SmtType;
+
+struct Smt {
+	SmtType type;
+	union {
+		Dcl *													declare;
+		struct { Exp *left; Exp *right; } 						assignment;
+		struct { Exp *result; } 								ret;
+		struct { Smt *smts; int count; } 						block;
+		struct { Exp *cond; Smt *body; Smt *elses; } 			ifs;
+		struct { Dcl *index; Exp *cond; Smt *inc; Smt *body; } 	fors;
+	};
+};
+
+Smt *new_declare_smt(ast_unit *ast, Dcl *dcl);
+Smt *new_assignment_smt(ast_unit *ast, Exp *left, Exp *right);
+Smt *new_binary_assignment_smt(ast_unit *ast, Exp *left, TokenType op, Exp *right);
+Smt *new_ret_smt(ast_unit *ast, Exp *result);
+Smt *new_block_smt(ast_unit *ast, Smt *smts, int smtCount);
+Smt *new_if_smt(ast_unit *ast, Exp *cond, Smt *body, Smt *elses);
+Smt *new_for_smt(ast_unit *ast, Dcl *index, Exp *cond, Smt *inc, Smt *body);
+
+// ============ Expressions ============
 
 typedef enum {
 	identExp,
@@ -65,7 +119,7 @@ typedef enum {
 	procTypeExp, // TODO: add this
 } ExpType;
 
-struct _Exp {
+struct Exp {
 	ExpType type;
 	union {
 		struct { char *name; Object *obj; } 				ident;
@@ -103,76 +157,3 @@ Exp *new_array_exp(ast_unit *ast, Exp *values, int valueCount);
 Exp *new_array_type_exp(ast_unit *ast, Exp *type, Exp *length);
 Exp *new_feild_type_exp(ast_unit *ast, Exp *type, Exp *name);
 Exp *new_struct_type_exp(ast_unit *ast, Exp *fields, int count);
-
-// Exp *new_int_literal_exp(char *n);
-
-typedef enum {
-	functionDcl,
-	argumentDcl,
-	varibleDcl,
-} DclType;
-
-struct _Dcl {
-	DclType type;
-	LLVMValueRef llvmValue;
-	union {
-		// functionDcl
-		struct {
-			char *name;
-			struct _Dcl *args;
-			int argCount;
-			Exp *returnType;
-			struct _Smt *body;
-		} function;
-
-		// argumentDcl
-		struct {
-			Exp *type;
-			char *name; 
-		} argument;
-
-		// varibleDcl
-		struct {
-			char *name;
-			Exp *type;
-			Exp *value;
-		} varible;
-	};
-};
-
-typedef struct _Dcl Dcl;
-
-Dcl *newArgumentDcl(Exp *type, char *name);
-Dcl *newVaribleDcl(char *name, Exp *type, Exp *value);
-Dcl *newFunctionDcl(char *name, Dcl *args, int argCount, Exp *returnType, Smt *body);
-
-typedef enum {
-	declareSmt,
-	assignmentSmt,
-	returnSmt,
-	blockSmt,
-	ifSmt,
-	forSmt,
-} SmtType;
-
-struct _Smt {
-	SmtType type;
-	union {
-		Dcl *													declare;
-		struct { Exp *left; Exp *right; } 						assignment;
-		struct { Exp *result; } 								ret;
-		struct { Smt *smts; int count; } 						block;
-		struct { Exp *cond; Smt *body; Smt *elses; } 			ifs;
-		struct { Dcl *index; Exp *cond; Smt *inc; Smt *body; } 	fors;
-	};
-};
-
-typedef struct _Smt Smt;
-
-Smt *new_declare_smt(ast_unit *ast, Dcl *dcl);
-Smt *new_assignment_smt(ast_unit *ast, Exp *left, Exp *right);
-Smt *new_binary_assignment_smt(ast_unit *ast, Exp *left, TokenType op, Exp *right);
-Smt *new_ret_smt(ast_unit *ast, Exp *result);
-Smt *new_block_smt(ast_unit *ast, Smt *smts, int smtCount);
-Smt *new_if_smt(ast_unit *ast, Exp *cond, Smt *body, Smt *elses);
-Smt *new_for_smt(ast_unit *ast, Dcl *index, Exp *cond, Smt *inc, Smt *body);

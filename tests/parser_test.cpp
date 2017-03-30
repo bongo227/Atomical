@@ -19,7 +19,7 @@ TEST(ParserTest, ScopeInsert) {
     Object *obj = (Object *)malloc(sizeof(Object));
     obj->type = badObj;
     obj->name = (char *)"test";
-    obj->node = newArgumentDcl(NULL, (char *)"test_name");
+    obj->node = new_argument_dcl(p->ast, NULL, (char *)"test_name");
     bool inserted = parser_insert_scope(p, (char *)"test", obj);
     ASSERT_TRUE(inserted);
 

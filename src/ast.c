@@ -259,8 +259,8 @@ Smt *new_for_smt(ast_unit *ast, Dcl *index, Exp *cond, Smt *inc, Smt *body) {
 	return s;
 }
 
-Dcl *newVaribleDcl(char *name, Exp *type, Exp *value) {
-	Dcl *d = malloc(sizeof(Dcl));
+Dcl *new_varible_dcl(ast_unit *ast, char *name, Exp *type, Exp *value) {
+	Dcl *d = pool_get(ast->dcl_pool);
 	d->type = varibleDcl;
 	d->varible.name = name;
 	d->varible.type = type;
@@ -269,10 +269,8 @@ Dcl *newVaribleDcl(char *name, Exp *type, Exp *value) {
 	return d;
 }
 
-
-
-Dcl *newArgumentDcl(Exp *type, char *name) {
-	Dcl *d = malloc(sizeof(Dcl));
+Dcl *new_argument_dcl(ast_unit *ast, Exp *type, char *name) {
+	Dcl *d = pool_get(ast->dcl_pool);
 	d->type = argumentDcl;
 	d->argument.type = type;
 	d->argument.name = name;
@@ -280,8 +278,8 @@ Dcl *newArgumentDcl(Exp *type, char *name) {
 	return d;
 }
 
-Dcl *newFunctionDcl(char *name, Dcl *args, int argCount, Exp *returnType, Smt *body) {
-	Dcl *d = malloc(sizeof(Dcl));
+Dcl *new_function_dcl(ast_unit *ast, char *name, Dcl *args, int argCount, Exp *returnType, Smt *body) {
+	Dcl *d = pool_get(ast->dcl_pool);
 	d->type = functionDcl;
 	d->function.name = name;
 	d->function.args = args;

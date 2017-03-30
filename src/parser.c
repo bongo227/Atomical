@@ -182,7 +182,7 @@ Dcl *parse_function_dcl(parser *p) {
 		// Construct argument
 		Exp *type = parse_type(p); // arg type
 		char *name = parser_expect(p, IDENT)->value; // arg name
-		Dcl *arg = newArgumentDcl(type, name);
+		Dcl *arg = new_argument_dcl(p->ast, type, name);
 		void *dest = memcpy(args + argCount - 1, arg, sizeof(Dcl));
 		
 	}
@@ -201,7 +201,7 @@ Dcl *parse_function_dcl(parser *p) {
 	Exp *returnType = parse_type(p);
 
 	// insert function into scope
-	Dcl* function = newFunctionDcl(name, args, argCount, returnType, NULL);
+	Dcl* function = new_function_dcl(p->ast, name, args, argCount, returnType, NULL);
 	Object *obj = (Object *)malloc(sizeof(Object));
 	obj->name = name;
 	obj->node = function;
@@ -234,7 +234,7 @@ Dcl *parse_variable_dcl(parser *p) {
 		value = parse_expression(p, 0);
 	}
 
-	Dcl *dcl = newVaribleDcl(name, type, value);
+	Dcl *dcl = new_varible_dcl(p->ast, name, type, value);
 
 	Object *obj = (Object *)malloc(sizeof(Object));
 	obj->name = name;
@@ -279,7 +279,7 @@ Smt *parse_statement(parser *p) {
 			assert(left->type == identExp);
 
 			char *name = left->ident.name;
-			smt = new_declare_smt(p->ast, newVaribleDcl(name, NULL, right));
+			smt = new_declare_smt(p->ast, new_varible_dcl(p->ast, name, NULL, right));
 			
 			// Added declaration to scope
 			Object *obj =(Object *)malloc(sizeof(Object));
