@@ -29,7 +29,7 @@ void *queue_enqueue(queue *q) {
 }
 
 void *queue_dequeue(queue *q) {
-    void *element = q->queue_memory + q->head_ptr * q->queue_size;
+    void *element = q->queue_memory + q->element_size * q->head_ptr;
     q->head_ptr++;
     return element;
 }

@@ -46,3 +46,18 @@ TEST(QueueTest, OverflowExtendQueue) {
     ASSERT_EQ(10, q->queue_capacity);
     ASSERT_EQ(6, q->queue_size); 
 }
+
+TEST(QueueTest, DequeueOrder) {
+    queue *q = new_queue(sizeof(int), 5);
+    for (int i = 0; i < 100; i++) {
+        int *value = (int *)queue_enqueue(q);
+        memcpy(value, &i, sizeof(int));
+    }
+
+    ASSERT_EQ(160, q->queue_capacity);
+    ASSERT_EQ(100, q->queue_size);
+    for(int i = 0; i < 100; i++) {
+        int *value = (int *)queue_dequeue(q);
+        ASSERT_EQ(i, *value);
+    }
+}
