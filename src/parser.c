@@ -114,6 +114,11 @@ Dcl *parse_declaration(parser *p) {
 	}
 }
 
+Dcl *parse_declaration_from_string(char *src) {
+	parser *p = new_parser(Lex(src));
+	return parse_declaration(p);
+}
+
 // parse_function_dcl parses a function decleration
 Dcl *parse_function_dcl(parser *p) {
 	parser_expect(p, PROC);
