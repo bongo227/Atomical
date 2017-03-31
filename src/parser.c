@@ -389,13 +389,16 @@ Smt *smtd(parser *p, Token *token) {
 		case IDENT: {
 			Exp *ident = parse_ident_exp(p);
 
+			Token one_token = {INT, 0, 0, "1"};
+			Exp *one_literal = new_literal_exp(p->ast, one_token);
+
 			switch(p->tokens->type) {
 				case INC:
 					p->tokens++;
-					return new_binary_assignment_smt(p->ast, ident, ADD_ASSIGN, newIntLiteral(p->ast, "1"));
+					return new_binary_assignment_smt(p->ast, ident, ADD_ASSIGN, one_literal);
 				case DEC:
 					p->tokens++;
-					return new_binary_assignment_smt(p->ast, ident, SUB_ASSIGN, newIntLiteral(p->ast, "1"));
+					return new_binary_assignment_smt(p->ast, ident, SUB_ASSIGN, one_literal);
 				default:
 					// expression is assigment or declaration so let caller handle it
 					p->tokens--; // go back to ident

@@ -1,10 +1,5 @@
 #include "includes/ast.h"
 
-// Exp *new_int_literal_exp(char *n) {
-// 	Token t = {INT, 0, 0, n};
-// 	return newLiteralExp(t);
-// }
-
 ast_unit *new_ast_unit() {
 	ast_unit *ast = malloc(sizeof(ast_unit));
 	ast->dcl_pool = new_pool(sizeof(Dcl), 128);
@@ -159,12 +154,6 @@ Exp *new_struct_type_exp(ast_unit *ast, Exp *fields, int count) {
 	e->structType.feildCount = count;
 
 	return e;
-}
-
-// TODO: consider remove this
-Exp *newIntLiteral(ast_unit *ast, char *value) {
-	Token t = {INT, 0, 0, value};
-	return new_literal_exp(ast, t);
 }
 
 Smt *new_declare_smt(ast_unit *ast, Dcl *dcl) {
