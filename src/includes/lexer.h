@@ -107,3 +107,4 @@ typedef struct {
 Token *Lex(char *source);
 char *TokenName(TokenType type);
 char *GetLine(char *src, int line);
+int get_binding_power(TokenType type);

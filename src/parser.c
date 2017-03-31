@@ -82,58 +82,6 @@ Object *parser_find_scope(parser *p, char *name) {
 	return NULL;
 }
 
-// get_binding_power returns the left binding power of a token
-int get_binding_power(TokenType type) {
-	switch (type) {
-	case END:
-		return -10;
-	// Non-binding operators
-	case SEMI:
-		return 0;
-	// Assignment operators
-	case ASSIGN:
-	case ADD_ASSIGN:
-	case SUB_ASSIGN:
-	case MUL_ASSIGN:
-	case REM_ASSIGN:
-	case OR_ASSIGN:
-	case SHR_ASSIGN:
-	case DEFINE:
-		return 10;
-	// Logical operators
-	case LAND:
-	case LOR:
-		return 20;
-	// Equality operators
-	case EQL:
-	case NEQ:
-	case LSS:
-	case GTR:
-	case LEQ:
-	case GEQ:
-		return 30;
-	// Math operators
-	case ADD:
-	case SUB:
-		return 40;
-	case MUL:
-	case QUO:
-	case REM:
-		return 50;
-	// Special unary
-	case NOT:
-		return 60;
-	// Strongly bound
-	case PERIOD:
-	case LBRACK:
-	case LPAREN:
-		return 70;
-	// Unknow token
-	default:
-		return 0;
-	}
-}
-
 // parser_next moves the parser onto the next token
 void parser_next(parser *p) {
 	p->tokens++;
@@ -296,8 +244,15 @@ Smt *parse_statement(parser *p) {
 	// If statment is null, the next tokens dont start a valid statement
 	assert(smt != NULL);
 
-	// TODO: free exp
+	// Release the converted expression back into the pool
+	pool_release(p->ast->exp_pool, exp);
+	
 	return smt;
+}
+
+Smt *parse_statement_from_string(char *src) {
+	parser *p = new_parser(Lex(src));
+    return parse_statement(p);
 }
 
 // smtd parser the current token in the context of the start of a statement
@@ -387,13 +342,16 @@ Smt *smtd(parser *p, Token *token) {
 		case IDENT: {
 			Exp *ident = parse_ident_exp(p);
 
+			Token one_token = {INT, 0, 0, "1"};
+			Exp *one_literal = new_literal_exp(p->ast, one_token);
+
 			switch(p->tokens->type) {
 				case INC:
 					p->tokens++;
-					return new_binary_assignment_smt(p->ast, ident, ADD_ASSIGN, newIntLiteral(p->ast, "1"));
+					return new_binary_assignment_smt(p->ast, ident, ADD_ASSIGN, one_literal);
 				case DEC:
 					p->tokens++;
-					return new_binary_assignment_smt(p->ast, ident, SUB_ASSIGN, newIntLiteral(p->ast, "1"));
+					return new_binary_assignment_smt(p->ast, ident, SUB_ASSIGN, one_literal);
 				default:
 					// expression is assigment or declaration so let caller handle it
 					p->tokens--; // go back to ident
@@ -420,6 +378,11 @@ Exp *parse_expression(parser *p, int rbp) {
 		left = led(p, t, left);
 	}
 	return left;
+}
+
+Exp *parse_expression_from_string(char *src) {
+	parser *p = new_parser(Lex(src));
+	return parse_expression(p, 0); 
 }
 
 // nud parses the current token in a prefix context (at the start of an (sub)expression)

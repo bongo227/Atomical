@@ -56,9 +56,7 @@ TEST(ParserTest, ScopeFind) {
 }
 
 TEST(ParserTest, ParseLiteralExpression) {
-    const char *src = "123";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"123");
 
     ASSERT_FALSE(exp == NULL);
     ASSERT_EQ((int)literalExp, (int)exp->type);
@@ -66,35 +64,27 @@ TEST(ParserTest, ParseLiteralExpression) {
 }
 
 TEST(ParserTest, ParseIdentExpression) {
-    const char *src = "test";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"test");
 
     ASSERT_EQ((int)identExp, (int)exp->type);
     ASSERT_STREQ("test", exp->ident.name);
 }
 
 TEST(ParserTest, ParseIdentExpressionWithNumber) {
-    const char *src = "test123";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"test123");
 
     ASSERT_EQ((int)identExp, (int)exp->type);
     ASSERT_STREQ("test123", exp->ident.name);
 }
 
 TEST(ParserTest, ParseBinaryExpression) {
-    const char *src = "a + b";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"a + b");
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseBidmasBinaryExpression) {
-    const char *src = "a + b * c";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"a + b * c");
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
     ASSERT_EQ((int)ADD, (int)exp->binary.op.type);
@@ -102,9 +92,7 @@ TEST(ParserTest, ParseBidmasBinaryExpression) {
 }
 
 TEST(ParserTest, ParseSelectorExpression) {
-    const char *src = "a.b";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"a.b");
 
     ASSERT_EQ((int)selectorExp, (int)exp->type);
     ASSERT_STREQ((char *)"a", exp->selector.exp->ident.name);
@@ -112,9 +100,7 @@ TEST(ParserTest, ParseSelectorExpression) {
 }
 
 TEST(ParserTest, ParseDoubleSelectorExpression) {
-    const char *src = "a.b.c";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"a.b.c");
 
     ASSERT_EQ((int)selectorExp, (int)exp->type);
     ASSERT_EQ((int)selectorExp, (int)exp->selector.exp->type);
@@ -124,50 +110,38 @@ TEST(ParserTest, ParseDoubleSelectorExpression) {
 }
 
 TEST(ParserTest, ParseIndexExpression) {
-    const char *src = "test[1]";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"test[1]");
 
     ASSERT_EQ((int)indexExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseRightAssociativeBinaryOperators) {
-    const char *src = "a || b || c";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"a || b || c");
 
     ASSERT_EQ((int)binaryExp, (int)exp->type);
     ASSERT_EQ((int)binaryExp, (int)exp->binary.right->type);
 }
 
 TEST(ParserTest, ParseUnaryExpression) {
-    const char *src = "!a";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"!a");
     
     ASSERT_EQ((int)unaryExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseUnaryMinuxExpression) {
-    const char *src = "-a";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"-a");
 
     ASSERT_EQ((int)unaryExp, (int)exp->type);
 }
 
 TEST(ParserTest, ParseAssignmentOperator) {
-    const char *src = "a = b";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"a = b");
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
 }
 
 TEST(ParserTest, ParseAddAssigmentOperator) {
-    const char *src = "a += b";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"a += b");
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
     ASSERT_EQ((int)binaryExp, (int)smt->assignment.right->type);
@@ -177,17 +151,13 @@ TEST(ParserTest, ParseAddAssigmentOperator) {
 }
 
 TEST(ParserTest, ParseReturnStatment) {
-    const char *src = "return a";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"return a");
 
     ASSERT_EQ((int)returnSmt, (int)smt->type);
 }
 
 TEST(ParserTest, ParseBlockStatment) {
-    const char *src = "{\nreturn test\n}";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"{\nreturn test\n}");
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
     ASSERT_EQ(1, smt->block.count);
@@ -195,9 +165,7 @@ TEST(ParserTest, ParseBlockStatment) {
 }
 
 TEST(ParserTest, ParserBlockSingleLine) {
-    const char *src = "{ return test }";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"{ return test }");
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
     ASSERT_EQ(1, smt->block.count);
@@ -205,18 +173,14 @@ TEST(ParserTest, ParserBlockSingleLine) {
 }
 
 TEST(ParserTest, ParserLongBlockSingleLine) {
-    const char *src = "{ a = 1; b = 2; return test }";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"{ a = 1; b = 2; return test }");
 
     ASSERT_EQ((int)blockSmt, (int)smt->type);
     ASSERT_EQ(3, smt->block.count);
 }
 
 TEST(ParserTest, ParseIfStatment) {
-    const char *src = "if true {\nreturn false\n}";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"if true {\nreturn false\n}");
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
     ASSERT_EQ((int)identExp, (int)smt->ifs.cond->type);
@@ -225,9 +189,7 @@ TEST(ParserTest, ParseIfStatment) {
 }
 
 TEST(ParserTest, ParseIfElseStatement) {
-    const char *src = "if true { return 123 } else { return 321 }";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"if true { return 123 } else { return 321 }");
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
     ASSERT_EQ((int)identExp, (int)smt->ifs.cond->type);
@@ -242,9 +204,7 @@ TEST(ParserTest, ParseIfElseStatement) {
 }
 
 TEST(ParserTest, ParseIfElseIfElseStatment) {
-    const char *src = "if false { return 321 } else if true { return 123 } else { return 0 }";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"if false { return 321 } else if true { return 123 } else { return 0 }");
 
     ASSERT_EQ((int)ifSmt, (int)smt->type);
     ASSERT_EQ((int)identExp, (int)smt->ifs.cond->type);
@@ -265,8 +225,7 @@ TEST(ParserTest, ParseIfElseIfElseStatment) {
 }
 
 TEST(ParserTest, ParserShortVaribleDeclare) {
-    const char *src = "a := 10";
-    parser *p = new_parser(Lex((char *)src));
+    parser *p = new_parser(Lex((char *)"a := 10"));
     Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
@@ -277,8 +236,7 @@ TEST(ParserTest, ParserShortVaribleDeclare) {
 }
 
 TEST(ParserTest, ParseLongVaribleDeclare) {
-    const char *src = "var int a = 10";
-    parser *p = new_parser(Lex((char *)src));
+    parser *p = new_parser(Lex((char *)"var int a = 10"));
     Smt *smt = parse_statement(p);
 
     ASSERT_EQ((int)declareSmt, (int)smt->type);
@@ -303,7 +261,7 @@ TEST(ParserTest, ParseArrayType) {
 TEST(ParserTest, ParseFunctionDefinition) {
     const char *src = "proc test :: int a, int b -> int {\nreturn a + b\n}";
     parser *p = new_parser(Lex((char *)src));
-    Dcl *dcl = parse_function_dcl(p);
+    Dcl *dcl = parse_declaration(p);
 
     ASSERT_EQ((int)functionDcl, (int)dcl->type);
     ASSERT_EQ(2, (int)dcl->function.argCount);
@@ -320,19 +278,15 @@ TEST(ParserTest, ParseFunctionDefinition) {
 }
 
 TEST(ParserTest, ParseEmptyCallExpression) {
-    const char *src = "test()";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
-
+    Exp *exp = parse_expression_from_string((char *)"test()");
+    
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(0, exp->call.argCount);
 }
 
 TEST(ParserTest, ParseCallExpression) {
-    const char *src = "test(1, test)";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
-
+    Exp *exp = parse_expression_from_string((char *)"test(1, test)");
+    
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(2, exp->call.argCount);
 
@@ -340,18 +294,14 @@ TEST(ParserTest, ParseCallExpression) {
 }
 
 TEST(ParserTest, ParseCallInCallExpression) {
-    const char *src = "test(test())";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
-
+    Exp *exp = parse_expression_from_string((char *)"test(test())");
+    
     ASSERT_EQ((int)callExp, (int)exp->type);
     ASSERT_EQ(1, exp->call.argCount);
 }
 
 TEST(ParserTest, ParseForLoop) {
-    const char *src = "for i := 0; i < 10; i += 1 {}";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"for i := 0; i < 10; i += 1 {}");
 
     ASSERT_EQ((int)forSmt, (int)smt->type);
     ASSERT_EQ((int)varibleDcl, (int)smt->fors.index->type);
@@ -361,17 +311,13 @@ TEST(ParserTest, ParseForLoop) {
 }
 
 TEST(ParserTest, ParseIncrement) {
-    const char *src = "i++";
-    parser *p = new_parser(Lex((char *)src));
-    Smt *smt = parse_statement(p);
+    Smt *smt = parse_statement_from_string((char *)"i++");
 
     ASSERT_EQ((int)assignmentSmt, (int)smt->type);
 }
 
 TEST(ParserTest, ParseKeyValueList) {
-    const char *src = "{a: 1, b: 2}";
-    parser *p = new_parser(Lex((char *)src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"{a: 1, b: 2}");
 
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(2, exp->keyValueList.keyCount);
@@ -380,29 +326,21 @@ TEST(ParserTest, ParseKeyValueList) {
 }
 
 TEST(ParserTest, ParseEmptyKeyValueList) {
-    char *src = (char *)"{}";
-    parser *p = new_parser(Lex(src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"{}");
     
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(0, exp->keyValueList.keyCount);
 }
 
-// TODO: create a parse_expression which takes in a src so we can make
-// these 3 lines into 1.
-TEST(ParserTest, ParseNullKeyValueList) {
-    char *src = (char *)"{1, 2, 3}";
-    parser *p = new_parser(Lex(src));
-    Exp *exp = parse_expression(p, 0);
+TEST(ParserTest, ParseNullKeyValueList) {   
+    Exp *exp = parse_expression_from_string((char *)"{1, 2, 3}");
     
     ASSERT_EQ((int)keyValueListExp, (int)exp->type);
     ASSERT_EQ(3, exp->keyValueList.keyCount);
 }
 
 TEST(ParserTest, ParseArrayExpression) {
-    char *src = (char *)"[1, 2, 3]";
-    parser *p = new_parser(Lex(src));
-    Exp *exp = parse_expression(p, 0);
+    Exp *exp = parse_expression_from_string((char *)"[1, 2, 3]");
 
     ASSERT_EQ((int)arrayExp, (int)exp->type);
     ASSERT_EQ(3, exp->array.valueCount);

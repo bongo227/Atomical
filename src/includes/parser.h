@@ -1,7 +1,8 @@
 #pragma once
 
-#include "all.h"
 #include "uthash.h"
+#include "all.h"
+#include "pool.h"
 
 typedef struct {
 	char *name;
@@ -32,8 +33,6 @@ void parser_exit_scope(parser *parser);
 bool parser_insert_scope(parser *parser, char *name, Object *object);
 Object *parser_find_scope(parser *parser, char *name);
 
-int get_binding_power(TokenType type); // TODO: move this somewhere approprite
-
 // Helpers
 void parser_next(parser *parser);
 Token *parser_expect(parser *parser, TokenType type);
@@ -46,10 +45,12 @@ Dcl *parse_variable_dcl(parser *parser);
 
 // Statements
 Smt *parse_statement(parser *parser);
+Smt *parse_statement_from_string(char *src);
 Smt *smtd(parser *p, Token *token);
 
 // Expressions
 Exp *parse_expression(parser *parser, int rbp);
+Exp *parse_expression_from_string(char *src);
 Exp *nud(parser *parser, Token *token);
 Exp *led(parser *parser, Token *token, Exp *exp);
 Exp *parse_key_value_exp(parser *parser);

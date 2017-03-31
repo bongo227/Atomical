@@ -393,7 +393,7 @@ LLVMValueRef CompileLiteralExp(Irgen *irgen, Exp *e) {
         case OCTAL:
             return LLVMConstIntOfString(LLVMInt64Type(), e->literal.value, 8);
         case STRING:
-            ASSERT(false, "TODO: implement strings");
+            ASSERT(false, "Strings not implemented yet");
         default:
             ASSERT(false, "Unexpected literal type");
     }
