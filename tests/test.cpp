@@ -11,6 +11,7 @@ extern "C" {
     #include "../src/includes/parser.h"
     #include "../src/includes/irgen.h"
     #include "../src/includes/pool.h"
+    #include "../src/includes/queue.h"
 }
 
 // test files
@@ -18,6 +19,7 @@ extern "C" {
 #include "parser_test.cpp"
 #include "irgen_test.cpp"
 #include "pool_test.cpp"
+#include "queue_test.cpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
