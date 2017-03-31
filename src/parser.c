@@ -250,6 +250,11 @@ Smt *parse_statement(parser *p) {
 	return smt;
 }
 
+Smt *parse_statement_from_string(char *src) {
+	parser *p = new_parser(Lex(src));
+    return parse_statement(p);
+}
+
 // smtd parser the current token in the context of the start of a statement
 Smt *smtd(parser *p, Token *token) {
 	switch(token->type) {
@@ -373,6 +378,11 @@ Exp *parse_expression(parser *p, int rbp) {
 		left = led(p, t, left);
 	}
 	return left;
+}
+
+Exp *parse_expression_from_string(char *src) {
+	parser *p = new_parser(Lex(src));
+	return parse_expression(p, 0); 
 }
 
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
