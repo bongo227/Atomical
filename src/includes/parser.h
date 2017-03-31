@@ -72,6 +72,7 @@ Dcl *parse_variable_dcl(parser *parser);
 // Statements
 Smt *parse_statement(parser *parser);
 Smt *parse_statement_from_string(char *src);
+Smt *parse_block_smt(parser *p);
 Smt *smtd(parser *p, Token *token);
 
 // Expressions

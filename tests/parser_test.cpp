@@ -358,3 +358,70 @@ TEST(ParserTest, ParseFunctionDclWithoutProc) {
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(PROC, error->expect_token.type);
 }
+
+TEST(ParserTest, ParseFunctionDclWithoutName) {
+    parser *p = new_parser(Lex((char *)"proc :: -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, p->error_queue->queue_size);
+    
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(IDENT, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutArgumentSeperator) {
+    parser *p = new_parser(Lex((char *)"proc add -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_NE(NULL, dcl);
+    ASSERT_EQ(1, p->error_queue->queue_size);
+    
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(DOUBLE_COLON, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutCommas) {
+    parser *p = new_parser(Lex((char *)"proc add :: int a int b int c -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_NE(NULL, dcl);
+    ASSERT_EQ(2, p->error_queue->queue_size);
+    
+    for (int i = 0; i < 2; i++) {
+        parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+        ASSERT_EQ(parser_error_expect_token, error->type);
+        ASSERT_EQ(1, error->length);
+        ASSERT_EQ(COMMA, error->expect_token.type);
+    }
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutArgTypeOrName) {
+    parser *p = new_parser(Lex((char *)"proc add :: int, int a -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, p->error_queue->queue_size);
+    
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(IDENT, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutArrow) {
+    parser *p = new_parser(Lex((char *)"proc add :: int a {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, p->error_queue->queue_size);
+    
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(ARROW, error->expect_token.type);
+}

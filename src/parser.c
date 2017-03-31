@@ -148,7 +148,6 @@ Dcl *parse_function_dcl(parser *p) {
 	// Parse proc
 	Token *proc = parser_expect(p, PROC);
 	if (proc == NULL) {
-		// Continue from end of function
 		parser_skip_next_block(p);
 		return NULL;
 	}
@@ -156,7 +155,6 @@ Dcl *parse_function_dcl(parser *p) {
 	// Parse function name
 	Token *ident = parser_expect(p, IDENT);
 	if (ident == NULL) {
-		// Continue from end of function
 		parser_skip_next_block(p);
 		return NULL;
 	}
@@ -164,20 +162,48 @@ Dcl *parse_function_dcl(parser *p) {
 	
 	// Parse argument seperator
 	parser_expect(p, DOUBLE_COLON);
+	// missing double colon is not fatel so countinue
 
 	// Parse arguments
 	Dcl *args = (Dcl *)malloc(0);
 	int argCount = 0;
-	while(p->tokens->type != ARROW) {
+	while(p->tokens->type != ARROW && p->tokens->type != LBRACE) {
 		if (argCount > 0) parser_expect(p, COMMA);
+		// missing comma not fatel
+
 		args = realloc(args, sizeof(Dcl) * ++argCount);
 
 		// Construct argument
 		Exp *type = parse_type(p); // arg type
-		char *name = parser_expect(p, IDENT)->value; // arg name
+		if (type == NULL) {
+			parser_skip_next_block(p);
+			return NULL;
+		}
+
+		// arg name
+		Token *name_token = parser_expect(p, IDENT); 
+		if (name_token == NULL) {
+			parser_skip_next_block(p);
+			return NULL;
+		}
+		char *name = name_token->value; 
+
+		// add argument to list
 		Dcl *arg = new_argument_dcl(p->ast, type, name);
 		void *dest = memcpy(args + argCount - 1, arg, sizeof(Dcl));
-		
+	}
+	
+	Token *arrow = parser_expect(p, ARROW);
+	if (arrow == NULL) {
+		// arrow fatel since we dont know the return type
+		parser_skip_next_block(p);
+		return NULL;
+	}
+
+	Exp *return_type = parse_type(p);
+	if (return_type == NULL) {
+		parser_skip_next_block(p);
+		return NULL;
 	}
 
 	// insert arguments into scope
@@ -189,12 +215,9 @@ Dcl *parse_function_dcl(parser *p) {
 		obj->type = argObj;
 		parser_insert_scope(p, obj->name, obj);
 	}
-	
-	parser_expect(p, ARROW);
-	Exp *returnType = parse_type(p);
 
 	// insert function into scope
-	Dcl* function = new_function_dcl(p->ast, name, args, argCount, returnType, NULL);
+	Dcl* function = new_function_dcl(p->ast, name, args, argCount, return_type, NULL);
 	Object *obj = (Object *)malloc(sizeof(Object));
 	obj->name = name;
 	obj->node = function;
@@ -202,7 +225,7 @@ Dcl *parse_function_dcl(parser *p) {
 	parser_insert_scope(p, name, obj);
 	
 	// parse body
-	Smt *body = parse_statement(p);
+	Smt *body = parse_block_smt(p);
 	function->function.body = body;
 
 	if(p->tokens->type == SEMI) p->tokens++;
@@ -300,6 +323,29 @@ Smt *parse_statement_from_string(char *src) {
     return parse_statement(p);
 }
 
+Smt *parse_block_smt(parser *p) {
+	parser_expect(p, LBRACE);
+	parser_enter_scope(p);
+
+	// build list of statements
+	int smtCount = 0;
+	Smt *smts = (Smt *)malloc(sizeof(Smt) * 1024);
+	Smt *smtsPrt = smts;
+	while(p->tokens->type != RBRACE) {
+		smtCount++;
+		memcpy(smtsPrt, parse_statement(p), sizeof(Smt));
+		if(p->tokens->type != RBRACE) parser_expect_semi(p);
+		smtsPrt++;
+	}
+	smts = realloc(smts, sizeof(Smt) * smtCount);
+
+	parser_expect(p, RBRACE);
+	parser_exit_scope(p);
+
+	Smt *s = new_block_smt(p->ast, smts, smtCount);
+	return s;
+}
+
 // smtd parser the current token in the context of the start of a statement
 Smt *smtd(parser *p, Token *token) {
 	switch(token->type) {
@@ -310,30 +356,9 @@ Smt *smtd(parser *p, Token *token) {
 			return s; 
 		}
 		// block statement
-		case LBRACE: {
-			p->tokens++;
-			
-			parser_enter_scope(p);
-
-			int smtCount = 0;
-			Smt *smts = (Smt *)malloc(sizeof(Smt) * 1024);
-			Smt *smtsPrt = smts;
-			while(p->tokens->type != RBRACE) {
-				smtCount++;
-				memcpy(smtsPrt, parse_statement(p), sizeof(Smt));
-				if(p->tokens->type != RBRACE) parser_expect_semi(p);
-				smtsPrt++;
-			}
-			smts = realloc(smts, sizeof(Smt) * smtCount);
-
-			Smt *s = new_block_smt(p->ast, smts, smtCount);
-
-			parser_expect(p, RBRACE);
-
-			parser_exit_scope(p);
-
-			return s;
-		}
+		case LBRACE:
+			return parse_block_smt(p);
+		
 		// if statement
 		case IF: {
 			p->tokens++;
@@ -608,13 +633,22 @@ Exp *parse_type(parser *p) {
 }
 
 Exp *parse_ident_exp_from_token(parser *p, Token *token) {
-	assert(token->type == IDENT);
-	
+	if(token->type != IDENT){
+		// Add error to queue
+		parser_error *error = queue_enqueue(p->error_queue);
+		error->type = parser_error_expect_token;
+		error->start = p->tokens;
+		error->length = 1;
+		error->expect_token.type = IDENT;
+		
+		return NULL;
+	}
+
 	char *name = token->value;
 	Exp *ident = new_ident_exp(p->ast, name);
-	
 	Object *obj = parser_find_scope(p, name);
 	ident->ident.obj = obj;
+	
 	return ident;
 }
 
