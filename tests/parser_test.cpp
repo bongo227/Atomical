@@ -332,8 +332,6 @@ TEST(ParserTest, ParseEmptyKeyValueList) {
     ASSERT_EQ(0, exp->keyValueList.keyCount);
 }
 
-// TODO: create a parse_expression which takes in a src so we can make
-// these 3 lines into 1.
 TEST(ParserTest, ParseNullKeyValueList) {   
     Exp *exp = parse_expression_from_string((char *)"{1, 2, 3}");
     
