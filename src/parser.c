@@ -82,58 +82,6 @@ Object *parser_find_scope(parser *p, char *name) {
 	return NULL;
 }
 
-// get_binding_power returns the left binding power of a token
-int get_binding_power(TokenType type) {
-	switch (type) {
-	case END:
-		return -10;
-	// Non-binding operators
-	case SEMI:
-		return 0;
-	// Assignment operators
-	case ASSIGN:
-	case ADD_ASSIGN:
-	case SUB_ASSIGN:
-	case MUL_ASSIGN:
-	case REM_ASSIGN:
-	case OR_ASSIGN:
-	case SHR_ASSIGN:
-	case DEFINE:
-		return 10;
-	// Logical operators
-	case LAND:
-	case LOR:
-		return 20;
-	// Equality operators
-	case EQL:
-	case NEQ:
-	case LSS:
-	case GTR:
-	case LEQ:
-	case GEQ:
-		return 30;
-	// Math operators
-	case ADD:
-	case SUB:
-		return 40;
-	case MUL:
-	case QUO:
-	case REM:
-		return 50;
-	// Special unary
-	case NOT:
-		return 60;
-	// Strongly bound
-	case PERIOD:
-	case LBRACK:
-	case LPAREN:
-		return 70;
-	// Unknow token
-	default:
-		return 0;
-	}
-}
-
 // parser_next moves the parser onto the next token
 void parser_next(parser *p) {
 	p->tokens++;

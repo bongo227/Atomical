@@ -116,7 +116,6 @@ typedef enum {
 	arrayTypeExp,
 	fieldTypeExp,
 	structTypeExp,
-	procTypeExp, // TODO: add this
 } ExpType;
 
 struct Exp {

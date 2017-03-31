@@ -33,8 +33,6 @@ void parser_exit_scope(parser *parser);
 bool parser_insert_scope(parser *parser, char *name, Object *object);
 Object *parser_find_scope(parser *parser, char *name);
 
-int get_binding_power(TokenType type); // TODO: move this somewhere approprite
-
 // Helpers
 void parser_next(parser *parser);
 Token *parser_expect(parser *parser, TokenType type);
