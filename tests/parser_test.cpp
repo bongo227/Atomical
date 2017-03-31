@@ -345,3 +345,16 @@ TEST(ParserTest, ParseArrayExpression) {
     ASSERT_EQ((int)arrayExp, (int)exp->type);
     ASSERT_EQ(3, exp->array.valueCount);
 }
+
+TEST(ParserTest, ParseFunctionDclWithoutProc) {
+    parser *p = new_parser(Lex((char *)"add :: -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, p->error_queue->queue_size);
+    
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(PROC, error->expect_token.type);
+}

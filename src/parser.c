@@ -6,6 +6,7 @@ parser *new_parser(Token *tokens) {
 	p->tokens = tokens;
 	p->scope = parser_new_scope(NULL);
 	p->ast = new_ast_unit();
+	p->error_queue = new_queue(sizeof(parser_error), ERROR_QUEUE_SIZE);
 	return p;
 }
 
@@ -90,9 +91,19 @@ void parser_next(parser *p) {
 // expect asserts that the token is of type type, if true parser advances
 Token *parser_expect(parser *p, TokenType type) {
 	Token *token = p->tokens;
-	assert(token->type == type);
-	parser_next(p);
-	return token;
+	if(token->type == type) {
+		parser_next(p);
+		return token;
+	} else {
+		// Add error to queue
+		parser_error *error = queue_enqueue(p->error_queue);
+		error->type = parser_error_expect_token;
+		error->start = p->tokens;
+		error->length = 1;
+		error->expect_token.type = type;
+
+		return NULL;
+	}
 }
 
 // parser_expect_semi expects a semicolon
@@ -119,13 +130,42 @@ Dcl *parse_declaration_from_string(char *src) {
 	return parse_declaration(p);
 }
 
+void parser_skip_next_block(parser *p) {
+		// Move to start of block
+		while(p->tokens->type != LBRACE) p->tokens++;
+		
+		// Skip over block (and all sub blocks)
+		int depth = 0;
+		do {
+			if(p->tokens->type == LBRACE) depth++;
+			else if(p->tokens->type == RBRACE) depth--;
+			p->tokens++;
+		} while(depth > 0);
+}
+
 // parse_function_dcl parses a function decleration
 Dcl *parse_function_dcl(parser *p) {
-	parser_expect(p, PROC);
-	char *name = parser_expect(p, IDENT)->value; // function name
+	// Parse proc
+	Token *proc = parser_expect(p, PROC);
+	if (proc == NULL) {
+		// Continue from end of function
+		parser_skip_next_block(p);
+		return NULL;
+	}
+
+	// Parse function name
+	Token *ident = parser_expect(p, IDENT);
+	if (ident == NULL) {
+		// Continue from end of function
+		parser_skip_next_block(p);
+		return NULL;
+	}
+	char *name = ident->value; // function name
+	
+	// Parse argument seperator
 	parser_expect(p, DOUBLE_COLON);
 
-	// parse arguments
+	// Parse arguments
 	Dcl *args = (Dcl *)malloc(0);
 	int argCount = 0;
 	while(p->tokens->type != ARROW) {

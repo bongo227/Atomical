@@ -1,9 +1,12 @@
 #include "error.c"
 #include "lexer.c"
 #include "pool.c"
+#include "queue.c"
 #include "ast.c"
 #include "parser.c"
 #include "irgen.c"
+
+// TODO: link this against furlib
 
 int main() {
 	Error(

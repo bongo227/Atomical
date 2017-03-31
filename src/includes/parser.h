@@ -2,7 +2,10 @@
 
 #include "uthash.h"
 #include "all.h"
-#include "pool.h"
+#include "queue.h"
+
+#define ERROR_QUEUE_SIZE 10
+#define MAX_ERRORS 10
 
 typedef struct {
 	char *name;
@@ -20,7 +23,30 @@ typedef struct {
 	scope *scope;
     Token *tokens;
 	ast_unit *ast;
+	queue *error_queue;
 } parser;
+
+typedef enum {
+	parser_error_expect_token,
+	parser_error_expect_declaration,
+	parser_error_expect_statement,
+	parser_error_expect_expression,
+	parser_error_expect_block,
+	parser_error_expect_prefix,
+	parser_error_expect_infix,
+} parser_error_type;
+
+typedef struct {
+	parser_error_type type;
+	Token *start;
+	int length;
+
+	union {
+		struct {
+			TokenType type;
+		} expect_token;
+	};
+} parser_error;
 
 // Parser interface
 parser *new_parser(Token *tokens);
