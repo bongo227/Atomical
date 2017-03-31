@@ -296,7 +296,9 @@ Smt *parse_statement(parser *p) {
 	// If statment is null, the next tokens dont start a valid statement
 	assert(smt != NULL);
 
-	// TODO: free exp
+	// Release the converted expression back into the pool
+	pool_release(p->ast->exp_pool, exp);
+	
 	return smt;
 }
 
