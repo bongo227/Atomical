@@ -335,13 +335,12 @@ Smt *parse_statement(parser *p) {
 	// Statement is an assignment/declaration, so treat it like an expression
 	// and transform it.
 	Exp *exp = parse_expression(p, 0);
-	if(exp == NULL) {
-		queue_pop_back(p->error_queue); // remove expression error
+	if(exp == NULL || exp->type != binaryExp) {
+		// expected assigment/declation statement
+		if(exp == NULL) queue_pop_back(p->error_queue); // remove expression error
 		new_error(p, parser_error_expect_statement, 1);
-	}
-
-	// Expected assigment/declation statement
-	assert(exp->type == binaryExp); 
+		parser_skip_to_semi(p);
+	} 
 	
 	Exp *left = exp->binary.left;
 	Exp *right = exp->binary.right;
@@ -358,25 +357,35 @@ Smt *parse_statement(parser *p) {
 			smt = new_binary_assignment_smt(p->ast, left, op.type, right);
 			break;
 		case DEFINE:
-			assert(left->type == identExp);
-
+			// definition name
+			if(left->type != identExp) {
+				new_error_token(p, IDENT);
+				parser_skip_to_semi(p);
+				return NULL;
+			}
 			char *name = left->ident.name;
+
 			smt = new_declare_smt(p->ast, new_varible_dcl(p->ast, name, NULL, right));
-			
+	
 			// Added declaration to scope
 			Object *obj =(Object *)malloc(sizeof(Object));
 			obj->name = name;
 			obj->node = smt->declare;
 			obj->type = varObj;
 			parser_insert_scope(p, name, obj);
+	
 			break;
 		default:
 			// Expected an assignment operator
-			assert(false);
+			new_error(p, parser_error_expect_statement, 1);
+			parser_skip_to_semi(p);
 	}
 
 	// If statment is null, the next tokens dont start a valid statement
-	assert(smt != NULL);
+	if(smt == NULL) {
+		new_error(p, parser_error_expect_statement, 1);
+		parser_skip_to_semi(p);
+	}
 
 	// Release the converted expression back into the pool
 	pool_release(p->ast->exp_pool, exp);
@@ -430,8 +439,7 @@ Smt *smtd(parser *p, Token *token) {
 			p->tokens++;
 			
 			Exp *cond = parse_expression(p, 0);
-			Smt *block = parse_statement(p);
-			assert(block->type == blockSmt);
+			Smt *block = parse_block_smt(p);
 			Smt *elses = NULL;
 
 			// Check for elseif/else
@@ -453,8 +461,7 @@ Smt *smtd(parser *p, Token *token) {
 			p->tokens++;
 
 			// parse index
-			Dcl *index = parse_declaration(p);
-			assert(index->type == varibleDcl);
+			Dcl *index = parse_variable_dcl(p);
 			parser_expect_semi(p);
 
 			// parse condition
@@ -465,8 +472,7 @@ Smt *smtd(parser *p, Token *token) {
 			Smt *inc = parse_statement(p);
 			
 			// parse body
-			Smt *body = parse_statement(p);
-			assert(body->type == blockSmt);
+			Smt *body = parse_block_smt(p);
 
 			return new_for_smt(p->ast, index, cond, inc, body);
 		}
@@ -495,8 +501,7 @@ Smt *smtd(parser *p, Token *token) {
 			}
 		}
 		default:
-			// Expected a statement
-			assert(false);
+			return NULL;
 	}
 	return NULL;
 }
