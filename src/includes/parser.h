@@ -23,7 +23,7 @@ typedef struct {
 	scope *scope;
     Token *tokens;
 	ast_unit *ast;
-	queue *error_queue;
+	queue *error_queue; // this should be a list so we can remove errors from the end to add more context
 } parser;
 
 typedef enum {
@@ -65,6 +65,8 @@ Object *parser_find_scope(parser *parser, char *name);
 void parser_next(parser *parser);
 Token *parser_expect(parser *parser, TokenType type);
 void parser_expect_semi(parser *parser);
+parser_error *new_error(parser *p, parser_error_type type, int length);
+parser_error *new_error_token(parser *p, TokenType token_type);
 
 // Declarations
 Dcl *parse_declaration(parser *parser);

@@ -96,21 +96,34 @@ Token *parser_expect(parser *p, TokenType type) {
 		parser_next(p);
 		return token;
 	} else {
-		// Add error to queue
-		parser_error *error = queue_enqueue(p->error_queue);
-		error->type = parser_error_expect_token;
-		error->start = p->tokens;
-		error->length = 1;
-		error->expect_token.type = type;
-
+		new_error_token(p, type);
 		return NULL;
 	}
 }
 
 // parser_expect_semi expects a semicolon
 void parser_expect_semi(parser *p) {
-	assert(p->tokens->type == SEMI || p->tokens->type == END);
-	parser_next(p);
+	if(p->tokens->type == SEMI || p->tokens->type == END) {
+		parser_next(p);
+	} else {
+		new_error_token(p, SEMI);
+	}
+}
+
+// new_error added a new error to the queue
+parser_error *new_error(parser *p, parser_error_type type, int length) {
+	parser_error *error = queue_enqueue(p->error_queue);
+	error->type = type;
+	error->start = p->tokens;
+	error->length = length;
+	return error;
+}
+
+// new_error_token added a new token error to the queue
+parser_error *new_error_token(parser *p, TokenType token_type) {
+	parser_error *error = new_error(p, parser_error_expect_token, 1);
+	error->expect_token.type = token_type;
+	return error;
 }
 
 // parse_declaration parse a decleration node
@@ -123,10 +136,7 @@ Dcl *parse_declaration(parser *p) {
 			return parse_variable_dcl(p);
 		default: {
 			// expected a top level declaration
-			parser_error *error = queue_enqueue(p->error_queue);
-			error->type = parser_error_expect_declaration;
-			error->start = p->tokens;
-			error->length = 1;
+			new_error(p, parser_error_expect_declaration, 1);
 			return NULL;
 		}
 	}
@@ -325,7 +335,11 @@ Smt *parse_statement(parser *p) {
 	// Statement is an assignment/declaration, so treat it like an expression
 	// and transform it.
 	Exp *exp = parse_expression(p, 0);
-	
+	if(exp == NULL) {
+		queue_dequeue(p->error_queue); // remove expression error
+		new_error(p, parser_error_expect_statement, 1);
+	}
+
 	// Expected assigment/declation statement
 	assert(exp->type == binaryExp); 
 	
@@ -534,10 +548,7 @@ Exp *nud(parser *p, Token *token) {
 
 		default: {
 			// Expected a prefix token
-			parser_error *error = queue_enqueue(p->error_queue);
-			error->type = parser_error_expect_prefix;
-			error->start = p->tokens;
-			error->length = 1;
+			new_error(p, parser_error_expect_prefix, 1);
 			return NULL;
 		}
 	}
@@ -622,10 +633,7 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		}
 		default: {
 			// expected an infix expression
-			parser_error *error = queue_enqueue(p->error_queue);
-			error->type = parser_error_expect_infix;
-			error->start = p->tokens;
-			error->length = 1;
+			new_error(p, parser_error_expect_infix, 1);
 			return NULL;
 		}
 	}
@@ -688,10 +696,7 @@ Exp *parse_type(parser *p) {
 	Exp *ident = parse_ident_exp(p);
 	if (ident == NULL) {
 		queue_dequeue(p->error_queue); // discard ident error
-		parser_error *error = queue_enqueue(p->error_queue);
-		error->type = parser_error_expect_type;
-		error->start = p->tokens;
-		error->length = 1;
+		new_error(p, parser_error_expect_type, 1);
 		return NULL;
 	}
 
@@ -700,10 +705,7 @@ Exp *parse_type(parser *p) {
 		p->tokens++;
 		Exp *length = parse_expression(p, 0);
 		if(length == NULL) {
-			parser_error *error = queue_enqueue(p->error_queue);
-			error->type = parser_error_expect_array_length;
-			error->start = p->tokens;
-			error->length = 1;
+			new_error(p, parser_error_expect_array_length, 1);
 			return NULL;
 		}
 
@@ -717,12 +719,7 @@ Exp *parse_type(parser *p) {
 Exp *parse_ident_exp_from_token(parser *p, Token *token) {
 	if(token->type != IDENT){
 		// Add error to queue
-		parser_error *error = queue_enqueue(p->error_queue);
-		error->type = parser_error_expect_token;
-		error->start = p->tokens;
-		error->length = 1;
-		error->expect_token.type = IDENT;
-		
+		new_error_token(p, IDENT);
 		return NULL;
 	}
 
