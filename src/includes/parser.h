@@ -31,6 +31,8 @@ typedef enum {
 	parser_error_expect_declaration,
 	parser_error_expect_statement,
 	parser_error_expect_expression,
+	parser_error_expect_type,
+	parser_error_expect_array_length,
 	parser_error_expect_block,
 	parser_error_expect_prefix,
 	parser_error_expect_infix,

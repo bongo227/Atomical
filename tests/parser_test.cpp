@@ -351,7 +351,7 @@ TEST(ParserTest, ParseFunctionDclWithoutProc) {
     Dcl *dcl = parse_function_dcl(p);
 
     ASSERT_EQ(NULL, dcl);
-    ASSERT_EQ(1, p->error_queue->queue_size);
+    ASSERT_EQ(1, queue_size(p->error_queue));
     
     parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
@@ -364,7 +364,7 @@ TEST(ParserTest, ParseFunctionDclWithoutName) {
     Dcl *dcl = parse_function_dcl(p);
     
     ASSERT_EQ(NULL, dcl);
-    ASSERT_EQ(1, p->error_queue->queue_size);
+    ASSERT_EQ(1, queue_size(p->error_queue));
     
     parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
@@ -377,7 +377,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArgumentSeperator) {
     Dcl *dcl = parse_function_dcl(p);
     
     ASSERT_NE(NULL, dcl);
-    ASSERT_EQ(1, p->error_queue->queue_size);
+    ASSERT_EQ(1, queue_size(p->error_queue));
     
     parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
@@ -390,7 +390,7 @@ TEST(ParserTest, ParseFunctionDclWithoutCommas) {
     Dcl *dcl = parse_function_dcl(p);
     
     ASSERT_NE(NULL, dcl);
-    ASSERT_EQ(2, p->error_queue->queue_size);
+    ASSERT_EQ(2, queue_size(p->error_queue));
     
     for (int i = 0; i < 2; i++) {
         parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
@@ -405,7 +405,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArgTypeOrName) {
     Dcl *dcl = parse_function_dcl(p);
 
     ASSERT_EQ(NULL, dcl);
-    ASSERT_EQ(1, p->error_queue->queue_size);
+    ASSERT_EQ(1, queue_size(p->error_queue));
     
     parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
@@ -418,10 +418,71 @@ TEST(ParserTest, ParseFunctionDclWithoutArrow) {
     Dcl *dcl = parse_function_dcl(p);
     
     ASSERT_EQ(NULL, dcl);
-    ASSERT_EQ(1, p->error_queue->queue_size);
+    ASSERT_EQ(1, queue_size(p->error_queue));
     
     parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(ARROW, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseNonDecleration) {
+    parser *p = new_parser(Lex((char *)"return a"));
+    Dcl *dcl = parse_declaration(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_declaration, error->type);
+    ASSERT_EQ(1, error->length);
+}
+
+TEST(ParserTest, ParseVaribleDclWithoutType) {
+    parser *p = new_parser(Lex((char *)"var = 100"));
+    Dcl *dcl = parse_declaration(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_type, error->type);
+    ASSERT_EQ(1, error->length);
+}
+
+TEST(ParserTest, ParseVariableDclWithoutName) {
+    parser *p = new_parser(Lex((char *)"var int = 100"));
+    Dcl *dcl = parse_declaration(p);
+    
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(IDENT, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseVaribleDclWithoutEquals) {
+    parser *p = new_parser(Lex((char *)"var int a 100"));
+    Dcl *dcl = parse_declaration(p);
+
+    ASSERT_NE(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(ASSIGN, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseVaribleDclWithoutValue) {
+    parser *p = new_parser(Lex((char *)"var int a = "));
+    Dcl *dcl = parse_declaration(p);
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    ASSERT_EQ(parser_error_expect_prefix, error->type);
+    ASSERT_EQ(1, error->length);
 }

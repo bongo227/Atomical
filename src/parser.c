@@ -88,7 +88,8 @@ void parser_next(parser *p) {
 	p->tokens++;
 }
 
-// expect asserts that the token is of type type, if true parser advances
+// parser_expect checks that the current token is of type type, if true parser advances, 
+// else an error message is created.
 Token *parser_expect(parser *p, TokenType type) {
 	Token *token = p->tokens;
 	if(token->type == type) {
@@ -112,6 +113,7 @@ void parser_expect_semi(parser *p) {
 	parser_next(p);
 }
 
+// parse_declaration parse a decleration node
 Dcl *parse_declaration(parser *p) {
 	switch(p->tokens->type) {
 		case PROC:
@@ -119,9 +121,14 @@ Dcl *parse_declaration(parser *p) {
 		case VAR:
 		case IDENT:
 			return parse_variable_dcl(p);
-		default:
-			// Expected a top level declaration
-			assert(false);
+		default: {
+			// expected a top level declaration
+			parser_error *error = queue_enqueue(p->error_queue);
+			error->type = parser_error_expect_declaration;
+			error->start = p->tokens;
+			error->length = 1;
+			return NULL;
+		}
 	}
 }
 
@@ -141,6 +148,14 @@ void parser_skip_next_block(parser *p) {
 			else if(p->tokens->type == RBRACE) depth--;
 			p->tokens++;
 		} while(depth > 0);
+
+		if(p->tokens->type == SEMI) p->tokens++;
+}
+
+void parser_skip_to_semi(parser *p) {
+	// Move past first semi
+	while(p->tokens->type != SEMI && p->tokens->type != END) p->tokens++;
+	if(p->tokens->type == SEMI) p->tokens++;
 }
 
 // parse_function_dcl parses a function decleration
@@ -240,14 +255,51 @@ Dcl *parse_variable_dcl(parser *p) {
 
 	if(p->tokens->type == VAR) {
 		p->tokens++;
+		
+		// Type
 		type = parse_type(p);
-		name = parser_expect(p, IDENT)->value;
+		if (type == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
+
+		// Name
+		Token *name_token = parser_expect(p, IDENT);
+		if(name_token == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
+		name = name_token->value;
+
+		// Assign
 		parser_expect(p, ASSIGN);
+		// non fatel
+
+		// Value
 		value = parse_expression(p, 0);
+		if(value == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
 	} else {
-		name = parser_expect(p, IDENT)->value;
+		// Name
+		Token *name_token = parser_expect(p, IDENT);
+		if(name_token == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
+		name = name_token->value;
+		
+		// Define
 		parser_expect(p, DEFINE);
+		// non fatel
+		
+		// Value
 		value = parse_expression(p, 0);
+		if(value == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
 	}
 
 	Dcl *dcl = new_varible_dcl(p->ast, name, type, value);
@@ -442,10 +494,12 @@ Exp *parse_expression(parser *p, int rbp) {
 	Token *t = p->tokens;
 	parser_next(p);
 	left = nud(p, t);
+	if(left == NULL) return NULL;
 	while (rbp < get_binding_power(p->tokens->type)) {
 		t = p->tokens;
 		parser_next(p);
 		left = led(p, t, left);
+		if(left == NULL) return NULL;
 	}
 	return left;
 }
@@ -458,29 +512,34 @@ Exp *parse_expression_from_string(char *src) {
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
 Exp *nud(parser *p, Token *token) {
 	switch (token->type) {
-	case IDENT:
-		return parse_ident_exp_from_token(p, token);
-	
-	case INT:
-	case FLOAT:
-	case HEX:
-	case OCTAL:
-	case STRING:
-		return new_literal_exp(p->ast, *token);
+		case IDENT:
+			return parse_ident_exp_from_token(p, token);
+		
+		case INT:
+		case FLOAT:
+		case HEX:
+		case OCTAL:
+		case STRING:
+			return new_literal_exp(p->ast, *token);
 
-	case NOT:
-	case SUB:
-		return new_unary_exp(p->ast, *token, parse_expression(p, 60));
+		case NOT:
+		case SUB:
+			return new_unary_exp(p->ast, *token, parse_expression(p, 60));
 
-	case LBRACE:
-		return parse_key_value_list_exp(p);
+		case LBRACE:
+			return parse_key_value_list_exp(p);
 
-	case LBRACK:
-		return parse_array_exp(p);
+		case LBRACK:
+			return parse_array_exp(p);
 
-	default:
-		// Expected a prefix token
-		assert(false);
+		default: {
+			// Expected a prefix token
+			parser_error *error = queue_enqueue(p->error_queue);
+			error->type = parser_error_expect_prefix;
+			error->start = p->tokens;
+			error->length = 1;
+			return NULL;
+		}
 	}
 
 	return NULL;
@@ -547,8 +606,8 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		}
 
 		// right associative binary expression or assignments
-		// if the expression is an assigment, return a binary statement and let
-		// ParseStatment transform it into a statment.
+		// if the expression is an assigment, return a binary statement and let parse_statement 
+		// transform it into a statement
 		case LAND:
 		case LOR:
 		case ASSIGN:
@@ -561,9 +620,14 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		case DEFINE: {
 			return new_binary_exp(p->ast, exp, *token, parse_expression(p, bp - 1));	
 		}
-		default:
-			// Expected an infix expression
-			assert(false);
+		default: {
+			// expected an infix expression
+			parser_error *error = queue_enqueue(p->error_queue);
+			error->type = parser_error_expect_infix;
+			error->start = p->tokens;
+			error->length = 1;
+			return NULL;
+		}
 	}
 
 	return NULL;
@@ -619,12 +683,30 @@ Exp *parse_array_exp(parser *p) {
 	return new_array_exp(p->ast, values, valueCount);
 }
 
+// parse_type parses a type, adds an error if no type was found
 Exp *parse_type(parser *p) {
 	Exp *ident = parse_ident_exp(p);
+	if (ident == NULL) {
+		queue_dequeue(p->error_queue); // discard ident error
+		parser_error *error = queue_enqueue(p->error_queue);
+		error->type = parser_error_expect_type;
+		error->start = p->tokens;
+		error->length = 1;
+		return NULL;
+	}
+
 	if(p->tokens->type == LBRACK) {
 		// Type is an array type
 		p->tokens++;
 		Exp *length = parse_expression(p, 0);
+		if(length == NULL) {
+			parser_error *error = queue_enqueue(p->error_queue);
+			error->type = parser_error_expect_array_length;
+			error->start = p->tokens;
+			error->length = 1;
+			return NULL;
+		}
+
 		parser_expect(p, RBRACK);
 		return new_array_type_exp(p->ast, ident, length);
 	}
