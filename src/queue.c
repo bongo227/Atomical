@@ -1,43 +1,82 @@
 #include "includes/queue.h"
 
-queue *new_queue(size_t element_size, int queue_capacity) {
-    assert(queue_capacity > 0);
+queue *new_queue(size_t element_size) {
     queue *q = malloc(sizeof(queue));
-    q->queue_memory = malloc(element_size * queue_capacity);
+    element_size += sizeof(queue_item);
     q->element_size = element_size;
-    q->queue_capacity = queue_capacity;
-    q->tail_ptr = 0;
-    q->head_ptr = 0;
-
+    q->first = NULL;
+    q->last = NULL;
+    q->size = 0;
     return q;
 }
 
-bool queue_full(queue *q) {
-    return q->queue_capacity == (q->tail_ptr + q->head_ptr);
-}
-
 int queue_size(queue *q) {
-    return q->tail_ptr - q->head_ptr;
+    return q->size;
 }
 
-void queue_extend(queue *q) {
-    q->queue_capacity *= 2;
-    q->queue_memory = realloc(q->queue_memory, q->element_size * q->queue_capacity);
+void *queue_push_front(queue *q) {
+    q->size++;
+    queue_item *q_item = malloc(q->element_size);
+    
+    q_item->prev = NULL;
+    if (q->first == NULL) {
+        q_item->next = NULL;
+        q->last = q_item;
+    } else {
+        q_item->next = q->first;
+        q->first->prev = q_item;
+    }
+    q->first = q_item;
+
+    return q_item + 1; // move past item header
 }
 
-void *queue_enqueue(queue *q) {
-    if (queue_full(q)) queue_extend(q);
-    void *element = q->queue_memory + q->element_size * q->tail_ptr;
-    q->tail_ptr++;
-    return element;
+void *queue_push_back(queue *q) {
+    q->size++;
+    queue_item *q_item = malloc(q->element_size);
+    
+    q_item->next = NULL;
+    if(q->first == NULL) {
+        q_item->prev = NULL;
+        q->first = q_item;
+    } else {
+        q_item->prev = q->last;
+        q->last->next = q_item;
+    }
+    q->last = q_item;
+    
+    return q_item + 1; // move past item header
 }
 
-void *queue_dequeue(queue *q) {
-    void *element = q->queue_memory + q->element_size * q->head_ptr;
-    q->head_ptr++;
-    return element;
+void *queue_pop_front(queue *q) {
+    if(q->first == NULL) return NULL;
+    q->size--;
+    queue_item *q_item = q->first;
+    if (q->first == q->last) q->last = NULL;
+    q->first->prev = NULL;
+    q->first = q->first->next;
+    return q_item + 1; // move past item header
+}
+
+void *queue_pop_back(queue *q) {
+    if(q->last == NULL) return NULL;
+    q->size--;
+    queue_item *q_item = q->last;
+    if (q->last == q->first) q->first = NULL;
+    q->last->next = NULL;
+    q->last = q->last->prev;
+    return q_item + 1; // move past item header
+}
+
+void queue_free_item(void *item) {
+    queue_item *q_item = item;
+    free(q_item - 1);
 }
 
 void queue_destroy(queue *q) {
-    free(q->queue_memory);
+    while(q->first != NULL) {
+        queue_item *next = q->first->next;
+        free(q->first);
+        q->first = next;
+    }
 }

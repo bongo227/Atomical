@@ -6,7 +6,7 @@ parser *new_parser(Token *tokens) {
 	p->tokens = tokens;
 	p->scope = parser_new_scope(NULL);
 	p->ast = new_ast_unit();
-	p->error_queue = new_queue(sizeof(parser_error), ERROR_QUEUE_SIZE);
+	p->error_queue = new_queue(sizeof(parser_error));
 	return p;
 }
 
@@ -112,7 +112,7 @@ void parser_expect_semi(parser *p) {
 
 // new_error added a new error to the queue
 parser_error *new_error(parser *p, parser_error_type type, int length) {
-	parser_error *error = queue_enqueue(p->error_queue);
+	parser_error *error = queue_push_back(p->error_queue);
 	error->type = type;
 	error->start = p->tokens;
 	error->length = length;
@@ -336,7 +336,7 @@ Smt *parse_statement(parser *p) {
 	// and transform it.
 	Exp *exp = parse_expression(p, 0);
 	if(exp == NULL) {
-		queue_dequeue(p->error_queue); // remove expression error
+		queue_pop_back(p->error_queue); // remove expression error
 		new_error(p, parser_error_expect_statement, 1);
 	}
 
@@ -695,7 +695,7 @@ Exp *parse_array_exp(parser *p) {
 Exp *parse_type(parser *p) {
 	Exp *ident = parse_ident_exp(p);
 	if (ident == NULL) {
-		queue_dequeue(p->error_queue); // discard ident error
+		queue_pop_back(p->error_queue); // discard ident error
 		new_error(p, parser_error_expect_type, 1);
 		return NULL;
 	}

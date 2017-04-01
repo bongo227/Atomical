@@ -2,18 +2,26 @@
 
 #include "all.h"
 
+struct queue_item {
+    struct queue_item *prev;
+    struct queue_item *next;
+};
+
+typedef struct queue_item queue_item;
+
 typedef struct {
-    void *queue_memory;
+    void *memory;
     size_t element_size;
-    int queue_capacity;
-    int tail_ptr;
-    int head_ptr;
+    int size;
+    queue_item *first;
+    queue_item *last;
 } queue;
 
-queue *new_queue(size_t element_size, int queue_capacity);
-bool queue_full(queue *q);
+queue *new_queue(size_t element_size);
 int queue_size(queue *q);
-void queue_extend(queue *q);
-void *queue_enqueue(queue *q);
-void *queue_dequeue(queue *q);
+void *queue_push_front(queue *q);
+void *queue_push_back(queue *q);
+void *queue_pop_front(queue *q);
+void *queue_pop_back(queue *q);
+void queue_free_item(void *item);
 void queue_destroy(queue *q);

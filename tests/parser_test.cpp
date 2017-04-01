@@ -353,7 +353,7 @@ TEST(ParserTest, ParseFunctionDclWithoutProc) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
     
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(PROC, error->expect_token.type);
@@ -366,7 +366,7 @@ TEST(ParserTest, ParseFunctionDclWithoutName) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
     
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(IDENT, error->expect_token.type);
@@ -379,7 +379,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArgumentSeperator) {
     ASSERT_NE(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
     
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(DOUBLE_COLON, error->expect_token.type);
@@ -393,7 +393,7 @@ TEST(ParserTest, ParseFunctionDclWithoutCommas) {
     ASSERT_EQ(2, queue_size(p->error_queue));
     
     for (int i = 0; i < 2; i++) {
-        parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+        parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
         ASSERT_EQ(parser_error_expect_token, error->type);
         ASSERT_EQ(1, error->length);
         ASSERT_EQ(COMMA, error->expect_token.type);
@@ -407,7 +407,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArgTypeOrName) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
     
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(IDENT, error->expect_token.type);
@@ -420,7 +420,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArrow) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
     
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(ARROW, error->expect_token.type);
@@ -433,7 +433,7 @@ TEST(ParserTest, ParseNonDecleration) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
 
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_declaration, error->type);
     ASSERT_EQ(1, error->length);
 }
@@ -445,7 +445,7 @@ TEST(ParserTest, ParseVaribleDclWithoutType) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
 
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_type, error->type);
     ASSERT_EQ(1, error->length);
 }
@@ -457,7 +457,7 @@ TEST(ParserTest, ParseVariableDclWithoutName) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
 
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(IDENT, error->expect_token.type);
@@ -470,7 +470,7 @@ TEST(ParserTest, ParseVaribleDclWithoutEquals) {
     ASSERT_NE(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
 
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_token, error->type);
     ASSERT_EQ(1, error->length);
     ASSERT_EQ(ASSIGN, error->expect_token.type);
@@ -482,7 +482,7 @@ TEST(ParserTest, ParseVaribleDclWithoutValue) {
     ASSERT_EQ(NULL, dcl);
     ASSERT_EQ(1, queue_size(p->error_queue));
 
-    parser_error *error = (parser_error *)queue_dequeue(p->error_queue);
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
     ASSERT_EQ(parser_error_expect_prefix, error->type);
     ASSERT_EQ(1, error->length);
 }

@@ -1,67 +1,65 @@
 #include <gtest/gtest.h>
 
 TEST(QueueTest, NewQueue) {
-    queue *q = new_queue(sizeof(int), 10);
-    ASSERT_FALSE(queue_full(q));
+    queue *q = new_queue(sizeof(int));
     ASSERT_EQ(0, queue_size(q));
-    ASSERT_EQ(10, q->queue_capacity);
-    ASSERT_EQ(sizeof(int), q->element_size);
+    ASSERT_EQ(sizeof(int) + sizeof(queue_item), q->element_size);
 }
 
-TEST(QueueTest, EnqueueAndDequeue) {
-    queue *q = new_queue(sizeof(int), 10);
-    int *in = (int *)queue_enqueue(q);
+TEST(QueueTest, PushPopFront) {
+    queue *q = new_queue(sizeof(int));
+    int *in = (int *)queue_push_front(q);
     int value = 100;
     memcpy(in, &value, sizeof(int));
     ASSERT_EQ(1, queue_size(q));
 
-    int *out = (int *)queue_dequeue(q);
+    int *out = (int *)queue_pop_front(q);
     ASSERT_EQ(0, queue_size(q));
     ASSERT_EQ(in, out);
     ASSERT_EQ(*in, *out);
+    queue_free_item(out);
 }
 
-TEST(QueueTest, FillQueue) {
-    queue *q = new_queue(sizeof(int), 5);
-    for (int i = 0; i < 5; i++) {
-        int *value = (int *)queue_enqueue(q);
-        memcpy(value, &i, sizeof(int));
-    }
+TEST(QueueTest, PushPopBack) {
+    queue *q = new_queue(sizeof(int));
+    int *in = (int *)queue_push_back(q);
+    int value = 100;
+    memcpy(in, &value, sizeof(int));
+    ASSERT_EQ(1, queue_size(q));
 
-    ASSERT_EQ(5, queue_size(q));
-    ASSERT_TRUE(queue_full(q));
-}
-
-TEST(QueueTest, ExtendQueue) {
-    queue *q = new_queue(sizeof(int), 5);
-    queue_extend(q);
-    ASSERT_EQ(10, q->queue_capacity);
+    int *out = (int *)queue_pop_back(q);
     ASSERT_EQ(0, queue_size(q));
+    ASSERT_EQ(in, out);
+    ASSERT_EQ(*in, *out);
+    queue_free_item(out);
 }
 
-TEST(QueueTest, OverflowExtendQueue) {
-    queue *q = new_queue(sizeof(int), 5);
-    for (int i = 0; i < 6; i++) {
-        int *value = (int *)queue_enqueue(q);
-        memcpy(value, &i, sizeof(int));
-    }
-
-    ASSERT_EQ(10, q->queue_capacity);
-    ASSERT_EQ(6, queue_size(q)); 
-}
-
-TEST(QueueTest, DequeueOrder) {
-    queue *q = new_queue(sizeof(int), 5);
-    for (int i = 0; i < 100; i++) {
-        int *value = (int *)queue_enqueue(q);
-        memcpy(value, &i, sizeof(int));
-    }
-
-    ASSERT_EQ(160, q->queue_capacity);
-    ASSERT_EQ(100, queue_size(q));
+TEST(QueueTest, PushPopManyFront) {
+    queue *q = new_queue(sizeof(int));
     for(int i = 0; i < 100; i++) {
-        int *value = (int *)queue_dequeue(q);
-        ASSERT_EQ(i, *value);
+        int *in = (int *)queue_push_back(q);
+        memcpy(in, &i, sizeof(int));
+        ASSERT_EQ(i+1, queue_size(q));
     }
-    ASSERT_EQ(0, queue_size(q));
+
+    for(int i = 0; i < 100; i++) {
+        int *out = (int *)queue_pop_front(q);
+        ASSERT_EQ(i, *out);
+        queue_free_item(out);
+    }
+}
+
+TEST(QueueTest, PushPopManyBack) {
+    queue *q = new_queue(sizeof(int));
+    for (int i = 0; i < 100; i++) {
+        int *in = (int *)queue_push_front(q);
+        memcpy(in, &i, sizeof(int));
+        ASSERT_EQ(i+1, queue_size(q));
+    }
+
+    for(int i = 99; i >= 0; i--) {
+        int *out = (int *)queue_pop_front(q);
+        ASSERT_EQ(i, *out);
+        queue_free_item(out);
+    }
 }
