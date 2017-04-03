@@ -1,3 +1,5 @@
+[Project Documentation](https://gitprint.com/bongo227/FurlangC/blob/master/doc/doc_gen.md?download)
+
 ### TODO
 - [x] For loops
 - [x] Arrays
