@@ -39,13 +39,13 @@ def get_imports(source):
     return imports
 
 source = ""
-with open('src/doc.md') as source_doc:
+with open('doc.md') as source_doc:
     source = source_doc.read()
 
 imports = get_imports(source)
 offset = 0
 for (start, end, value) in imports:
-    value = 'src/' + value
+    # value = 'src/' + value
     print "Importing: {}".format(value)
     with open(value, 'r') as import_file:
         insert = import_file.read()

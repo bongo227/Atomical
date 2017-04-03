@@ -2,5 +2,5 @@
 This file is the ir generation...
 
 ```c
-#import "../../src/irgen.c"
+#import "../src/irgen.c"
 ```
