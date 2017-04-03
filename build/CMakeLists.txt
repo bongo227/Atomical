@@ -141,17 +141,17 @@ set(LLVM_LIBS
 # Enable debug symbols
 set(CMAKE_BUILD_TYPE Debug)
 
-# Compiler executable
-add_executable(fur ../src/main.c)
-target_link_libraries(fur ${LLVM_LIBS})
-target_compile_options(fur PRIVATE "-Werror")
-target_compile_options(fur PRIVATE "-std=c11")
-
 # Compiler library
 add_library(furlib ../src/lib.c)
 target_link_libraries(furlib ${LLVM_LIBS})
 target_compile_options(furlib PRIVATE "-Werror")
 target_compile_options(furlib PRIVATE "-std=c11")
+
+# Compiler executable
+add_executable(fur ../src/main.c)
+target_link_libraries(fur ${LLVM_LIBS} furlib)
+target_compile_options(fur PRIVATE "-Werror")
+target_compile_options(fur PRIVATE "-std=c11")
 
 # Test executable 
 add_executable(fur_tests ../tests/test.cpp)

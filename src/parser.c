@@ -126,6 +126,10 @@ parser_error *new_error_token(parser *p, TokenType token_type) {
 	return error;
 }
 
+char *format_error(char *src, parser_error *error) {
+	return "";
+}
+
 // parse_declaration parse a decleration node
 Dcl *parse_declaration(parser *p) {
 	switch(p->tokens->type) {
