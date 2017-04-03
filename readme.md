@@ -1,4 +1,4 @@
-[Project Documentation](https://gitprint.com/bongo227/FurlangC/blob/master/doc/doc_gen.md?download)
+[Project Documentation](/doc/doc_gen.md)
 
 ### TODO
 - [x] For loops
