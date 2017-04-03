@@ -2,10 +2,13 @@
 
 ## Analysis
 
-In this investigation the aim is to design a programming language and implement the basics of a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all asspects of a modern programming language, standard library and language tooling. Instead the focus wull be on implementing a small subset such that simple algorithums like the greatest common divisor and bubble sort can be created.
+In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all asspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithums like the greatest bubble and insertion sort can be created.
+
+### Background
+The C programming language was developed by Dennis Ritchie between 1969 and 1973. C came at a time were language design was in its infacy. Through its many inovations including its type system, lexical scoping and syntax it inspired many of the popular langauges we see today. Even after decades of language theory and thousands of languages and innovation C is still has a firm place in kernals, embedable systems and high performant software applications and librarys.
 
 ### Research
-In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design disicions behind them in order the judge what Fur should look like.
+In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design disicions behind them in order the judge what code should look like.
 
 ### Syntax
 Compared to C modern programming languages use a lot less characters to describe the instructions which make the final program. By using less character it becomes alot faster to read through the source code in order to understand the logic, which intern makes the language easier to use and faster to develop in. With Fur, I wanted to explore some of these modern ideas and how they can be implemented. 
@@ -93,17 +96,24 @@ C++ and Java both have operator overloading which makes their source code easy t
     * `f64` (64 bit float)
     * `float` (platform specific fastest float)
 
-### Memory Managment
+### Memory managment
 When a program needs memory to persist longer than the scope of a function, memory needs to be allocated from the heap. The heap is slower than stack but the program can choose at run-time how much memory it wants. This flexibility brings several problems such as: what if the operating system can't give you the memory you requested, what if you need more, what if the you never give it back. In languages with manual memory management the programmer must solve all these problems whenever they need to allocate memory on the heap, making the code more complex and error prone.
 
 One solution to this problem is a garbage collector. In languages such as Go and Java the run-time allocates blocks of memory, whenever the program requests memory a portion of that block is returned. The run-time then keeps track of where the memory is used, when the portion of memory is no longer in use its is marked and recycled ready for the next allocation. Over time these garbage collectors have been getting faster and much more sophisticated, one consequence of this is that it can be hard to understand their behavior.
 
-The problems arises in applications which have low latency requirements, such as games. With virtual reality and higher refresh rate monitors, games have less than 7 milliseconds to update and render the next frame. GC max pause times in Go are around [50µs<sup>[6]</sup>](#6) (with considerable CPU usage) and [50ms<sup>[7]</sup>](#7) in Java, what's worse is that they can happen at anytime causing the game to freeze and stutter. One workaround is to budget this into your frame time i.e. 5ms to update and render and 2ms for any GC pauses, this means reduced graphics, less realistic physics and simpler game mechanics. Even if you do not pause mid-frame there is still the problem of: higher read/write latency, less CPU performance and less data locality (hence less cache utilization). For this reason Fur will not have a garbage collector.
+The problems arises in applications which have low latency requirements, such as games. With virtual reality and higher refresh rate monitors, games have less than 7 milliseconds to update and render the next frame. GC max pause times in Go are around [50µs<sup>[6]</sup>](#6) (with considerable CPU usage) and [50ms<sup>[7]</sup>](#7) in Java, what's worse is that they can happen at anytime causing the game to freeze and stutter. One workaround is to budget this into your frame time i.e. 5ms to update and render and 2ms for any GC pauses, this means reduced graphics, less realistic physics and simpler game mechanics. Even if you do not pause mid-frame there is still the problem of: higher read/write latency, less CPU performance and less data locality (hence less cache utilization). For these reason Fur will not have a garbage collector.
 
-#### Objectives
- - Compile programs should have no runtime managed memory.
+#### Memory managment objectives
+ * Compile programs should have no runtime managed memory.
 
+### Command line interface
+Compilers normaly expose a command line interface to transform the syntax into an executable file. This makes it very easy to integrate the compiler with other build tools, text editors and IDE's. Fur doesn't require a large range of flags and options since it is a small language however some debug options could help the programmer (and the development of the compiler).
 
+#### Command line interface objectives
+* Create an executable that invokes the compiler
+* `-o`, `--output` flag should control the path of the compiled executable
+* `-t`, `--tokens` produces a file with a list of the tokens (for debugging)
+* `-i`, `--ircode` produces a file with the LLVM IR code for the program (for debugging)  
 
 ### Irgen.c
 This file is the ir generation...
