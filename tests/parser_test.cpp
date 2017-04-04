@@ -345,3 +345,144 @@ TEST(ParserTest, ParseArrayExpression) {
     ASSERT_EQ((int)arrayExp, (int)exp->type);
     ASSERT_EQ(3, exp->array.valueCount);
 }
+
+TEST(ParserTest, ParseFunctionDclWithoutProc) {
+    parser *p = new_parser(Lex((char *)"add :: -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+    
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(PROC, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutName) {
+    parser *p = new_parser(Lex((char *)"proc :: -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+    
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(IDENT, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutArgumentSeperator) {
+    parser *p = new_parser(Lex((char *)"proc add -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_NE(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+    
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(DOUBLE_COLON, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutCommas) {
+    parser *p = new_parser(Lex((char *)"proc add :: int a int b int c -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_NE(NULL, dcl);
+    ASSERT_EQ(2, queue_size(p->error_queue));
+    
+    for (int i = 0; i < 2; i++) {
+        parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+        ASSERT_EQ(parser_error_expect_token, error->type);
+        ASSERT_EQ(1, error->length);
+        ASSERT_EQ(COMMA, error->expect_token.type);
+    }
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutArgTypeOrName) {
+    parser *p = new_parser(Lex((char *)"proc add :: int, int a -> int {}"));
+    Dcl *dcl = parse_function_dcl(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+    
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(IDENT, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseFunctionDclWithoutArrow) {
+    parser *p = new_parser(Lex((char *)"proc add :: int a {}"));
+    Dcl *dcl = parse_function_dcl(p);
+    
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+    
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(ARROW, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseNonDecleration) {
+    parser *p = new_parser(Lex((char *)"return a"));
+    Dcl *dcl = parse_declaration(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_declaration, error->type);
+    ASSERT_EQ(1, error->length);
+}
+
+TEST(ParserTest, ParseVaribleDclWithoutType) {
+    parser *p = new_parser(Lex((char *)"var = 100"));
+    Dcl *dcl = parse_declaration(p);
+
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_type, error->type);
+    ASSERT_EQ(1, error->length);
+}
+
+TEST(ParserTest, ParseVariableDclWithoutName) {
+    parser *p = new_parser(Lex((char *)"var int = 100"));
+    Dcl *dcl = parse_declaration(p);
+    
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(IDENT, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseVaribleDclWithoutEquals) {
+    parser *p = new_parser(Lex((char *)"var int a 100"));
+    Dcl *dcl = parse_declaration(p);
+
+    ASSERT_NE(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_token, error->type);
+    ASSERT_EQ(1, error->length);
+    ASSERT_EQ(ASSIGN, error->expect_token.type);
+}
+
+TEST(ParserTest, ParseVaribleDclWithoutValue) {
+    parser *p = new_parser(Lex((char *)"var int a = "));
+    Dcl *dcl = parse_declaration(p);
+    ASSERT_EQ(NULL, dcl);
+    ASSERT_EQ(1, queue_size(p->error_queue));
+
+    parser_error *error = (parser_error *)queue_pop_front(p->error_queue);
+    ASSERT_EQ(parser_error_expect_prefix, error->type);
+    ASSERT_EQ(1, error->length);
+}

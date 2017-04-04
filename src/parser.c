@@ -6,6 +6,7 @@ parser *new_parser(Token *tokens) {
 	p->tokens = tokens;
 	p->scope = parser_new_scope(NULL);
 	p->ast = new_ast_unit();
+	p->error_queue = new_queue(sizeof(parser_error));
 	return p;
 }
 
@@ -87,20 +88,49 @@ void parser_next(parser *p) {
 	p->tokens++;
 }
 
-// expect asserts that the token is of type type, if true parser advances
+// parser_expect checks that the current token is of type type, if true parser advances, 
+// else an error message is created.
 Token *parser_expect(parser *p, TokenType type) {
 	Token *token = p->tokens;
-	assert(token->type == type);
-	parser_next(p);
-	return token;
+	if(token->type == type) {
+		parser_next(p);
+		return token;
+	} else {
+		new_error_token(p, type);
+		return NULL;
+	}
 }
 
 // parser_expect_semi expects a semicolon
 void parser_expect_semi(parser *p) {
-	assert(p->tokens->type == SEMI || p->tokens->type == END);
-	parser_next(p);
+	if(p->tokens->type == SEMI || p->tokens->type == END) {
+		parser_next(p);
+	} else {
+		new_error_token(p, SEMI);
+	}
 }
 
+// new_error added a new error to the queue
+parser_error *new_error(parser *p, parser_error_type type, int length) {
+	parser_error *error = queue_push_back(p->error_queue);
+	error->type = type;
+	error->start = p->tokens;
+	error->length = length;
+	return error;
+}
+
+// new_error_token added a new token error to the queue
+parser_error *new_error_token(parser *p, TokenType token_type) {
+	parser_error *error = new_error(p, parser_error_expect_token, 1);
+	error->expect_token.type = token_type;
+	return error;
+}
+
+char *format_error(char *src, parser_error *error) {
+	return "";
+}
+
+// parse_declaration parse a decleration node
 Dcl *parse_declaration(parser *p) {
 	switch(p->tokens->type) {
 		case PROC:
@@ -108,9 +138,11 @@ Dcl *parse_declaration(parser *p) {
 		case VAR:
 		case IDENT:
 			return parse_variable_dcl(p);
-		default:
-			// Expected a top level declaration
-			assert(false);
+		default: {
+			// expected a top level declaration
+			new_error(p, parser_error_expect_declaration, 1);
+			return NULL;
+		}
 	}
 }
 
@@ -119,25 +151,88 @@ Dcl *parse_declaration_from_string(char *src) {
 	return parse_declaration(p);
 }
 
+void parser_skip_next_block(parser *p) {
+		// Move to start of block
+		while(p->tokens->type != LBRACE) p->tokens++;
+		
+		// Skip over block (and all sub blocks)
+		int depth = 0;
+		do {
+			if(p->tokens->type == LBRACE) depth++;
+			else if(p->tokens->type == RBRACE) depth--;
+			p->tokens++;
+		} while(depth > 0);
+
+		if(p->tokens->type == SEMI) p->tokens++;
+}
+
+void parser_skip_to_semi(parser *p) {
+	// Move past first semi
+	while(p->tokens->type != SEMI && p->tokens->type != END) p->tokens++;
+	if(p->tokens->type == SEMI) p->tokens++;
+}
+
 // parse_function_dcl parses a function decleration
 Dcl *parse_function_dcl(parser *p) {
-	parser_expect(p, PROC);
-	char *name = parser_expect(p, IDENT)->value; // function name
-	parser_expect(p, DOUBLE_COLON);
+	// Parse proc
+	Token *proc = parser_expect(p, PROC);
+	if (proc == NULL) {
+		parser_skip_next_block(p);
+		return NULL;
+	}
 
-	// parse arguments
+	// Parse function name
+	Token *ident = parser_expect(p, IDENT);
+	if (ident == NULL) {
+		parser_skip_next_block(p);
+		return NULL;
+	}
+	char *name = ident->value; // function name
+	
+	// Parse argument seperator
+	parser_expect(p, DOUBLE_COLON);
+	// missing double colon is not fatel so countinue
+
+	// Parse arguments
 	Dcl *args = (Dcl *)malloc(0);
 	int argCount = 0;
-	while(p->tokens->type != ARROW) {
+	while(p->tokens->type != ARROW && p->tokens->type != LBRACE) {
 		if (argCount > 0) parser_expect(p, COMMA);
+		// missing comma not fatel
+
 		args = realloc(args, sizeof(Dcl) * ++argCount);
 
 		// Construct argument
 		Exp *type = parse_type(p); // arg type
-		char *name = parser_expect(p, IDENT)->value; // arg name
+		if (type == NULL) {
+			parser_skip_next_block(p);
+			return NULL;
+		}
+
+		// arg name
+		Token *name_token = parser_expect(p, IDENT); 
+		if (name_token == NULL) {
+			parser_skip_next_block(p);
+			return NULL;
+		}
+		char *name = name_token->value; 
+
+		// add argument to list
 		Dcl *arg = new_argument_dcl(p->ast, type, name);
 		void *dest = memcpy(args + argCount - 1, arg, sizeof(Dcl));
-		
+	}
+	
+	Token *arrow = parser_expect(p, ARROW);
+	if (arrow == NULL) {
+		// arrow fatel since we dont know the return type
+		parser_skip_next_block(p);
+		return NULL;
+	}
+
+	Exp *return_type = parse_type(p);
+	if (return_type == NULL) {
+		parser_skip_next_block(p);
+		return NULL;
 	}
 
 	// insert arguments into scope
@@ -149,12 +244,9 @@ Dcl *parse_function_dcl(parser *p) {
 		obj->type = argObj;
 		parser_insert_scope(p, obj->name, obj);
 	}
-	
-	parser_expect(p, ARROW);
-	Exp *returnType = parse_type(p);
 
 	// insert function into scope
-	Dcl* function = new_function_dcl(p->ast, name, args, argCount, returnType, NULL);
+	Dcl* function = new_function_dcl(p->ast, name, args, argCount, return_type, NULL);
 	Object *obj = (Object *)malloc(sizeof(Object));
 	obj->name = name;
 	obj->node = function;
@@ -162,7 +254,7 @@ Dcl *parse_function_dcl(parser *p) {
 	parser_insert_scope(p, name, obj);
 	
 	// parse body
-	Smt *body = parse_statement(p);
+	Smt *body = parse_block_smt(p);
 	function->function.body = body;
 
 	if(p->tokens->type == SEMI) p->tokens++;
@@ -177,14 +269,51 @@ Dcl *parse_variable_dcl(parser *p) {
 
 	if(p->tokens->type == VAR) {
 		p->tokens++;
+		
+		// Type
 		type = parse_type(p);
-		name = parser_expect(p, IDENT)->value;
+		if (type == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
+
+		// Name
+		Token *name_token = parser_expect(p, IDENT);
+		if(name_token == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
+		name = name_token->value;
+
+		// Assign
 		parser_expect(p, ASSIGN);
+		// non fatel
+
+		// Value
 		value = parse_expression(p, 0);
+		if(value == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
 	} else {
-		name = parser_expect(p, IDENT)->value;
+		// Name
+		Token *name_token = parser_expect(p, IDENT);
+		if(name_token == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
+		name = name_token->value;
+		
+		// Define
 		parser_expect(p, DEFINE);
+		// non fatel
+		
+		// Value
 		value = parse_expression(p, 0);
+		if(value == NULL) {
+			parser_skip_to_semi(p);
+			return NULL;
+		}
 	}
 
 	Dcl *dcl = new_varible_dcl(p->ast, name, type, value);
@@ -210,9 +339,12 @@ Smt *parse_statement(parser *p) {
 	// Statement is an assignment/declaration, so treat it like an expression
 	// and transform it.
 	Exp *exp = parse_expression(p, 0);
-	
-	// Expected assigment/declation statement
-	assert(exp->type == binaryExp); 
+	if(exp == NULL || exp->type != binaryExp) {
+		// expected assigment/declation statement
+		if(exp == NULL) queue_pop_back(p->error_queue); // remove expression error
+		new_error(p, parser_error_expect_statement, 1);
+		parser_skip_to_semi(p);
+	} 
 	
 	Exp *left = exp->binary.left;
 	Exp *right = exp->binary.right;
@@ -229,25 +361,35 @@ Smt *parse_statement(parser *p) {
 			smt = new_binary_assignment_smt(p->ast, left, op.type, right);
 			break;
 		case DEFINE:
-			assert(left->type == identExp);
-
+			// definition name
+			if(left->type != identExp) {
+				new_error_token(p, IDENT);
+				parser_skip_to_semi(p);
+				return NULL;
+			}
 			char *name = left->ident.name;
+
 			smt = new_declare_smt(p->ast, new_varible_dcl(p->ast, name, NULL, right));
-			
+	
 			// Added declaration to scope
 			Object *obj =(Object *)malloc(sizeof(Object));
 			obj->name = name;
 			obj->node = smt->declare;
 			obj->type = varObj;
 			parser_insert_scope(p, name, obj);
+	
 			break;
 		default:
 			// Expected an assignment operator
-			assert(false);
+			new_error(p, parser_error_expect_statement, 1);
+			parser_skip_to_semi(p);
 	}
 
 	// If statment is null, the next tokens dont start a valid statement
-	assert(smt != NULL);
+	if(smt == NULL) {
+		new_error(p, parser_error_expect_statement, 1);
+		parser_skip_to_semi(p);
+	}
 
 	// Release the converted expression back into the pool
 	pool_release(p->ast->exp_pool, exp);
@@ -260,6 +402,29 @@ Smt *parse_statement_from_string(char *src) {
     return parse_statement(p);
 }
 
+Smt *parse_block_smt(parser *p) {
+	parser_expect(p, LBRACE);
+	parser_enter_scope(p);
+
+	// build list of statements
+	int smtCount = 0;
+	Smt *smts = (Smt *)malloc(sizeof(Smt) * 1024);
+	Smt *smtsPrt = smts;
+	while(p->tokens->type != RBRACE) {
+		smtCount++;
+		memcpy(smtsPrt, parse_statement(p), sizeof(Smt));
+		if(p->tokens->type != RBRACE) parser_expect_semi(p);
+		smtsPrt++;
+	}
+	smts = realloc(smts, sizeof(Smt) * smtCount);
+
+	parser_expect(p, RBRACE);
+	parser_exit_scope(p);
+
+	Smt *s = new_block_smt(p->ast, smts, smtCount);
+	return s;
+}
+
 // smtd parser the current token in the context of the start of a statement
 Smt *smtd(parser *p, Token *token) {
 	switch(token->type) {
@@ -270,37 +435,15 @@ Smt *smtd(parser *p, Token *token) {
 			return s; 
 		}
 		// block statement
-		case LBRACE: {
-			p->tokens++;
-			
-			parser_enter_scope(p);
-
-			int smtCount = 0;
-			Smt *smts = (Smt *)malloc(sizeof(Smt) * 1024);
-			Smt *smtsPrt = smts;
-			while(p->tokens->type != RBRACE) {
-				smtCount++;
-				memcpy(smtsPrt, parse_statement(p), sizeof(Smt));
-				if(p->tokens->type != RBRACE) parser_expect_semi(p);
-				smtsPrt++;
-			}
-			smts = realloc(smts, sizeof(Smt) * smtCount);
-
-			Smt *s = new_block_smt(p->ast, smts, smtCount);
-
-			parser_expect(p, RBRACE);
-
-			parser_exit_scope(p);
-
-			return s;
-		}
+		case LBRACE:
+			return parse_block_smt(p);
+		
 		// if statement
 		case IF: {
 			p->tokens++;
 			
 			Exp *cond = parse_expression(p, 0);
-			Smt *block = parse_statement(p);
-			assert(block->type == blockSmt);
+			Smt *block = parse_block_smt(p);
 			Smt *elses = NULL;
 
 			// Check for elseif/else
@@ -322,8 +465,7 @@ Smt *smtd(parser *p, Token *token) {
 			p->tokens++;
 
 			// parse index
-			Dcl *index = parse_declaration(p);
-			assert(index->type == varibleDcl);
+			Dcl *index = parse_variable_dcl(p);
 			parser_expect_semi(p);
 
 			// parse condition
@@ -334,8 +476,7 @@ Smt *smtd(parser *p, Token *token) {
 			Smt *inc = parse_statement(p);
 			
 			// parse body
-			Smt *body = parse_statement(p);
-			assert(body->type == blockSmt);
+			Smt *body = parse_block_smt(p);
 
 			return new_for_smt(p->ast, index, cond, inc, body);
 		}
@@ -364,8 +505,7 @@ Smt *smtd(parser *p, Token *token) {
 			}
 		}
 		default:
-			// Expected a statement
-			assert(false);
+			return NULL;
 	}
 	return NULL;
 }
@@ -377,10 +517,12 @@ Exp *parse_expression(parser *p, int rbp) {
 	Token *t = p->tokens;
 	parser_next(p);
 	left = nud(p, t);
+	if(left == NULL) return NULL;
 	while (rbp < get_binding_power(p->tokens->type)) {
 		t = p->tokens;
 		parser_next(p);
 		left = led(p, t, left);
+		if(left == NULL) return NULL;
 	}
 	return left;
 }
@@ -393,29 +535,31 @@ Exp *parse_expression_from_string(char *src) {
 // nud parses the current token in a prefix context (at the start of an (sub)expression)
 Exp *nud(parser *p, Token *token) {
 	switch (token->type) {
-	case IDENT:
-		return parse_ident_exp_from_token(p, token);
-	
-	case INT:
-	case FLOAT:
-	case HEX:
-	case OCTAL:
-	case STRING:
-		return new_literal_exp(p->ast, *token);
+		case IDENT:
+			return parse_ident_exp_from_token(p, token);
+		
+		case INT:
+		case FLOAT:
+		case HEX:
+		case OCTAL:
+		case STRING:
+			return new_literal_exp(p->ast, *token);
 
-	case NOT:
-	case SUB:
-		return new_unary_exp(p->ast, *token, parse_expression(p, 60));
+		case NOT:
+		case SUB:
+			return new_unary_exp(p->ast, *token, parse_expression(p, 60));
 
-	case LBRACE:
-		return parse_key_value_list_exp(p);
+		case LBRACE:
+			return parse_key_value_list_exp(p);
 
-	case LBRACK:
-		return parse_array_exp(p);
+		case LBRACK:
+			return parse_array_exp(p);
 
-	default:
-		// Expected a prefix token
-		assert(false);
+		default: {
+			// Expected a prefix token
+			new_error(p, parser_error_expect_prefix, 1);
+			return NULL;
+		}
 	}
 
 	return NULL;
@@ -482,8 +626,8 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		}
 
 		// right associative binary expression or assignments
-		// if the expression is an assigment, return a binary statement and let
-		// ParseStatment transform it into a statment.
+		// if the expression is an assigment, return a binary statement and let parse_statement 
+		// transform it into a statement
 		case LAND:
 		case LOR:
 		case ASSIGN:
@@ -496,9 +640,11 @@ Exp *led(parser *p, Token *token, Exp *exp) {
 		case DEFINE: {
 			return new_binary_exp(p->ast, exp, *token, parse_expression(p, bp - 1));	
 		}
-		default:
-			// Expected an infix expression
-			assert(false);
+		default: {
+			// expected an infix expression
+			new_error(p, parser_error_expect_infix, 1);
+			return NULL;
+		}
 	}
 
 	return NULL;
@@ -554,12 +700,24 @@ Exp *parse_array_exp(parser *p) {
 	return new_array_exp(p->ast, values, valueCount);
 }
 
+// parse_type parses a type, adds an error if no type was found
 Exp *parse_type(parser *p) {
 	Exp *ident = parse_ident_exp(p);
+	if (ident == NULL) {
+		queue_pop_back(p->error_queue); // discard ident error
+		new_error(p, parser_error_expect_type, 1);
+		return NULL;
+	}
+
 	if(p->tokens->type == LBRACK) {
 		// Type is an array type
 		p->tokens++;
 		Exp *length = parse_expression(p, 0);
+		if(length == NULL) {
+			new_error(p, parser_error_expect_array_length, 1);
+			return NULL;
+		}
+
 		parser_expect(p, RBRACK);
 		return new_array_type_exp(p->ast, ident, length);
 	}
@@ -568,13 +726,17 @@ Exp *parse_type(parser *p) {
 }
 
 Exp *parse_ident_exp_from_token(parser *p, Token *token) {
-	assert(token->type == IDENT);
-	
+	if(token->type != IDENT){
+		// Add error to queue
+		new_error_token(p, IDENT);
+		return NULL;
+	}
+
 	char *name = token->value;
 	Exp *ident = new_ident_exp(p->ast, name);
-	
 	Object *obj = parser_find_scope(p, name);
 	ident->ident.obj = obj;
+	
 	return ident;
 }
 

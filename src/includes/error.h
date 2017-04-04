@@ -6,4 +6,4 @@
 #include <string.h>
 #include <stdio.h>
 
-void Error(char *src, int line, int start, int end, char *msg, ...);
+void error(char *src, int line, int start, int end, char *msg, ...);
