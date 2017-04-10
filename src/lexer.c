@@ -251,7 +251,7 @@ char *escape(char **input, char quote) {
 	return esc;
 }
 
-char *string(char **input) {
+char *lex_string(char **input) {
 	char *string = (char *)malloc(1024 * sizeof(char));
 	int length = 0;
 
@@ -400,7 +400,7 @@ Token *Lex(char *source) {
 				case '"':
 					lexer.semi = true;
 					token.type = STRING;
-					token.value = string(&lexer.source);
+					token.value = lex_string(&lexer.source);
 					break;
 
 				case ':':
