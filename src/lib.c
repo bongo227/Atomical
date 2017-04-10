@@ -5,3 +5,4 @@
 #include "irgen.c"
 #include "pool.c"
 #include "queue.c"
+#include "string.c"

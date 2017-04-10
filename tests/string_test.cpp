@@ -16,6 +16,18 @@ TEST(StringTest, CreateNewStringLength) {
     string_free(s);
 }
 
+TEST(StringTest, CreateNewStringFile) {
+    FILE *f = fopen("/tmp/string_test_file.fur", "w");
+    fprintf(f, "test");
+    fclose(f);
+
+    f = fopen("/tmp/string_test_file.fur", "r");
+    string s = string_new_file(f);
+    fclose(f);
+
+    ASSERT_EQ(0, strcmp(s, "test"));
+}
+
 TEST(StringTest, CopyString) {
     string s = string_new("test");
     string copy = string_copy(s);
@@ -40,7 +52,7 @@ TEST(StringTest, StringAvalible) {
 
 TEST(StringTest, StringExpand) {
     string s = string_new("test");
-    string_expand(s, 10);
+    s = string_expand(s, 10);
     ASSERT_EQ(10, string_capacity(s));
     ASSERT_EQ(6, string_avalible(s));
     ASSERT_EQ(4, string_length(s));
@@ -49,39 +61,49 @@ TEST(StringTest, StringExpand) {
 
 TEST(StringTest, StringClear) {
     string s = string_new("test");
-    string_clear(s);
+    s = string_clear(s);
     ASSERT_EQ(0, strcmp(s, ""));
 }
 
 TEST(StringTest, StringAppend){
     string s1 = string_new("hello ");
     string s2 = string_new("world");
-    string_append(s1, s2);
+    s1 = string_append(s1, s2);
     ASSERT_EQ(0, strcmp(s1, "hello world"));
 }
 
 TEST(StringTest, StringAppendLength) {
     string s1 = string_new("hello ");
     string s2 = string_new("world of earth");
-    string_append_length(s1, s2, 5);
+    s1 = string_append_length(s1, s2, 5);
     ASSERT_EQ(0, strcmp(s1, "hello world"));
 }
 
 TEST(StringTest, StringAppendCString) {
     string s1 = string_new("hello");
-    string_append_cstring(s1, (char *)" world");
+    s1 = string_append_cstring(s1, (char *)" world");
     ASSERT_EQ(0, strcmp(s1, "hello world"));
+}
+
+TEST(StringTest, StringMultipleAppendWithMalloc) {
+    string s1 = string_new("hello");
+    s1 = string_append_cstring(s1, (char *)" world");
+    malloc(10);
+    s1 = string_append_cstring(s1, (char *)" of");
+    s1 = string_append_cstring(s1, (char *)" ours");
+
+    ASSERT_EQ(0, strcmp(s1, "hello world of ours"));
 }
 
 TEST(StringTest, StringSliceEnd) {
     string s1 = string_new("hello world of ours");
-    string_slice(s1, 0, 11);
+    s1 = string_slice(s1, 0, 11);
     ASSERT_EQ(0, strcmp(s1, "hello world"));
 }
 
 TEST(StringTest, StringSlice) {
     string s1 = string_new("hello world of ours");
-    string_slice(s1, 6, 11);
+    s1 = string_slice(s1, 6, 11);
     ASSERT_EQ(0, strcmp(s1, "world"));
 }
 

@@ -26,6 +26,20 @@ string string_new_length(const char *str, int len) {
     return s;
 }
 
+string string_new_file(FILE *f) {
+    fseek (f, 0, SEEK_END);
+	int file_length = ftell (f);
+	fseek (f, 0, SEEK_SET);
+
+    string s = string_new("");
+    string_expand(s, file_length + 1);
+    fread(s, 1, file_length, f);
+    s[file_length] = '\0';
+    STRING_HEADER(s)->length = file_length;
+
+    return s;
+}
+
 void string_free(string s) {
     free(STRING_HEADER(s));
 }
@@ -47,38 +61,44 @@ int string_avalible(string s) {
     return header->capacity - header->length;
 }
 
-void string_expand(string s, int capacity) {
+string string_expand(string s, int capacity) {
     string_header *header = STRING_HEADER(s);
-    if (header->capacity > capacity) return;
+    if (header->capacity > capacity) return s;
     header = realloc(header, sizeof(string_header) + capacity);
     header->capacity = capacity;
+    return (char *)(header + 1);
 }
 
-void string_clear(string s) {
-    string_slice(s, 0, 0);
+string string_clear(string s) {
+    return string_slice(s, 0, 0);
 }
 
-void string_append(string s1, string s2) {
-    string_append_length(s1, s2, string_length(s2));
+string string_append(string s1, string s2) {
+    return string_append_length(s1, s2, string_length(s2));
 }
 
-void string_append_length(string s1, char *s2, int length) {
+string string_append_length(string s1, char *s2, int length) {
     int current_length = string_length(s1);
-    string_expand(s1, current_length + length);
+    s1 = string_expand(s1, current_length + length + 1);
     memcpy(s1 + current_length, s2, length);
     s1[current_length + length] = '\0';
     STRING_HEADER(s1)->length = current_length + length;
+    return s1;
 }
 
-void string_append_cstring(string s, char *str) {
-    string_append_length(s, str, strlen(str));
+string string_append_cstring(string s, char *str) {
+    return string_append_length(s, str, strlen(str));
 }
 
-void string_slice(string s, int start, int end) {
+string string_slice(string s, int start, int end) {
+    string_header *header = STRING_HEADER(s);
+    assert(start >= 0);
+    assert(end <= header->length);
     int length = end - start;
     if(start > 0) memmove(s, s + start, length);
     s[length] = '\0';
-    STRING_HEADER(s)->length = length;
+    header->length = length;
+    return s;
 }
 
 bool string_equals(string s1, string s2) {
