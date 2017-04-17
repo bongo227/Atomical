@@ -2,10 +2,20 @@
 
 ## Analysis
 
-In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all asspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithums like the greatest bubble and insertion sort can be created.
+In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithums like the greatest common devisor, bubble sort and insertion sort can be created.
 
 ### Background
-The C programming language was developed by Dennis Ritchie between 1969 and 1973. C came at a time were language design was in its infacy. Through its many inovations including its type system, lexical scoping and syntax it inspired many of the popular langauges we see today. Even after decades of language theory and thousands of languages and innovation C is still has a firm place in kernals, embedable systems and high performant software applications and librarys.
+The first recognizable modern computers were created in the 1940's. Their limited hardware meant programmers would write hand tuned assembly which had none of the abstraction of modern languages meaning programs were slow to develop and error-prone. Autocode, developed in the 1950's, was the first higher-level compiled language. The invention of a compiler meant programmers could write less code and rely on the compiler to make optermizations that had previously required a large amount of knowledge to implement.
+
+Fortran was invented in 1954 at IBM, it was the first higher level functional language. To this day fortran can be seen in high performace code bases espesically in the acedemic areas of computer science like machine learning. List is another language developed towards the enfo of the 1950's that is still in use today. Lisp brougt lexical scoping which allowed a block to hide its varibles and procedures from code outside that block.
+
+The 1960's - 70's saw the invention of much of the syntax and paradigms used today. Simula was the first langauge to support object oriented programing were code is seperated into many objects which have methods and attributes much like real objects. ML brought the first staically typed functional programming languse with its polymorphic type system. C was developed at Bell labs and quickly became one of the most important languages ever, powering many low level systems to this day.
+
+The 80's broght alot of refinement such as the idea of organizing code into modules which helped make large code bases more maintainable and generic programming which meant programmers could write functions that worked for many diffrent types rather than many functions for each possible type. Computer instrubtion sets got smaller and more efficent which lead way to many improvements in the speed of programs which meant more advance systems could be designed.
+
+The explosive growth of the internet in the 90's caused widespread devleopment and use of scripting languages, espsicaly javascript which powers almost all of the interactive portions of websites to this day. Other developments included the integrated development enviroment which packaged all the languages tool into a text editor which made programming easier and faster. Garbage collection meant that memory no longer needed to be managed by the programmer, instead the runtime would detect when data was not being used and recycle for when the programmer needed new memory.
+
+Since then concurrent constructs such as callbacks and langauge level scedulers for light weight threads meant that programs could more easily take advantage of a modern processor with many cores. The idea of open source where programmers would post the code online so anyone could use and improve the software. OpenCL and CUDA allowed programmers to write massively parralel software for the GPU.
 
 ### Research
 In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design disicions behind them in order the judge what code should look like.
@@ -114,6 +124,167 @@ Compilers normaly expose a command line interface to transform the syntax into a
 * `-o`, `--output` flag should control the path of the compiled executable
 * `-t`, `--tokens` produces a file with a list of the tokens (for debugging)
 * `-i`, `--ircode` produces a file with the LLVM IR code for the program (for debugging)  
+
+## Documented design
+
+### Lexer
+The lexer's job is to turn the source code into a sequence of tokens. A token is the smallest possible bit of meaningfull source code such as a number or name. The following is all the possible types of token:
+
+| Name | Example | Note |
+| --- | --- | --- |
+| ILLEGAL | | If a token isnt one of the other types of token it becomes an illegal token and somthing fately wrong has happened.
+| END | | The last token, signifys the end of the token list. |
+| IDENT | `foo` | Identifier |
+| INT | `123` | Integer literal |
+| FLOAT | `10.23` | Float literal |
+| HEX | `0xFFFFFF` | Hex literal |
+| OCTAL | `0123` | Octal literal |
+| STRING | `"foo"` | String literal |
+| BREAK | `break` | Break keyword |
+| CASE | `case` | Case keyword |
+| CONST | `const` | Const keyword |
+| CONTINUE | `continue` | Continue keyword |
+| DEFAULT | `default` | Default keyword |
+| ELSE | `else` | Else keyword |
+| FALLTHROUGH | `fallthrough` | Fallthrough keyword |
+| FOR | `for` | For keyword |
+| FUNC | `func` | Func keyword |
+| PROC | `proc` | Proc keyword |
+| IF | `if` | If keyword |
+| IMPORT | `import` | Import keyword |
+| RETURN | `return` | Return keyword |
+| SELECT | `select` | Select keyword |
+| STRUCT | `struct` | Struct keyword |
+| SWITCH | `switch` | Switch keyword |
+| TYPE | `type` | Type keyword |
+| VAR | `var` | Var keyword |
+| DEFER | `defer` | Defer keyword |
+| DEFINE | `:=` | Define symbol |
+| SEMI | `;` | Semicolon symbol |
+| COLON | `:` | Colon symbol |
+| DOUBLE_COLON | `::` | Double colon symbol |
+| ELLIPSE | `...` | Ellipse symbol |
+| PERIOD | `.` | Period symbol |
+| COMMA | `,` | Comma symbol |
+| LPAREN | `(` | Left parentesis symbol |
+| RPAREN | `)` | Right parentesis symbol |
+| LBRACK | `[` | Left bracket symbol |
+| RBRACK | `]` | Right parentesis symbol |
+| LBRACE | `{` | Left brace symbol |
+| RBRACE | `}` | Right brace symbol |
+| ADD | `+` | Add symbol |
+| ADD_ASSIGN | `+=` | Add assign symbol |
+| INC | `++` | Increment symbol |
+| ARROW | `->` | Arrow symbol |
+| SUB | `-` | Substract symbol |
+| SUB_ASSIGN | `-=` | Subtract assign symbol |
+| DEC | `--` | Decrement symbol |
+| MUL | `*` | Multiplication symbol |
+| MUL_ASSIGN | `*=` | Mutltiply assign symbol |
+| QUO | `/` | Quotiant symbol |
+| QUO_ASSIGN | `/=` | Quotiant assign symbol |
+| REM | `%` | Remainder symbol |
+| REM_ASSIGN | `%=` | Remainder assign symbol |
+| XOR | `^` | Excusive or symbol |
+| XOR_ASSIGN | `^=` | Excusive or assign symbol |
+| GTR | `>` | Greater than symbol |
+| GEQ | `>=` | Greater than or equal to symbol |
+| LSS | `<` | Less than symbol |
+| LEQ | `<=` | Less than or equal to symbol |
+| SHL | `<<` | Shift left symbol |
+| SHL_ASSIGN | `<<=` | Shift left assign symbol |
+| SHR | `>>` | Shift right symbol |
+| SHR_ASSIGN | `>>=` | Shift right assign symbol |
+| ASSIGN | `=` | Assign symbol |
+| EQL | `==` | Equality symbol |
+| NOT | `!` | Not symbol |
+| NEQ | `!=` | Not equal to symbol |
+| AND | `&` | Bitwise and sybol |
+| AND_ASSIGN | `&=` | Bitwise and assign symbol |
+| AND_NOT | `&^` | Bit clear symbol |
+| AND_NOT_ASSIGN | `&^=` | Bit clear assign symbol |
+| LAND | `&&` | Logical and symbol |
+| OR | `|` | Bitwise or symbol |
+| OR_ASSIGN | `|=` | Bitwise or assign symbol |
+| LOR | `|` | Logical or symbol |
+
+To convert the source to token the lexer runs through the file character by character invoking diffrent procedures depending on which character the head points to.
+
+#### Extracting a number
+Fur has four types of numerical literals: ints, floats, octals and hexedecimals. Instead of a seperate procedure for each one which would require backtracking/look-head and alot of code duplication we use a single procedure. Note this uses gotos which are normaly a terrible idea, in this case they make the code more efficent, cleaner and easier to follow. 
+
+The first part is `extractMantissa` which returns all the digits which are less than `base`. `isDigit` checks if a character literal is a digit (0-F) and `asDigit` converts a character literal to an integer. `character` is the current character the lexer is reading and `nextCharacter` moves the `character` pointer to the next character.  
+
+```
+FUNCTION extractMantissa(base)
+  mantissa <- ""
+  WHILE isDigit(character) && asDigit(character) < base THEN
+    mantissa <- mantissa + character
+    length <- length + 1
+    nextCharacter()
+  LOOP
+  RETURN mantissa
+END FUNCTION
+```
+
+This is the main part of the algortithum. If first checks for hexedecimals or octals then integers and floats, when we check for octals we may find that it was actualy an integer (or float) in which case we can jump to the appropriate point. 
+```
+FUNCTION number()
+  number <- ""
+  type <- INTEGER
+  base <- 10
+
+  IF character = '0' THEN
+    nextCharacter()
+    IF character = 'x' OR character = 'X' THEN
+      type <- HEXEDECIMAL
+      base <- 16
+      nextCharacter()
+      number <- number + extractMantissa(base)
+    ELSE
+      octal <- TRUE
+      base <- 8
+      number <- number + extractMantissa(base)
+
+      IF character = '8' OR character = '9' THEN
+        octal <- FALSE
+        base <- 10
+      ELSE
+        type <- OCTAL
+      END IF
+
+      IF character = '.' THEN
+        GOTO fraction
+      END IF
+
+      IF NOT octal THEN
+        ERROR "Illegal octal number"
+      END IF
+    END IF
+
+    GOTO exit
+  END IF
+
+  base <- 10
+  number <- number + extractMantissa(base)
+
+LABEL fraction
+  IF character = '.' THEN
+    number <- number + '.'
+    nextCharacter()
+    type <- FLOAT
+    base <- 10
+    number <- number + extractMantissa(base)
+  END IF
+END LABEL
+
+LABEL exit
+  RETURN number
+END LABEL
+
+END FUNCTION
+```
+
 
 ### Irgen.c
 This file is the ir generation...
