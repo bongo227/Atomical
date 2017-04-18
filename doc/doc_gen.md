@@ -220,7 +220,6 @@ FUNCTION extractMantissa(base)
   mantissa <- ""
   WHILE isDigit(character) && asDigit(character) < base THEN
     mantissa <- mantissa + character
-    length <- length + 1
     nextCharacter()
   LOOP
   RETURN mantissa
