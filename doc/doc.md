@@ -204,9 +204,9 @@ The lexer's job is to turn the source code into a sequence of tokens. A token is
 | AND_NOT | `&^` | Bit clear symbol |
 | AND_NOT_ASSIGN | `&^=` | Bit clear assign symbol |
 | LAND | `&&` | Logical and symbol |
-| OR | `|` | Bitwise or symbol |
-| OR_ASSIGN | `|=` | Bitwise or assign symbol |
-| LOR | `|` | Logical or symbol |
+| OR | `\|` | Bitwise or symbol |
+| OR_ASSIGN | `\|=` | Bitwise or assign symbol |
+| LOR | `\|\|` | Logical or symbol |
 
 To convert the source to token the lexer runs through the file character by character invoking diffrent procedures depending on which character the head points to.
 
@@ -220,7 +220,6 @@ FUNCTION extractMantissa(base)
   mantissa <- ""
   WHILE isDigit(character) && asDigit(character) < base THEN
     mantissa <- mantissa + character
-    length <- length + 1
     nextCharacter()
   LOOP
   RETURN mantissa
@@ -285,65 +284,6 @@ END LABEL
 END FUNCTION
 ```
 
-## Parser
-The parser takes the list of tokens constructed by the lexer and transforms them into an abstract syntax tree, which is a tree structure which represents the program being compiled. An AST is constructed from nodes each with children for example the expression `-a + 4 * 5` would be parsed into:
-```golang
-BinaryNode {
-	Left: Unary Node {
-		Operator: '-'
-		Expression:  IdentNode{
-			name: 'a'
-		}
-	}
-	Operator: '+'
-	Right: BinaryNode {
-		Left: LiteralNode{
-			value: 4
-		}
-		Operator: '*'
-		Right: LiteralNode {
-			value: 5
-		}
-	}
-}
-```
-This structure allows us to more easily translate the higher level language into a lower level one.
-
-### Pratt Parser
-When it comes to language parsing their are many different options. A parser generator can automatically build a parser from a list of rules, however the error messages that they produce can be hard to understand and not very customizable. For this reason most languages opt to right their own parsers from scratch as I did with Fur. For this project I implemented a Top down operator precedence parser, also known as a Pratt parser, with a few modifications. 
-
-The key parts of this algorithm is the `led` and `nud` procedures. `led` (short for left denotation) parses the next token in an infix context i.e. the token joins two expressions.
-
-`nud` (short for null denotation) parser a token in a prefix context, i.e. the token starts a new expression.  
-```
-FUNCTION nud(token)
-	SWITCH typeof(token)
-		# Case statements here ...
-	END SWITCH
-END FUNCTION
-```
-
-#### Literal token
-If a literal is at the beginning of an expression (or sub-expression) we return a literal node, any following operators will be handled in an infix context. This is a key distinction between some other algorithms, by delaying infix operators we are able to parse mathematical expressions like `a + b * c` without having to use something like the shunting yard algorithm which requires allocating a stack (two stacks for function calls) and queue.
-```
-CASE LITERAL:
-	return LiteralNode { token }
-```
-
-#### Identifier token
-```
-CASE IDENT:
-	return IdentNode { token }
-```
-
-#### Unary token
-A unary node is somthing like `+100` or `-14`, the operator in front changes the value to the right. To parse a unary node we treat the tokens after the operator as a sub-expression by calling `expression()` (see below). This is what gives the ast its tree structure and allows us to parse expressions such as `-(14 + a)`, in this case the expression on the right wasnt a simple literal value but a binary expression.
-```
-CASE UNARY:
-	return UnaryNode { token, expression() }
-```
-
-#### 
 
 ### Irgen.c
 This file is the ir generation...
