@@ -204,9 +204,9 @@ The lexer's job is to turn the source code into a sequence of tokens. A token is
 | AND_NOT | `&^` | Bit clear symbol |
 | AND_NOT_ASSIGN | `&^=` | Bit clear assign symbol |
 | LAND | `&&` | Logical and symbol |
-| OR | `|` | Bitwise or symbol |
-| OR_ASSIGN | `|=` | Bitwise or assign symbol |
-| LOR | `|` | Logical or symbol |
+| OR | `\|` | Bitwise or symbol |
+| OR_ASSIGN | `\|=` | Bitwise or assign symbol |
+| LOR | `\|\|` | Logical or symbol |
 
 To convert the source to token the lexer runs through the file character by character invoking diffrent procedures depending on which character the head points to.
 
