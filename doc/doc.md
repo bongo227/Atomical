@@ -127,6 +127,195 @@ Compilers normaly expose a command line interface to transform the syntax into a
 
 ## Documented design
 
+### String
+Strings in C are represented by a pointer to some characters (that end with a null byte). This means that to append somthing to a string it would require a reallocation, which is slow. Additionaly to find the length of a C string, it requires a function call which loops until it reaches the null byte unlike most languages were it would be a constant time operation. It makes sence in this case to build a more dynamic string for when we dont know how long the string should be, and dont care about the additional memory.
+
+Strings have are split into two parts, the header and the characters. So that strings are compatible with the C standard library all the pointers returned by the string functions point to the characters so the header is hidden and must be accessed through the string functions. The header contains the length of the string (for fast direct access) and the capacity of the string (how many character can be stored before a reallocation must occor).
+
+#### String equality
+One side effect of knowing the strings length without looping though the string is faster string equality checks. The C standard library compares two strings character by character, if their is a diffrence the function returns false (non-zero) however since we have constant time access to the string length we can first check if the two strings lengths are equal thus improving performance in the case where two strings are not the same length.
+
+```
+FUNCTION string_equals(string a, string b)
+    length <- string_length(a)
+    if length != string_length(b) THEN
+        RETURN FALSE
+    ELSE
+        FOR i <- 0 TO length
+            IF a[i] != b[i] THEN
+                RETURN FALSE
+            ENDIF
+        LOOP
+    ENDIF
+    
+    RETURN TRUE
+ENDFUNCTION
+```
+
+#### string.h
+This is the header file for the string implementation
+
+```
+#include "../src/include/string.h"
+```
+
+#### string.c
+This is the source file for the string implmentation
+
+```
+#include "../src/string.c"
+```
+
+### Pool
+A compiler often allocates and frees many of the same structures. You could use the standard memory allocation function `malloc()` and `free()` however these are slow for many small allocations and the data has bad locality, so more cache misses occor when the data is read. The solution to this problem is a custom allocator, in this case a pool allocator.
+
+A pool allocator takes a large chunk of memory and divides it into equal parts. When ever a piece of memory is required, the pool allocator returns a section of this memory. When the memory is freed the pool allocator reclaims this memory ready to give out on the next request.
+
+#### Constructing a pool
+The pool must first allocate a large chunk of memory to form the pool. From their the free list is set up by looping through each slice of memory and adding a header with pointer to the next slice of memory. 
+
+```
+lastElement = memory[0]
+FOR i = 0 TO elementCount
+    element <- memory[i]
+    lastElement.next <- element
+    lastElement <- element
+LOOP
+lastElement.next <- _
+```
+
+Finaly we create a structure to save some details about the pool.
+```
+pool <- _
+pool.memory = memory
+pool.elementSize = elementSize
+pool.elementCount = elementCount
+pool.head = memory[0]
+pool.tail = lastElement
+RETURN pool
+```
+
+#### Pool full
+If the pool is full then the free list is empty hence `pool.head` (and `pool.tail`) must be `NULL`
+
+```
+FUNCTION poolFull(pool) 
+    return pool.head = _
+ENDFUNCTION
+```
+
+#### Pool count
+For debugging purposes its often usefull to know how much elements are in the pool. To compute this, we walk the free list to find out how much slices are free, then subtract that from `elementCount`
+
+```
+FUNCTION poolCount(pool)
+    IF poolFull(pool) THEN
+        return pool.elementCount
+    ELSE
+        free <- 0
+        ptr <- pool.head
+        WHILE ptr != pool.tail 
+            free <- free + 1
+            ptr <- ptr.next
+        ENDWHILE
+        free <- free + 1
+        
+        RETURN pool.elementCount - free
+    ENDIF
+ENDFUNCTION
+```
+
+#### Expaning the pool
+Expading the pool is quite involved since the pools memory may have been moved by the reallocation. First we must save some details about the old pool.
+```
+oldCount <- pool.count
+isFull <- poolFull(pool)
+```
+Then we compute the pointer offset of the head and tail so that we can restore them later.
+```
+oldMemory <- pool.memory
+headOffset <- pool.head - oldMemory
+tailOffset <- pool.tail - oldMemory
+```
+Now we can do the reallocation and restore the head and tail pointers.
+```
+pool.memory <- realloc(pool.memory, pool.elementSize * pool.elementCount)
+pool.head <- pool.memory + headOffset
+pool.tail <- pool.memory + tailOffset
+```
+The free list pointers are also invalidated by the reallocation so they too must be restored.
+```
+IF !isFull THEN
+    ptr <- pool.head
+    WHILE ptr != pool.tail
+        ptr.next <- pool.memory + ptr.next - oldMemory
+        ptr <- ptr.next
+    ENDWHILE
+ENDIF
+```
+Now that the pools capacity has expaned we need to expand the free list. First we set up a free list of all the new elements
+```
+firstNew <- pool.memory[oldCount]
+lastElement <- firstNew
+FOR i = oldCount TO pool.elementCount
+    element <- pool.memory[i]
+    lastElement.next = element
+    lastElement = element
+LOOP
+```
+The two lists can now be joined unless the pool was full before, then their was not old list so the new list becomes the free list.
+```
+IF isFull THEN
+    pool.head <- firstNew
+ELSE
+    pool.tail.next <- firstNew
+ENDIF
+pool.tail <- lastElement
+```
+As you can see extending the pool is quite an expensive option, however the time it takes to (re)allocate a pool far outweighs the time taken to allocated many small structures.
+
+#### Getting memory from the pool
+If the pool is full then their is no memory to give, thus we expand the pool. Otherwise we return the next element in the free list, after removing it from the list.
+
+```
+FUNCTION poolGet(pool)
+    IF poolFull(pool) THEN
+        poolExpand(pool, pool.elementCount * 2)
+    ENDIF
+    
+    element <- pool.head
+    pool.head <- pool.head.next
+    RETURN element
+ENDFUNCTIO
+```
+
+#### Releasing memory back to the pool
+Releasing memory back into the pool is as simple as adding the slice back into the free list. If the pool is full then the element starts a new freelist.
+```
+FUNCTION poolRelease(pool, element)
+    IF poolFull(pool) THEN
+        pool.head <- element
+        pool.head.next <- _
+        pool.tail <- pool.head
+    ELSE
+        pool.tail.next <- element
+        pool.tail <- element
+    ENDIF
+ENDFUNCTION
+```
+
+#### pool.h
+This is the header file for the pool implementation
+```
+#include "../src/includes/pool.h
+```
+
+#### pool.c
+This is the source file for the pool implementation
+```
+#include "../src/pool.c
+```
+
 ### Lexer
 The lexer's job is to turn the source code into a sequence of tokens. A token is the smallest possible bit of meaningfull source code such as a number or name. The following is all the possible types of token:
 
@@ -208,7 +397,49 @@ The lexer's job is to turn the source code into a sequence of tokens. A token is
 | OR_ASSIGN | `\|=` | Bitwise or assign symbol |
 | LOR | `\|\|` | Logical or symbol |
 
-To convert the source to token the lexer runs through the file character by character invoking diffrent procedures depending on which character the head points to.
+
+#### Lexing
+To convert the source to token the lexer runs through the file character by character invoking diffrent procedures depending on which character the head points to. For example when a `"` is at the read pointer we know its the start of a string literal which end when we reach the closing `"` character. In psudocode this looks like the following.
+
+```
+FUNCTION lex(readPointer) 
+    tokens <- []
+    
+    WHILE readPointer != _ 
+        SWITCH readPointer
+            ...
+            CASE '"':
+                type <- STRING
+                value <- ""
+                next(readPointer)
+                WHILE readPointer != `"`
+                    value <- value + readPointer
+                ENDWHILE
+            ...
+        ENDSWITCH
+        
+        tokens <- Token{type, value}
+    ENDWHILE
+ENDFUNCTION
+```
+
+#### Semicolon insertion
+In C every statement ends in a semi-colon. This tells the compiler that it is the end of a statement, and that the next tokens form a seperate statement. Most code only has a single statement per line so almost all semi-colons are at the end of a line, thus if the compiler was to insert semicolons at the end of all lines we could emit semicolons from the source code as in langauges like Go and javascript. 
+
+To insert semi-colons in the correct place a simple `semi` flag tells the compiler weather to insert a semi at the end of the line. If this flag is false `clearWhitespace` (which moves the `readPointer` past all the whitespace characters) skips over the newline without inserting a semi colon, else the `\n` character is detected in the lex routine and a semi colon is inserted in its place.
+
+```
+FUNCTION clearWhitespace()
+    WHILE readPointer = ' ' OR 
+        readpointer = '\t' OR 
+        (readpointer = '\n' AND !semi) OR
+        readpointer = '\r'
+        
+        next(readPointer)
+        column -> column + 1
+    ENDWHILE
+ENDFUNCTION
+```
 
 #### Extracting a number
 Fur has four types of numerical literals: ints, floats, octals and hexedecimals. Instead of a seperate procedure for each one which would require backtracking/look-head and alot of code duplication we use a single procedure. Note this uses gotos which are normaly a terrible idea, in this case they make the code more efficent, cleaner and easier to follow. 
@@ -284,12 +515,429 @@ END LABEL
 END FUNCTION
 ```
 
+#### lexer.h
+This is the header file for the lexer implementation
 
-### Irgen.c
-This file is the ir generation...
+```
+#include "../src/includes/lexer.h"
+```
 
-```c
-#import "../src/irgen.c"
+#### lexer.c
+This is the source file for the lexer implementation
+
+```
+#include "../src/lexer.c"
+```
+
+### Parser
+The parser takes the list of tokens constructed by the lexer and transforms them into an abstract syntax tree, which is a tree structure which represents the program being compiled. An AST is constructed from nodes each with children for example the expression -a + 4 * 5 would be parsed into:
+```go
+BinaryNode {
+	Left: UnaryNode {
+		Operator: '-'
+		Expression:  IdentNode{
+			name: 'a'
+		}
+	}
+	Operator: '+'
+	Right: BinaryNode {
+		Left: LiteralNode{
+			value: 4
+		}
+		Operator: '*'
+		Right: LiteralNode {
+			value: 5
+		}
+	}
+}
+```
+
+This structure allows us to more easily translate the higher level language into a lower level one.
+
+Nodes are slit into 3 types, expressions, statements and declarations.
+
+#### Expressions
+Expression nodes are nodes that can be evaluated.
+
+| Name | Example | Notes |
+| ---- | ------- | ----- |
+| identExp | `foo` | An identifier |
+| literalExp | `123` | Any literal value including numbers and strings |
+| unaryExp | `-100` | An expression whith a leading unary operation |
+| binaryExp | `10 + 3` | Binary expression with an infix operation |
+| selectorExp | `foo.bar` | A selection expression, for accessing keys in a struct |
+| indexExp | `foo[0]` | An index expression, for accessing items in an array |
+| callExp | `foo(bar, baz)` | Function call expression |
+| keyValueExp | `foo: 123` | Expression with a (optional key) and value |
+| keyValueListExp | `{foo: 123, bar: 321}` | List of key value expressions |
+| structValueExp | `foo{bar: 123}` | Key value list with a procedding type |
+| arrayExp | `[1, 2, 3]` | Array initilizer expression |
+| arrayType | `int[10]` | Array type expression |
+
+#### Statements
+Statements provide the control flow and assignment syntax.
+
+| Name | Example | Notes |
+| ---- | ------- | ----- |
+| declareSmt | `foo := 100` | Wrapper around declare node |
+| assignmentSmt | `foo = 100` | Varible assignment |
+| retSmt | `return 100` | Return statement |
+| ifSmt | `if foo > 19 {}` | If statement |
+| forSmt | `for i := 0; i < 10; i++ {}` | For statement |
+
+#### Declarations
+Declare nodes are the top level parent nodes.
+
+| Name | Example | Notes |
+| --- | --- | --- |
+| argumentDcl | `int a` | Function argument declaration |
+| functionDcl | `proc foo :: int bar, int baz -> int` | Function declaration |
+| varibleDcl | `var int a = 100` | Varible declarations |
+
+#### Pratt Parser
+
+When it comes to language parsing their are many different options. A parser generator can automatically build a parser from a list of rules, however the error messages that they produce can be hard to understand and not very customizable. For this reason most languages opt to right their own parsers from scratch as I did with Fur. For this project I implemented a Top down operator precedence parser, also known as a Pratt parser, with a few modifications.
+
+The key parts of this algorithm is the `led` and `nud` procedures. `led` (short for left denotation) parses the next token in an infix context i.e. the token joins two expressions. The original Pratt parser was only designed for expressions however I have added a a `stmd` function which parses a statement in a simular style.
+
+##### Nud method
+`nud` (short for null denotation) parser a token in a prefix context, i.e. the token starts a new expression.
+
+```
+FUNCTION nud(token)
+	SWITCH typeof(token)
+		# Case statements here ...
+	END SWITCH
+END FUNCTION
+```
+###### Literal expression
+If a literal is at the beginning of an expression (or sub-expression) we return a literal node, any following operators will be handled in an infix context. This is a key distinction between some other algorithms, by delaying infix operators we are able to parse mathematical expressions like a + b * c without having to use something like the shunting yard algorithm which requires allocating a stack (two stacks for function calls) and queue.
+
+```
+CASE INT, FLOAT, HEX, OCTAL, STRING:
+	return LiteralNode { token }
+```
+
+###### Ident expression
+```
+CASE IDENT:
+	return IdentNode { token }
+```
+
+###### Unary expression
+A unary node is normaly somthing like `-14`, the operator in front changes the value to the right. To parse a unary node we treat the tokens after the operator as a sub-expression by calling `expression` (see below). 
+
+We parse in a value of 60 for the binding power of the sub expression, this is the other unique feature of a Pratt parser. To delay the parsing of infix tokens we use the consept of binding power, which is how well tokens should _bind_ to eachother. For example the binding power of `*` will be higher than the binding power of `-` since we alway multiply before subtracting. By calling `expression` we get the next subexpression where all the tokens are bound by a binding power higher than the right binding power (which is the parameter to expression).
+
+`expression` is what gives the ast its tree structure and allows us to parse expressions such as `-(14 + a)`, in this case the expression on the right wasnt a simple literal value but a binary expression.
+
+```
+CASE NOT, SUB:
+	return UnaryNode { token, expression(60) }
+```
+
+###### Key value expression
+A key value node is a list of values with keys such as:
+```
+{
+    baz: 123,
+    qux: 2.4,
+}
+```
+but the keys may be ommited 
+```
+{ 123, 2.4 }
+```
+To parse a list of values we use a loop to parse each key value pair until we reach a `}` which is the end of list. Inside the loop we try to parse a key or a value, since we dont know if the item has a key we must check if the next token is a `:`. If it is then the `keyOrValue` was a key and the value expression is parsed, if their was no colon then `keyOrValue` must be a value. A `KeyValue` node is then appended to the `keyValues` array which will form the `KeyValueList` node. 
+
+```
+CASE LPAREN:
+    count <- 0
+    keyValues <- []
+    
+    WHILE token != RBRACE DO
+        keyOrValue <- expression()
+        key <- NULL
+        value <- NULL
+
+        if token == COLON THEN
+            nextToken()
+            key <- keyOrValue
+            value = expression()
+        ELSE
+            value = keyOrValue
+        ENDIF
+        
+        keyValues[count] <- KeyValue {key, value}
+        count <- count + 1
+        
+        expect(COMMA)
+    ENDWHILE
+    
+    RETURN KeyValueList{keyValues}
+```
+
+###### Array expression
+Array nodes are very simular to a `KeyValueList` expression however they can ommit the check for keys since array initilizers dont have keys
+
+```
+CASE LPAREN:
+    count <- 0
+    values <- []
+    
+    WHILE token != RBRACK DO
+        value <- expression()
+        values[count] <- value
+        count <- count + 1
+        expect(COMMA)
+    ENDWHILE
+    
+    RETURN Array{keyValues}
+```
+
+##### Led method
+The led method parses a token that in an infix context, i.e. between two nodes.
+```
+FUNCTION led(exp, token)
+    rbp <- getBindingPower(token)
+    SWITCH typeof(token)
+        # Case statements here ...
+    END SWITCH
+END FUNCTION
+```
+
+###### Binary expression
+A binary expression is like a unary expression except the operator is in the middle of two values such as `41 + 2`. In this case `41` would have already been parsed and `+` is the current token. To finish the node the right hand side must be constructed by a call to `expression`.
+
+Assignment statements are also parsed here and then transformed into the correct node elsewhere otherwise some look ahead functionality would be required which would make the parser less efficent.
+
+```
+CASE ADD, SUB, MUL, QUO, REM, 
+    EQL, NEQ, GTR, LSS, GEQ, LEQ, LAND, LOR,
+    ASSIGN, ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, REM_ASSIGN, OR_ASSIGN, SHL_ASSIGN:
+    
+    RETURN BinaryExp{exp, token, expression(rbp)}
+```
+
+###### Selector expression
+A selector expression is exactly the same as a binary expression except the two values are seperated by a `.`.
+
+```
+CASE PERIOD:
+    RETURN SelectorExp{exp, expression(rbp)}
+```
+
+###### Call expression
+A call expression is simular to a key value list expression.
+
+```
+CASE LPAREN:
+    count <- 0
+    parameters <- []
+    
+    WHILE token != RPAREN DO
+        param <- expression()
+        parameters[count] <- param
+        count <- count + 1
+        expect(COMMA)
+    ENDWHILE
+    
+    RETURN Call{parameters, exp}
+```
+
+##### Smtd method
+Statment parses the token in the context of the start of a _statement_, instead of a expression as in `nud`. This is an important distinction since the same token can mean diffrent things if it is at the start of an expression of statement.
+
+###### Return statement
+Return statements are simple nodes with a single expression being the value the statement returns.
+```
+CASE RETURN:
+    RETURN Return{expression()}
+```
+
+###### Block statement
+Block statements are used in more complex statements such as if and for statments or on their own.
+```
+CASE LBRACE:
+    expect(LBRACE)
+    smtCount <- 0
+    smts <- []
+    WHILE token != RBRACE THEN
+        smtCount <- smtCount + 1
+        smts[smtCount] <- statement()
+        expect(SEMI)
+    ENDWHILE
+    expect(RBRACE)
+    RETURN Block{smts}
+```
+
+###### If statement
+To parse an if statements we look for the `IF` token, then parse the condition as an expression and the block as a block. If their is an `ELSE` after the block, we check for an `IF`. If their is an `IF` we recursivly call `if()` to parse the next if, otherwise it must be a final else with no condition.
+
+```
+CASE IF:
+    expect(IF)
+    condition <- expression()
+    block <- block()
+    else <- _
+    IF token == ELSE THEN
+        expect(ELSE)
+        IF token == IF THEN
+            else <- if()
+        ELSE
+            else <- If{_, block(), _}
+        ENDIF
+    ENDIF
+    
+    RETURN If{condition, block, else}
+```
+
+###### For statement
+For statments are simular to if statements
+
+```
+CASE FOR:
+    expect(FOR)
+    index <- declaration()
+    condition <- expression()
+    body <- block()
+```
+
+###### Variable declaration
+Varible declarations are normaly handled elsewhere however if it starts with the optional `var` then we can parse the varible declaration now (rather than later).
+
+```
+CASE VAR:
+    RETURN declaration()
+```
+
+###### Increment expression
+Increment statements dont start with a keyword, so we look for an identifier. If their is not a proceeding increment or decrement token then we know the expression is a assignment or declaration node so we let the caller handle it.
+
+```
+CASE IDENT:
+    ident <- Ident()
+    SWITCH token
+        CASE INC:
+            RETURN binary{ident, ADD_ASSIGN, 1}
+        CASE DEC:
+            RETURN binary{ident, SUB_ASSIGN, 1}
+    ENDSWITCH
+    RETURN _
+```
+
+##### Declarations
+Their are only two declaration nodes, functions and varibles.
+
+###### Function declaration
+Function declaration are more complicated than most nodes since they contain alot of infomation
+
+```
+CASE PROC:
+    expect(PROC)
+    name <- Ident()
+    expect(DOUBLE_COLON)
+    
+    args <- []
+    argCount <- 0
+    WHILE token != ARROW OR token != LBRACE
+        type <- Type()
+        name <- Ident()
+        args[argCount] = Arg{type, name}
+        argCount <- argCount + 1
+    ENDWHILE
+    
+    expect(ARROW)
+    
+    returnType <- Type()    
+    
+    body <- Block()
+    
+    RETURN Function{name, args, returnType, body}
+```
+
+###### Varible declaration
+Variable declaration come in two forms, short form such as `foo := 123` and `var bar int = 199`. In the case of the long form declaration we know ahead of time that is a varible declaration since it starts with the var keyword.
+
+```
+CASE VAR:
+    type <- Type()
+    name <- Ident()
+    value <- Expression()
+    RETURN VariableDcl{type, name, value}
+```
+
+Otherwise the statement wrapper function first trys to parse it as a statement with `smtd()`, for short varible declarations this will return `NULL`. Next it trys parsing it as an expression, this will return a binary expression node where the operator is a assign or define type. From their the expression is converted into a statement.
+
+```
+FUNCTION Statement()
+    statement <- smtd()
+    IF statement != _ THEN
+        RETURN statement
+    ENDIF
+    
+    expression <- Expression()
+    IF expression = _ THEN
+        RETURN _
+    ENDIF
+    
+    SWITCH expression.op
+        CASE ASSIGN, ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, REM_ASSIGN, OR_ASSIGN, SHL_ASSIGN:
+            RETURN Assignment{expression.left, expression.op, expression.right}
+        CASE DEFINE:
+            RETURN VariableDcl{expression.left, expression.right}
+    ENDSWITCH
+ENDFUNCTION
+```
+
+##### Error handling
+Error handling inside a parser is particulaly difficult, if their an unexpect token anywhere, we cant parse the current expression, statement or declaration however their may be other errors further down. Most compilers will no halt at a single error, but continue so that any other errors can be reported in a single compilation which makes finding and fixing bugs much easier.
+
+So whenever we call `expect()` we return the token we were expecting or `NULL` if the token was not what we expected. If the token was incorrect an error is produced and added to the array of errors. It is up to the caller how to handle and incorrect token, generaly their is three diffrent options.
+
+* If the token is non fatel such as a `::` in a function definition, the parser can continue from were it is.
+* If we are inside a statement and the token was fatel we can skip over the tokens until a `SEMI` token is reached, then the parser can continue safely.
+* Otherwise the whole block must be skipped.
+
+If the parser doesnt skip over the affected tokens, the same line of source code would have many confilicting errors which wouldnt make sence.
+
+```
+FUNCTION skipBlock()
+    WHILE token != LBRACE
+        nextToken()
+    ENDWHILE
+    
+    depth <- 0
+    REPEAT
+        IF token = LBRACE THEN
+            depth <- depth + 1
+        ELSEIF token = RBRACE THEN
+            depth <- depth - 1
+        ENDIF
+        nextToken()
+    WHILE depth > 0
+ENDFUNCTION
+```
+
+```
+FUNCTION skipSemi()
+    WHILE token != SEMI THEN
+        nextToken()
+    ENDWHILE
+    nextToken()
+ENDFUNCTION
+```
+
+#### parser.h
+This is the header file for the parser implementation
+```
+#include "../src/includes/parser.h"
+```
+
+#### parser.c
+This is the source file for the parser implementation
+```
+#include "../src/includes/parser.c"
 ```
 
 ## References
