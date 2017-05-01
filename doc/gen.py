@@ -4,7 +4,6 @@ def get_imports(source):
     imports = []
     i = 0
     while i < len(source)-1:
-        print i
         # Find the next import
         i = source.find("#import", i, len(source))
         if i == -1:
@@ -20,7 +19,6 @@ def get_imports(source):
             i += 1
 
         # Match "
-        print i
         assert source[i] == '"'
         
         # Extract value

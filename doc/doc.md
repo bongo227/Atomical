@@ -172,14 +172,14 @@ ENDFUNCTION
 This is the header file for the string implementation
 
 ```
-#include "../src/include/string.h"
+#import "../src/includes/string.h"
 ```
 
 #### string.c
 This is the source file for the string implmentation
 
 ```
-#include "../src/string.c"
+#import "../src/string.c"
 ```
 
 ### Pool
@@ -323,13 +323,13 @@ ENDFUNCTION
 #### pool.h
 This is the header file for the pool implementation
 ```
-#include "../src/includes/pool.h
+#import "../src/includes/pool.h"
 ```
 
 #### pool.c
 This is the source file for the pool implementation
 ```
-#include "../src/pool.c
+#import "../src/pool.c"
 ```
 
 ### Queue
@@ -437,14 +437,14 @@ ENDFUNCTION
 This is the header file for the queue implementation
 
 ```
-#include "../src/includes/queue.h"
+#import "../src/includes/queue.h"
 ```
 
 #### queue.c
 This is the source file for the queue implementation
 
 ```
-#include "../src/queue.c"
+#import "../src/queue.c"
 ```
 
 ### Lexer
@@ -650,14 +650,14 @@ END FUNCTION
 This is the header file for the lexer implementation
 
 ```
-#include "../src/includes/lexer.h"
+#import "../src/includes/lexer.h"
 ```
 
 #### lexer.c
 This is the source file for the lexer implementation
 
 ```
-#include "../src/lexer.c"
+#import "../src/lexer.c"
 ```
 
 ### Parser
@@ -1062,13 +1062,13 @@ ENDFUNCTION
 #### parser.h
 This is the header file for the parser implementation
 ```
-#include "../src/includes/parser.h"
+#import "../src/includes/parser.h"
 ```
 
 #### parser.c
 This is the source file for the parser implementation
 ```
-#include "../src/includes/parser.c"
+#import "../src/parser.c"
 ```
 
 ### IR Generation
@@ -1160,13 +1160,13 @@ SetBlock(irgen, endBlock)
 #### irgen.h
 This is the header file for the IR generation implementation
 ```
-#include "../src/includes/irgen.h"
+#import "../src/includes/irgen.h"
 ```
 
 #### irgen.c
 This is the source file for the IR generation implementation
 ```
-#include "../src/includes/irgen.c"
+#import "../src/irgen.c"
 ```
 
 ## Technical solution
@@ -1177,7 +1177,7 @@ This folder is were the make file produces the executables and librarys for the 
 #### CMakeLists.txt
 This is the make file for the project
 ```
-#include "../build/CMakeLists.txt
+#import "../build/CMakeLists.txt"
 ```
 
 ### src/
@@ -1186,108 +1186,108 @@ This is the folder were all the source files for the compiler reside.
 #### includes/all.h
 Contains a few helpfull defines for the whole project.
 ```
-#include "../src/includes/all.h"
+#import "../src/includes/all.h"
 ```
 
 #### includes/ast.h
 Typedefs for all the ast nodes.
 ```
-#include "../src/includes/ast.h`
+#import "../src/includes/ast.h"
 ```
 
 #### ast.c
 Constructors for the AST nodes.
 ```
-#include "../src/ast.c"
+#import "../src/ast.c"
 ```
 
 #### includes/error.h
 ```
-#include "../src/includes/error.h"
+#import "../src/includes/error.h"
 ```
 
 #### error.c
 Pretty prints errors to the terminal.
 ```
-#include "../src/error.c"
+#import "../src/error.c"
 ```
 
 #### includes/irgen.h
 ```
-#include "../src/includes/irgen.c"
+#import "../src/includes/irgen.h"
 ```
 
 #### irgen.c
 ```
-#include "../src/irgen.c"
+#import "../src/irgen.c"
 ```
 
 #### includes/lexer.h
 ```
-#include "../src/includes/lexer.h"
+#import "../src/includes/lexer.h"
 ```
 
 #### lexer.c
 ```
-#include "../src/lexer.c"
+#import "../src/lexer.c"
 ```
 
 #### lib.c
 Includes all the source files so the compiler can be exposed as a library (which we use in the unit tests).
 ```
-#include "../src/lib.c
+#import "../src/lib.c"
 ```
 
 #### main.c
 Entry point for the compiler
 ```
-#include "../src/main.c"
+#import "../src/main.c"
 ```
 
 #### includes/parser.h
 ```
-#include "../src/includes/parser.h"
+#import "../src/includes/parser.h"
 ```
 
 #### parser.c
 ```
-#include "../src/parser.c"
+#import "../src/parser.c"
 ```
 
 #### includes/pool.h
 ```
-#include "../src/includes/pool.h"
+#import "../src/includes/pool.h"
 ```
 
 #### pool.c
 ```
-#include "../src/pool.c"
+#import "../src/pool.c"
 ```
 
 #### includes/queue.h
 ```
-#include "../src/includes/queue.h"
+#import "../src/includes/queue.h"
 ```
 
 #### queue.c
 ```
-#include "../src/queue.c"
+#import "../src/queue.c"
 ```
 
 #### includes/string.h
 ```
-#include "../src/includes/string.h"
+#import "../src/includes/string.h"
 ```
 
 #### string.c
 ```
-#include "../src/string.c"
+#import "../src/string.c"
 ```
 
 #### includes/uthash.h
 The only other external dependencie (apart from LLVM), uthash which is a single header hash table.
 ```
-#include "../src/includes/uthash.h"
+#import "../src/includes/uthash.h"
 ```
 
 ### tests/
@@ -1295,139 +1295,139 @@ This folder contains the C++ program that tests the compiler
 
 #### tests/add.fur
 ```
-#include "../tests/tests/add.fur
+#import "../tests/tests/add.fur"
 ```
 
 #### tests/arrayInit.fur
 ```
-#include "../tests/tests/arrayInit.fur
+#import "../tests/tests/arrayInit.fur"
 ```
 
 #### tests/arraySum.fur
 ```
-#include "../tests/tests/arraySum.fur
+#import "../tests/tests/arraySum.fur"
 ```
 
 #### tests/binaryFloat.fur
 ```
-#include "../tests/tests/binaryFloat.fur
+#import "../tests/tests/binaryFloat.fur"
 ```
 
 #### tests/binaryInt.fur
 ```
-#include "../tests/tests/binaryInt.fur
+#import "../tests/tests/binaryInt.fur"
 ```
 
 #### tests/bubbleSort.fur
 ```
-#include "../tests/tests/bubbleSort.fur
+#import "../tests/tests/bubblesort.fur"
 ```
 
 #### tests/fibbonanci.fur
 ```
-#include "../tests/tests/fibbonanci.fur
+#import "../tests/tests/fibbonanci.fur"
 ```
 
 #### tests/for.fur
 ```
-#include "../tests/tests/for.fur
+#import "../tests/tests/for.fur"
 ```
 
 #### tests/gcd.fur
 ```
-#include "../tests/tests/gcd.fur
+#import "../tests/tests/gcd.fur"
 ```
 
 #### tests/if.fur
 ```
-#include "../tests/tests/if.fur
+#import "../tests/tests/if.fur"
 ```
 
 #### tests/ifElse.fur
 ```
-#include "../tests/tests/ifElse.fur
+#import "../tests/tests/ifElse.fur"
 ```
 
 #### tests/ifElseIfElse.fur
 ```
-#include "../tests/tests/ifElseIfElse.fur
+#import "../tests/tests/ifElseIfElse.fur"
 ```
 
 #### tests/ifElseIfElseIfElse.fur
 ```
-#include "../tests/tests/ifElseIfElseIfElse.fur
+#import "../tests/tests/ifElseIfElseIfElse.fur"
 ```
 
 #### tests/literal.fur
 ```
-#include "../tests/tests/literal.fur
+#import "../tests/tests/literal.fur"
 ```
 
 #### tests/longVar.fur
 ```
-#include "../tests/tests/longVar.fur
+#import "../tests/tests/longVar.fur"
 ```
 
 #### tests/nestedFor.fur
 ```
-#include "../tests/tests/nestedFor.fur
+#import "../tests/tests/nestedFor.fur"
 ```
 
 #### tests/reassignArg.fur
 ```
-#include "../tests/tests/reassignArg.fur
+#import "../tests/tests/reassignArg.fur"
 ```
 
 #### tests/shortVar.fur
 ```
-#include "../tests/tests/shortVar.fur
+#import "../tests/tests/shortVar.fur"
 ```
 
 #### tests/unary.fur
 ```
-#include "../tests/tests/unary.fur
+#import "../tests/tests/unary.fur"
 ```
 
 #### irgen_test.cpp
 Contains unit tests for the ir generation and the integrations tests for the whole system
 ```
-#include "../tests/irgen_test.cpp"
+#import "../tests/irgen_test.cpp"
 ```
 
 #### lexer_test.cpp
 Unit tests for the lexer
 ```
-#include "../tests/lexer_test.cpp"
+#import "../tests/lexer_test.cpp"
 ```
 
 #### parser_test.cpp
 Unit tests for the parser
 ```
-#include "../tests/parser_test.cpp"
+#import "../tests/parser_test.cpp"
 ```
 
 #### pool_test.cpp
 Unit tests for the pool
 ```
-#include "../tests/pool_test.cpp"
+#import "../tests/pool_test.cpp"
 ```
 
 #### queue_test.cpp
 Unit tests for the queue
 ```
-#include "../tests/queue_test.cpp"
+#import "../tests/queue_test.cpp"
 ```
 
 #### string_test.cpp
 Unit tests for the string
 ```
-#include "../tests/string_test.cpp"
+#import "../tests/string_test.cpp"
 ```
 
 #### test.cpp
 Test program entry point
 ```
-#include "../tests/test.cpp
+#import "../tests/test.cpp"
 ```
 
 ## Testing
