@@ -2,7 +2,7 @@
 
 ## Analysis
 
-In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithums like the greatest common devisor, bubble sort and insertion sort can be created.
+In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithums like the greatest common devisor, bubble sort and fibbonanci sequence can be created.
 
 ### Background
 The first recognizable modern computers were created in the 1940's. Their limited hardware meant programmers would write hand tuned assembly which had none of the abstraction of modern languages meaning programs were slow to develop and error-prone. Autocode, developed in the 1950's, was the first higher-level compiled language. The invention of a compiler meant programmers could write less code and rely on the compiler to make optermizations that had previously required a large amount of knowledge to implement.
@@ -126,6 +126,22 @@ Compilers normaly expose a command line interface to transform the syntax into a
 * `-i`, `--ircode` produces a file with the LLVM IR code for the program (for debugging)  
 
 ## Documented design
+
+### Overview
+![](https://i.imgur.com/dA6xCKY.png)
+1. Source code is parsed into the compiler
+2. The lexer turns the source code into tokens, the smallest pieces of syntax
+3. The parser turns the tokens into an abstract syntax tree
+4. The AST is transformed into LLVM IR, which is a lower level language
+5. LLVM uses lots of parses through the IR to optermize the code
+6. LLVM produces assembly which is can then be linked by a linker, producing an executable
+
+### Psudocode
+This project was implemented in C which means their is alot of code which isnt important for an explanation on how each algoritum works. To help illustrate how the algorithums work I have opted to use psudocode so that it is easier to understand. The psudocode is close to the AQA psudocode spec with a few additions.
+
+* `LABEL` and `ENDLABEL` make a labeled section of code
+* `GOTO` goes to a label
+* `_` is equivilent to `NULL` in C 
 
 ### String
 Strings in C are represented by a pointer to some characters (that end with a null byte). This means that to append somthing to a string it would require a reallocation, which is slow. Additionaly to find the length of a C string, it requires a function call which loops until it reaches the null byte unlike most languages were it would be a constant time operation. It makes sence in this case to build a more dynamic string for when we dont know how long the string should be, and dont care about the additional memory.
@@ -314,6 +330,121 @@ This is the header file for the pool implementation
 This is the source file for the pool implementation
 ```
 #include "../src/pool.c
+```
+
+### Queue
+Queues are an important are another important data structure which the C standard library doesnt provide, so I implemented my own. This queue uses a double ended linked list on the back end allowing for fast insertions and deletions from either end of the queue. This is not strickly a queue, and can also be used as a stack.
+
+#### Queue push
+To push onto a queue, the queue allocates a new element with a header which is returned to the caller for populating with data. To push to the frount we add the new element at the start of the queue and link the new element and old element.
+
+```
+FUNCTION queuePushFront(queue)
+    queue.size <- queue.size + 1
+    item <- malloc(queue.elementSize)
+    
+    item->prev <- _
+    IF queue.first = _ THEN
+        item.next <- _
+        queue.last <- item
+    ELSE
+        item.next <- queue.first
+        queue.first.prev <- item
+    ENDIF
+    queue.first <- item
+    
+    return item
+ENDFUNCTION
+```
+
+Likewise to push to the back of the queue we use a simular routine, adding the new element at the end of the queue.
+
+```
+FUNCTION queuePushBack(queue)
+    queue.size <- queue.size + 1
+    item <- malloc(queue.elementSize)
+    
+    item->next <- _
+    IF queue.first = _ THEN
+        item.prev <- _
+        queue.first <- item
+    ELSE
+        item.prev <- queue.last
+        queue.last.next <- item
+    ENDIF
+    queue.last <- item
+    
+    return item
+ENDFUNCTION
+```
+
+#### Queue pop
+Popping from the queue is as simple as removing an item from the frount or back and updating the list.
+```
+FUNCTION queuePopFrount(queue)
+    IF queue.first = _
+        RETURN _
+    ENDIF
+    
+    q.size <- q.size - 1
+    item <- queue.first
+    
+    IF q.first = q.last THEN
+        q.last <- _
+    ENDIF
+    
+    q.first.prev <- _
+    q.first <- q.first.next
+    
+    RETURN item
+ENDFUNCTION
+```
+
+```
+FUNCTION queuePopBack(queue)
+    IF queue.last = _
+        RETURN _
+    ENDIF
+    
+    q.size <- q.size - 1
+    item <- queue.last
+    
+    IF q.last = q.first THEN
+        q.first <- _
+    ENDIF
+    
+    q.last.next <- _
+    q.last <- q.last.prev
+    
+    RETURN item
+ENDFUNCTION
+```
+
+#### Queue destroy
+Destroying the queue is as simple as walking along the linked list and freeing each node.
+
+```
+FUNCTION queueDestroy(queue)
+    WHILE queue.first != _
+        next <- queue.first.next
+        free(queue.first)
+        queue.first <- next
+    ENDWHILE
+ENDFUNCTION
+```
+
+#### queue.h
+This is the header file for the queue implementation
+
+```
+#include "../src/includes/queue.h"
+```
+
+#### queue.c
+This is the source file for the queue implementation
+
+```
+#include "../src/queue.c"
 ```
 
 ### Lexer
@@ -939,6 +1070,371 @@ This is the source file for the parser implementation
 ```
 #include "../src/includes/parser.c"
 ```
+
+### IR Generation
+Having converted the source code to tokens and the tokens to an abstract syntax tree we now can transform it into LLVM IR which LLVM will compile to machine code. LLVM IR is much lower level than Fur however the LLVM C API does alot of the heavy lifting for by constructuing the intemediantry language in memory.
+
+#### If statements
+LLVM IR does not have any if statements only conditional branches. To brach we must break the code into seperate blocks which end with a terminating statements (such as a branch, return etc). Since if statements can be chained it make sence for the transformation to be recursive hence we need a two functions, the recursive `compileIfBranch()` function and the `compileIf()` function to call into the recursive function.
+
+`compileIf()` just sets up a `endBlock` which is the block which the program will continue executing from.
+```
+FUNCTION compileIf(irgen, ifSmt)
+    endBlock <- LLVMAppendBasicBlock(irgen.function, "endBlock")
+    compileIfBranch(irgen, ifSmt, _, endBlock)
+ENDFUNCTION
+```
+
+`compileIfBranch()` takes four arguments: a refrence to irgen which holds some state about the ir generation, the if node, the block to branch from (will be `NULL` for root level if branches) and the block to continue execution from. 
+
+The first step is to check for a condition, if the condition is `NULL` then this branch must be an else branch therefore we compile the block and exit. `CompileBlockAt()` compiles a block statement and returns an `LLVMBlockRef` to were the execution should continue. We use `SetBlock()` to set it as are current block and check if its not terminated, if its not then we insert a branch to the endblock.
+```
+condition <- ifSmt.condition
+IF condition = _ THEN
+    outBlock <- CompileBlockAt(irgen, ifSmt.body, block)
+    
+    SetBlock(irgen, outBlock)
+    IF LLVMGetBasicBlockTerminator(outBlock) = _ THEN
+        LLVMBuildBr(irgen.builder, endBlock)
+        SetBlock(irgen, endBlock)
+    ENDIF
+    
+    RETURN
+ENDIF
+```
+
+From this point we know the if branch must be an if or an else if. The next step is to get the `parent` block, which is the block to branch from.
+```
+parent <- _
+IF block = _ THEN
+    parent <- irgen.block
+ELSE
+    parent <- block
+ENDIF
+```
+
+`block` now becomes the block if the condition is true
+```
+block <- LLVMAppendBasicBlock(irgen.function, "if")
+```
+
+`falseBlock` will be either the next else/else if branch or the block to continue execution
+```
+falseBlock <- _
+IF ifSmt.else != _ THEN
+    falseBlock <- LLVMAppendBasicBlock(irgen.function, "else")
+ELSE
+    falseBlock <- endBlock
+ENDIF
+```
+
+Now we can compile the body of the current if/else if branch, if the execution is not terminated we also branch to `endBlock`
+```
+outBlock <- CompileBlockAt(irgen, ifSmt.body, block)
+IF LLVMGetBasicBlockTerminator(outBlock) = _ THEN
+    SetBlock(irgen, outBlock)
+    LLVMBuildBr(irgen.builder, endBlock)
+    SetBlock(irgen, parent)
+ENDIF
+```
+
+The conditional branch instruction is next.
+```
+condition <- CompileExp(irgen, cond);
+LLVMBuildCondBr(irgen.builder, condition, block, falseBlock);
+```
+
+Next we check for any chaining else if/else blocks. If their are we recursivly call this function to compile the whole chain.
+```
+SetBlock(irgen, falseBlock)
+IF ifSmt.else != _ THEN
+    CompileIfBranch(irgen, ifSmt.else, falseBlock, endBlock)
+ENDIF
+```
+
+Finaly we set the endBlock as the current block so any further instructions execute from their.
+```
+SetBlock(irgen, endBlock)
+```
+
+#### irgen.h
+This is the header file for the IR generation implementation
+```
+#include "../src/includes/irgen.h"
+```
+
+#### irgen.c
+This is the source file for the IR generation implementation
+```
+#include "../src/includes/irgen.c"
+```
+
+## Technical solution
+
+### build/
+This folder is were the make file produces the executables and librarys for the project.
+
+#### CMakeLists.txt
+This is the make file for the project
+```
+#include "../build/CMakeLists.txt
+```
+
+### src/
+This is the folder were all the source files for the compiler reside.
+
+#### includes/all.h
+Contains a few helpfull defines for the whole project.
+```
+#include "../src/includes/all.h"
+```
+
+#### includes/ast.h
+Typedefs for all the ast nodes.
+```
+#include "../src/includes/ast.h`
+```
+
+#### ast.c
+Constructors for the AST nodes.
+```
+#include "../src/ast.c"
+```
+
+#### includes/error.h
+```
+#include "../src/includes/error.h"
+```
+
+#### error.c
+Pretty prints errors to the terminal.
+```
+#include "../src/error.c"
+```
+
+#### includes/irgen.h
+```
+#include "../src/includes/irgen.c"
+```
+
+#### irgen.c
+```
+#include "../src/irgen.c"
+```
+
+#### includes/lexer.h
+```
+#include "../src/includes/lexer.h"
+```
+
+#### lexer.c
+```
+#include "../src/lexer.c"
+```
+
+#### lib.c
+Includes all the source files so the compiler can be exposed as a library (which we use in the unit tests).
+```
+#include "../src/lib.c
+```
+
+#### main.c
+Entry point for the compiler
+```
+#include "../src/main.c"
+```
+
+#### includes/parser.h
+```
+#include "../src/includes/parser.h"
+```
+
+#### parser.c
+```
+#include "../src/parser.c"
+```
+
+#### includes/pool.h
+```
+#include "../src/includes/pool.h"
+```
+
+#### pool.c
+```
+#include "../src/pool.c"
+```
+
+#### includes/queue.h
+```
+#include "../src/includes/queue.h"
+```
+
+#### queue.c
+```
+#include "../src/queue.c"
+```
+
+#### includes/string.h
+```
+#include "../src/includes/string.h"
+```
+
+#### string.c
+```
+#include "../src/string.c"
+```
+
+#### includes/uthash.h
+The only other external dependencie (apart from LLVM), uthash which is a single header hash table.
+```
+#include "../src/includes/uthash.h"
+```
+
+### tests/
+This folder contains the C++ program that tests the compiler
+
+#### tests/add.fur
+```
+#include "../tests/tests/add.fur
+```
+
+#### tests/arrayInit.fur
+```
+#include "../tests/tests/arrayInit.fur
+```
+
+#### tests/arraySum.fur
+```
+#include "../tests/tests/arraySum.fur
+```
+
+#### tests/binaryFloat.fur
+```
+#include "../tests/tests/binaryFloat.fur
+```
+
+#### tests/binaryInt.fur
+```
+#include "../tests/tests/binaryInt.fur
+```
+
+#### tests/bubbleSort.fur
+```
+#include "../tests/tests/bubbleSort.fur
+```
+
+#### tests/fibbonanci.fur
+```
+#include "../tests/tests/fibbonanci.fur
+```
+
+#### tests/for.fur
+```
+#include "../tests/tests/for.fur
+```
+
+#### tests/gcd.fur
+```
+#include "../tests/tests/gcd.fur
+```
+
+#### tests/if.fur
+```
+#include "../tests/tests/if.fur
+```
+
+#### tests/ifElse.fur
+```
+#include "../tests/tests/ifElse.fur
+```
+
+#### tests/ifElseIfElse.fur
+```
+#include "../tests/tests/ifElseIfElse.fur
+```
+
+#### tests/ifElseIfElseIfElse.fur
+```
+#include "../tests/tests/ifElseIfElseIfElse.fur
+```
+
+#### tests/literal.fur
+```
+#include "../tests/tests/literal.fur
+```
+
+#### tests/longVar.fur
+```
+#include "../tests/tests/longVar.fur
+```
+
+#### tests/nestedFor.fur
+```
+#include "../tests/tests/nestedFor.fur
+```
+
+#### tests/reassignArg.fur
+```
+#include "../tests/tests/reassignArg.fur
+```
+
+#### tests/shortVar.fur
+```
+#include "../tests/tests/shortVar.fur
+```
+
+#### tests/unary.fur
+```
+#include "../tests/tests/unary.fur
+```
+
+#### irgen_test.cpp
+Contains unit tests for the ir generation and the integrations tests for the whole system
+```
+#include "../tests/irgen_test.cpp"
+```
+
+#### lexer_test.cpp
+Unit tests for the lexer
+```
+#include "../tests/lexer_test.cpp"
+```
+
+#### parser_test.cpp
+Unit tests for the parser
+```
+#include "../tests/parser_test.cpp"
+```
+
+#### pool_test.cpp
+Unit tests for the pool
+```
+#include "../tests/pool_test.cpp"
+```
+
+#### queue_test.cpp
+Unit tests for the queue
+```
+#include "../tests/queue_test.cpp"
+```
+
+#### string_test.cpp
+Unit tests for the string
+```
+#include "../tests/string_test.cpp"
+```
+
+#### test.cpp
+Test program entry point
+```
+#include "../tests/test.cpp
+```
+
+## Testing
+When creating this project I used the test driven development workflow in which you write a test first, watch it fail, then write the code to make it parse. By following this I have constructed a test program which tests every unit of the compiler as well as intergration tests to test the whole system. This is so important when building software to ensure no new code breaks any features.
+
+## Evaluation
+In the analysis I stated that "simple algorithums like the greatest common devisor, bubble sort and fibbonanci sequence" should be able to be made in Fur. Each of these algorithums are included as part of the integrations tests, which all pass, so I would say the final program meets the requirements.
 
 ## References
 1. The Rust Reference <a id="1">https://doc.rust-lang.org/reference.html</a>
