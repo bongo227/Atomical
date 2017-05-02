@@ -16,12 +16,13 @@ extern "C" {
 }
 
 // test files
-#include "lexer_test.cpp"
-#include "parser_test.cpp"
-#include "irgen_test.cpp"
 #include "pool_test.cpp"
 #include "queue_test.cpp"
 #include "string_test.cpp"
+#include "lexer_test.cpp"
+#include "parser_test.cpp"
+#include "irgen_test.cpp"
+#include "integration_test.cpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

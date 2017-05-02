@@ -23,7 +23,7 @@ typedef struct {
 	scope *scope;
     Token *tokens;
 	ast_unit *ast;
-	queue *error_queue; // this should be a list so we can remove errors from the end to add more context
+	queue *error_queue;
 } parser;
 
 typedef enum {
