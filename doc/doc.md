@@ -1169,6 +1169,210 @@ This is the source file for the IR generation implementation
 #import "../src/irgen.c"
 ```
 
+## Testing
+When creating this project I used the test driven development workflow in which you write a test first, watch it fail, then write the code to make it parse. By following this I have constructed a test program which tests every unit of the compiler as well as integration tests to test the whole system. This is so important when building software to ensure no new code breaks any features. 
+
+### String test
+| Name | Description |
+| -------------------------- | --- |
+| StringTest.CreateNewString | Tests that new strings, from a C string, are constructed correctly |
+| StringTest.CreateNewStringLength | Test that new strings, from a c string with a specified length, are constructed correctly |
+| StringTest.CreateNewStringFile | Test that new strings, from a file handle, are constructed correctly |
+| Stringtest.CopyString | Test that a string is copyed correctly |
+| StringTest.StringCapacity | Test that a string returns the correct capacity |
+| StringTest.StringAvalivle | Test that string returns the correct amount of space avalible |
+| StringTest.StringExpand | test that a string correctly expands its space |
+| StringTest.StringClear | Test that a string correctly clears its data |
+| StringTest.StringAppend | Test that two strings are correctly appended |
+| StringTest.StringAppendLength | Test that two strings, with a specified length, are correctly appended |
+| StringTest.StringAppendCString | Test that a string and a C String are appended correctly |
+| StringTest.StringSliceEnd | Test that a string is correctly sliced from the end |
+| StringTest.StringSlice | Test that a string is correctly sliced in the middle |
+| StringTest.StringEqual | Test that two equal strings are compared correctly |
+| StringTest.StringNotEqualLength | Test that two non equal lengthed strings are compared correctly |
+| StringTest.StringNotEqual | Test that tow equal lengthed strings are compared correctly |
+
+#### String test implementation
+```
+#import "../tests/string_test.cpp"
+```
+
+### Pool test
+| Name | Description |
+| -------------------------- | --- |
+| PoolTest.NewPool                  | Tests that a new pool is correctly constructed |
+| PoolTest.InsertPool               | Tests that an item is correctly inserted into the pool |
+| PoolTest.FillPool                 | Tests the pool can be filled and `pool_full()` returns `true` |
+| PoolTest.ExtendPool               | Tests the pool capacity can be extended |
+| Pooltest.OverflowExtendPool       | Tests inserting into a full pool extends the pool |
+| PoolTest.ReleaseElementFromPool   | Tests an element is correctly released from the pool | 
+| PoolTest.ReusePool                | Tests that memory can be reclaimed and reused from the pool |
+
+#### Pool test implementation
+```
+#import "../tests/pool_test.cpp"
+```
+
+### Queue test
+| Name | Description |
+| -------------------------- | --- |
+| QueueTest.NewQueue | Tests that a new queue is correctly constructed |
+| QueueTest.PushPopFrount | Tests that an element can be correctly pushed and popped from the frount |
+| QueueTest.PushPopBack | Tests that an element can be correctly pushed and popped from the back |
+| QueueTest.PushPopManyFrount | Tests that many elements can be pushed and popped off the front in the correct order |
+| QueueTest.PushPopManyBack | Tests that many elements can be pushed and popped off the back in the correct order |
+
+#### Queue test implementation
+```
+#import "../tests/queue_test.cpp"
+```
+
+### Lexer test
+| Name                          | Description                                           |
+| ----------------------------- | ----------------------------------------------------- |   
+| LexerTest.Identifier          | Test that identifiers are lexed correctly             |
+| LexerTest.Numbers             | Test that integer numbers are lexed correctly         |
+| LexerTest.Strings             | Test that strings are lexed correctly                 |
+| LexerTest.Symbols             | Tests that all symbols are lexed correctly            |
+| LexerTest.LineNumbers         | Tests the line numbers of the tokens are correct      |
+| LexerTest.ColumnNumbers       | Tests the column numbers of the tokens are correct    |
+| LexerTest.SemiColonInsertion  | Tests that semi colons are inserted correctly         |
+
+#### Lexer test implementation
+```
+#import "../tests/lexer_test.cpp"
+```
+
+### Parser test
+| Name | Description |
+| ----- | --- |
+| ParserTest.ScopeEnter | Test that a new scope is correctly entered |
+| ParserTest.ScopeExit | Tests that a scope is correctly exited |
+| ParserTest.ScopeInsert | Tests that a new object is correctly inserted into the scope |
+| ParserTest.ScopeFind | Tests that an object can be found in scope |
+| ParserTest.ParseLiteralExpression | Tests that a literal expression is parsed correctly |
+| ParserTest.ParseIdentExpression | Tests that a identifier expression is parsed correcly |
+| ParserTest.ParseIdentExpressionWithNumber | Tests that a identifier expression, with a number, is parsed correctly |
+| ParserTest.ParseBinaryExpression | Tests that a binary expression is parsed correctly |
+| ParserTest.ParseBidmasBinaryExpression | Tests that the rules of BIDMAS when parsing binary expressions are followed |
+| ParserTest.ParseSelectorExpression | Tests that a selector expression is correctly parsed |
+| ParserTest.ParseDoubleSelectorExpression | Tests that a double selector expression is correclty parsed |
+| ParserTest.ParseIndexExpression | Tests that an index expression is correctly parsed |
+| ParserTest.ParserightAssociativeBinaryOperators | Tests that right associative binary operators are parsed correctly |
+| ParserTest.ParseUnaryExpression | Tests that a unary expression is parsed correctly |
+| ParserTest.ParseUnaryMinusExpression | Tests that a unary minus expression works correctly |
+| ParserTest.ParseAssignmentOperator | Tests that a assignment expression works correctly |
+| ParserTest.ParseAddAssigmentOperator | Tests that a add assignment expression is parsed correctly |
+| ParserTest.ParseReturnStatment | Tests that a return statement is parsed correctly |
+| ParserTest.ParseBlockStatment | Tests that a block statement is parsed correctly |
+| ParserTest.ParseBlockSingleLine | Tests that a single line block is parsed correctly |
+| ParserTest.ParseLongBlockSingleLine | Tests that a single line block with many statements is parsed correctly |
+| ParserTest.ParseIfStatment | Tests that an if statement is parsed correctly |
+| ParserTest.ParseIfElseStatment | Tests that an if else statement is parsed correctly |
+| ParserTest.ParseIfElseIfElseStatment | Tests that an if else if else statement is parsed correctly |
+| ParserTest.ParseShortVaribleDeclare | Tests that a short variable declaration is parsed correctly |
+| ParserTest.ParseLongVaribleDeclare | Tests that a long variable declaration is parsed correctly |
+| ParserTest.ParseArrayType | Tests that an array type is parsed correctly |
+| ParserTest.ParseFunctionDefinition | Tests that a function definition is parsed correctly |
+| ParserTest.ParseEmptyCallExpression | Tests that a call expression is parsed correctly |
+| ParserTest.ParseCallInCallExpression | Tests that a call in a call expression is parsed correctly |
+| ParserTest.ParseForLoop | Tests that a for loop is parsed correctly |
+| ParserTest.ParseIncrement | Tests that a increment statement is parsed correctly |
+| ParserTest.ParseKeyValueList | Tests that a key value list is parsed correctly |
+| ParserTest.ParseEmptyKeyValueList | Tests that an empty key value list is parsed correctly |
+| ParserTest.ParseNullKeyValueList | Tests that an key value list with null keys is parsed correctly |
+| ParserTest.ParseArrayExpression | Tests that an array initilizer expression is parsed correctly |
+| ParserTest.ParseFunctionDclWithoutProc | Tests that a function declaration is parsed without a proc (and error is produced) |
+| ParserTest.ParseFunctionDclWithoutName | Tests that a function declaration is parsed without a name (and error is produced) |
+| ParserTest.ParseFunctionDclWithoutArgumentSeperator | Tests that a function declaration without an argument seperator (and error is produced) |
+| ParserTest.ParseFunctionDclWithoutCommas | Tests that a function declaration without commas are passed correctly (and error is produced) |
+| ParserTest.ParseFunctionDclWithoutArgTypeOrName | Tests that a function declaration without argument type or name is parsed correctly (and error is produced) |
+| ParserTest.ParseFunctionDclWithoutArrow | Tests that a function declaration without an arrow is parsed correctly (and error is produced) |
+| ParserTest.ParseNonDeclaration | Tests that an error is produced when a declaration is expected |
+| ParserTest.ParseVaribleDclWithoutType | Tests that a long variable declaration without a type is parsed correclty (and error is produced) |
+| ParserTest.ParseVariableDclWithoutName | Tests that an error is produced when a varible declaration doesnt have a name |
+| ParserTest.ParseVaribleDclWithoutEquals | Tests that a long variable declaration without an equals is parsed correctly (and error is produced) |
+| ParserTest.ParseVaribleDclWithoutValue | Tests that a long variable declaration without a value produces error |
+
+#### Parser test implementation
+```
+#import "../tests/parser_test.cpp"
+```
+
+### Irgen tests
+| Name | Description |
+| ----- | --- |
+| IrgenTest.CompileTypeInt          | Tests integer type is compiled correctly          |
+| IrgenTest.CompileTypeI64          | Tests 64 bit integer type is compiled correctly   |
+| IrgenTest.CompileTypeI32          | Tests 32 bit integer type is compiled correctly   |
+| IrgenTest.CompileTypeI16          | Tests 16 bit integer type is compiled correctly   |
+| IrgenTest.CompileTypeI8           | Tests 8 bit integer type is compiled correctly    |
+| IrgenTest.CompileTypeFloat        | Tests float type is compiled correctly            |
+| IrgenTest.CompileTypeF64          | Tests 64 bit float type is compiled correctly     |
+| IrgenTest.CompileTypeF32          | Tests 32 bit float type is compiled correctly     |
+| IrgenTest.CompileTypeIntArray     | Tests integer array is compiled correctly         |
+| IrgenTest.CompileTypeFloatArray   | Tests float array is compiled correctly           |
+| IrgenTest.CompileLiteralInt       | Tests integer literal are compiled correctly      |
+| Irgentest.CompileLiteralFloat     | Tests float literals are compiled correctly       |
+| IrgenTest.CompileLiteralHex       | Tests hex literals are compiled correctly         |
+| IrgenTest.CompileLiteralOctal     | Tests octal literals are compiled correctly       |
+| IrgenTest.I64ToI32                | Tests cast from 64 bit integer to 32 bit integer  |
+| IrgenTest.I16ToFloat              | Tests cast from 16 bit integer to float           |
+| IrgenTest.FloatToDouble           | Tests cast from float to double                   |
+| IrgenTest.DoubleToI64             | Tests cast from double to 64 bit integer          |
+| IrgenTest.CompileFunctionLiteral  | Tests `literal.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionBinaryInt  | Tests `binaryInt.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionBinaryFloat  | Tests `binaryFloat.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionLongVar  | Tests `longVar.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionShortVar  | Tests `shortVar.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionIf  | Tests `if.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionIfElse  | Tests `ifElse.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionIfElseIfElse  | Tests `ifElseIfelse.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionIfElseIfelseIfElse  | Tests `ifElseIfElseIfElse.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionFor  | Tests `for.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionArrayInit  | Tests `arrayInit.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionAdd  | Tests `add.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionUnary  | Tests `unary.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionReassignArg  | Tests `reassignArg.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionGCD  | Tests `gcd.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionFibbonanci  | Tests `fibbonanci.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionArraySum  | Tests `arraySum.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionNestedFor  | Tests `nestedFor.fur` compiles and returns the correct code |
+| IrgenTest.CompileFunctionBubblesort  | Tests `bubblesort.fur` compiles and returns the correct code |
+
+#### Irgen test implementation
+```
+#import "../tests/irgen_test.cpp"
+```
+
+## Evaluation
+In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
+
+### Syntax objectives
+As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions.
+
+### Memory management objectives
+Since their is no run time at all, the is no managed memory, thus the memory management objective has been met
+
+### Command line interface objectives
+All flags were used during development to debug the compiler, so all flags exist and the objectives have been met.
+
+### Feedback
+> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvements for this kind of project are endless including:
+> * Standard library
+> * More syntax
+> * Module system
+> * Cross platform builds
+> * Better distribution
+> * REPL
+> * etc
+
+If I had more time I would have liked to add some of these features. A module system would present an interesting opportunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
+
+With a module system in place the implementation of a standard library would be trivial. When the compiler reaches an include/import statement it would first search the standard library before the working directory. All the standard library would be implemented in Fur, and eventually the compiler itself.
+
+Cross platform builds and better distribution would involve porting some of the OS code to windows, perhaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
+
 ## Technical solution
 
 ### build/
@@ -1429,210 +1633,6 @@ Test program entry point
 ```
 #import "../tests/test.cpp"
 ```
-
-## Testing
-When creating this project I used the test driven development workflow in which you write a test first, watch it fail, then write the code to make it parse. By following this I have constructed a test program which tests every unit of the compiler as well as integration tests to test the whole system. This is so important when building software to ensure no new code breaks any features. 
-
-### String test
-| Name | Description |
-| -------------------------- | --- |
-| StringTest.CreateNewString | Tests that new strings, from a C string, are constructed correctly |
-| StringTest.CreateNewStringLength | Test that new strings, from a c string with a specified length, are constructed correctly |
-| StringTest.CreateNewStringFile | Test that new strings, from a file handle, are constructed correctly |
-| Stringtest.CopyString | Test that a string is copyed correctly |
-| StringTest.StringCapacity | Test that a string returns the correct capacity |
-| StringTest.StringAvalivle | Test that string returns the correct amount of space avalible |
-| StringTest.StringExpand | test that a string correctly expands its space |
-| StringTest.StringClear | Test that a string correctly clears its data |
-| StringTest.StringAppend | Test that two strings are correctly appended |
-| StringTest.StringAppendLength | Test that two strings, with a specified length, are correctly appended |
-| StringTest.StringAppendCString | Test that a string and a C String are appended correctly |
-| StringTest.StringSliceEnd | Test that a string is correctly sliced from the end |
-| StringTest.StringSlice | Test that a string is correctly sliced in the middle |
-| StringTest.StringEqual | Test that two equal strings are compared correctly |
-| StringTest.StringNotEqualLength | Test that two non equal lengthed strings are compared correctly |
-| StringTest.StringNotEqual | Test that tow equal lengthed strings are compared correctly |
-
-#### String test implementation
-```
-#import "../tests/string_test.cpp"
-```
-
-### Pool test
-| Name | Description |
-| -------------------------- | --- |
-| PoolTest.NewPool                  | Tests that a new pool is correctly constructed |
-| PoolTest.InsertPool               | Tests that an item is correctly inserted into the pool |
-| PoolTest.FillPool                 | Tests the pool can be filled and `pool_full()` returns `true` |
-| PoolTest.ExtendPool               | Tests the pool capacity can be extended |
-| Pooltest.OverflowExtendPool       | Tests inserting into a full pool extends the pool |
-| PoolTest.ReleaseElementFromPool   | Tests an element is correctly released from the pool | 
-| PoolTest.ReusePool                | Tests that memory can be reclaimed and reused from the pool |
-
-#### Pool test implementation
-```
-#import "../tests/pool_test.cpp"
-```
-
-### Queue test
-| Name | Description |
-| -------------------------- | --- |
-| QueueTest.NewQueue | Tests that a new queue is correctly constructed |
-| QueueTest.PushPopFrount | Tests that an element can be correctly pushed and popped from the frount |
-| QueueTest.PushPopBack | Tests that an element can be correctly pushed and popped from the back |
-| QueueTest.PushPopManyFrount | Tests that many elements can be pushed and popped off the front in the correct order |
-| QueueTest.PushPopManyBack | Tests that many elements can be pushed and popped off the back in the correct order |
-
-#### Queue test implementation
-```
-#import "../tests/queue_test.cpp"
-```
-
-### Lexer test
-| Name                          | Description                                           |
-| ----------------------------- | ----------------------------------------------------- |   
-| LexerTest.Identifier          | Test that identifiers are lexed correctly             |
-| LexerTest.Numbers             | Test that integer numbers are lexed correctly         |
-| LexerTest.Strings             | Test that strings are lexed correctly                 |
-| LexerTest.Symbols             | Tests that all symbols are lexed correctly            |
-| LexerTest.LineNumbers         | Tests the line numbers of the tokens are correct      |
-| LexerTest.ColumnNumbers       | Tests the column numbers of the tokens are correct    |
-| LexerTest.SemiColonInsertion  | Tests that semi colons are inserted correctly         |
-
-#### Lexer test implementation
-```
-#import "../tests/lexer_test.cpp"
-```
-
-### Parser test
-| Name | Description |
-| ----- | --- |
-| ParserTest.ScopeEnter | Test that a new scope is correctly entered |
-| ParserTest.ScopeExit | Tests that a scope is correctly exited |
-| ParserTest.ScopeInsert | Tests that a new object is correctly inserted into the scope |
-| ParserTest.ScopeFind | Tests that an object can be found in scope |
-| ParserTest.ParseLiteralExpression | Tests that a literal expression is parsed correctly |
-| ParserTest.ParseIdentExpression | Tests that a identifier expression is parsed correcly |
-| ParserTest.ParseIdentExpressionWithNumber | Tests that a identifier expression, with a number, is parsed correctly |
-| ParserTest.ParseBinaryExpression | Tests that a binary expression is parsed correctly |
-| ParserTest.ParseBidmasBinaryExpression | Tests that the rules of BIDMAS when parsing binary expressions are followed |
-| ParserTest.ParseSelectorExpression | Tests that a selector expression is correctly parsed |
-| ParserTest.ParseDoubleSelectorExpression | Tests that a double selector expression is correclty parsed |
-| ParserTest.ParseIndexExpression | Tests that an index expression is correctly parsed |
-| ParserTest.ParserightAssociativeBinaryOperators | Tests that right associative binary operators are parsed correctly |
-| ParserTest.ParseUnaryExpression | Tests that a unary expression is parsed correctly |
-| ParserTest.ParseUnaryMinusExpression | Tests that a unary minus expression works correctly |
-| ParserTest.ParseAssignmentOperator | Tests that a assignment expression works correctly |
-| ParserTest.ParseAddAssigmentOperator | Tests that a add assignment expression is parsed correctly |
-| ParserTest.ParseReturnStatment | Tests that a return statement is parsed correctly |
-| ParserTest.ParseBlockStatment | Tests that a block statement is parsed correctly |
-| ParserTest.ParseBlockSingleLine | Tests that a single line block is parsed correctly |
-| ParserTest.ParseLongBlockSingleLine | Tests that a single line block with many statements is parsed correctly |
-| ParserTest.ParseIfStatment | Tests that an if statement is parsed correctly |
-| ParserTest.ParseIfElseStatment | Tests that an if else statement is parsed correctly |
-| ParserTest.ParseIfElseIfElseStatment | Tests that an if else if else statement is parsed correctly |
-| ParserTest.ParseShortVaribleDeclare | Tests that a short variable declaration is parsed correctly |
-| ParserTest.ParseLongVaribleDeclare | Tests that a long variable declaration is parsed correctly |
-| ParserTest.ParseArrayType | Tests that an array type is parsed correctly |
-| ParserTest.ParseFunctionDefinition | Tests that a function definition is parsed correctly |
-| ParserTest.ParseEmptyCallExpression | Tests that a call expression is parsed correctly |
-| ParserTest.ParseCallInCallExpression | Tests that a call in a call expression is parsed correctly |
-| ParserTest.ParseForLoop | Tests that a for loop is parsed correctly |
-| ParserTest.ParseIncrement | Tests that a increment statement is parsed correctly |
-| ParserTest.ParseKeyValueList | Tests that a key value list is parsed correctly |
-| ParserTest.ParseEmptyKeyValueList | Tests that an empty key value list is parsed correctly |
-| ParserTest.ParseNullKeyValueList | Tests that an key value list with null keys is parsed correctly |
-| ParserTest.ParseArrayExpression | Tests that an array initilizer expression is parsed correctly |
-| ParserTest.ParseFunctionDclWithoutProc | Tests that a function declaration is parsed without a proc (and error is produced) |
-| ParserTest.ParseFunctionDclWithoutName | Tests that a function declaration is parsed without a name (and error is produced) |
-| ParserTest.ParseFunctionDclWithoutArgumentSeperator | Tests that a function declaration without an argument seperator (and error is produced) |
-| ParserTest.ParseFunctionDclWithoutCommas | Tests that a function declaration without commas are passed correctly (and error is produced) |
-| ParserTest.ParseFunctionDclWithoutArgTypeOrName | Tests that a function declaration without argument type or name is parsed correctly (and error is produced) |
-| ParserTest.ParseFunctionDclWithoutArrow | Tests that a function declaration without an arrow is parsed correctly (and error is produced) |
-| ParserTest.ParseNonDeclaration | Tests that an error is produced when a declaration is expected |
-| ParserTest.ParseVaribleDclWithoutType | Tests that a long variable declaration without a type is parsed correclty (and error is produced) |
-| ParserTest.ParseVariableDclWithoutName | Tests that an error is produced when a varible declaration doesnt have a name |
-| ParserTest.ParseVaribleDclWithoutEquals | Tests that a long variable declaration without an equals is parsed correctly (and error is produced) |
-| ParserTest.ParseVaribleDclWithoutValue | Tests that a long variable declaration without a value produces error |
-
-### Parser test implementation
-```
-#import "../tests/parser_test.cpp"
-```
-
-## Irgen tests
-| Name | Description |
-| ----- | --- |
-| IrgenTest.CompileTypeInt          | Tests integer type is compiled correctly          |
-| IrgenTest.CompileTypeI64          | Tests 64 bit integer type is compiled correctly   |
-| IrgenTest.CompileTypeI32          | Tests 32 bit integer type is compiled correctly   |
-| IrgenTest.CompileTypeI16          | Tests 16 bit integer type is compiled correctly   |
-| IrgenTest.CompileTypeI8           | Tests 8 bit integer type is compiled correctly    |
-| IrgenTest.CompileTypeFloat        | Tests float type is compiled correctly            |
-| IrgenTest.CompileTypeF64          | Tests 64 bit float type is compiled correctly     |
-| IrgenTest.CompileTypeF32          | Tests 32 bit float type is compiled correctly     |
-| IrgenTest.CompileTypeIntArray     | Tests integer array is compiled correctly         |
-| IrgenTest.CompileTypeFloatArray   | Tests float array is compiled correctly           |
-| IrgenTest.CompileLiteralInt       | Tests integer literal are compiled correctly      |
-| Irgentest.CompileLiteralFloat     | Tests float literals are compiled correctly       |
-| IrgenTest.CompileLiteralHex       | Tests hex literals are compiled correctly         |
-| IrgenTest.CompileLiteralOctal     | Tests octal literals are compiled correctly       |
-| IrgenTest.I64ToI32                | Tests cast from 64 bit integer to 32 bit integer  |
-| IrgenTest.I16ToFloat              | Tests cast from 16 bit integer to float           |
-| IrgenTest.FloatToDouble           | Tests cast from float to double                   |
-| IrgenTest.DoubleToI64             | Tests cast from double to 64 bit integer          |
-| IrgenTest.CompileFunctionLiteral  | Tests `literal.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionBinaryInt  | Tests `binaryInt.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionBinaryFloat  | Tests `binaryFloat.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionLongVar  | Tests `longVar.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionShortVar  | Tests `shortVar.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIf  | Tests `if.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIfElse  | Tests `ifElse.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIfElseIfElse  | Tests `ifElseIfelse.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIfElseIfelseIfElse  | Tests `ifElseIfElseIfElse.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionFor  | Tests `for.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionArrayInit  | Tests `arrayInit.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionAdd  | Tests `add.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionUnary  | Tests `unary.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionReassignArg  | Tests `reassignArg.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionGCD  | Tests `gcd.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionFibbonanci  | Tests `fibbonanci.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionArraySum  | Tests `arraySum.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionNestedFor  | Tests `nestedFor.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionBubblesort  | Tests `bubblesort.fur` compiles and returns the correct code |
-
-### Irgen test implementation
-```
-#import "../tests/irgen_test.cpp"
-```
-
-## Evaluation
-In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
-
-### Syntax objectives
-As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions.
-
-### Memory management objectives
-Since their is no run time at all, the is no managed memory, thus the memory management objective has been met
-
-### Command line interface objectives
-All flags were used during development to debug the compiler, so all flags exist and the objectives have been met.
-
-### Feedback
-> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvements for this kind of project are endless including:
-> * Standard library
-> * More syntax
-> * Module system
-> * Cross platform builds
-> * Better distribution
-> * REPL
-> * etc
-
-If I had more time I would have liked to add some of these features. A module system would present an interesting opportunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
-
-With a module system in place the implementation of a standard library would be trivial. When the compiler reaches an include/import statement it would first search the standard library before the working directory. All the standard library would be implemented in Fur, and eventually the compiler itself.
-
-Cross platform builds and better distribution would involve porting some of the OS code to windows, perhaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
 
 ## References
 1. The Rust Reference <a id="1">https://doc.rust-lang.org/reference.html</a>
