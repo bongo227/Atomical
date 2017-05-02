@@ -7630,24 +7630,6 @@ int main(int argc, char *argv[]) {
 	system(rm_command);
 	printf("Removed temporary files\n");
 
-	// char *src = "proc add :: int a, int b -> int {\n\treturn a + c\n}";
-
-	// error(
-	// 	src,
-	// 	1,
-	// 	6,
-	// 	8,
-	// 	"Function with name \"%s\" already defined",
-	// 	"add");
-	
-	// error(
-	// 	src,
-	// 	2,
-	// 	12,
-	// 	12,
-	// 	"Varible \"%s\" is not defined",
-	// 	"a");
-
 	fclose(in_file_hdl);
 
 	return 0;
