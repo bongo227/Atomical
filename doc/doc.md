@@ -62,9 +62,9 @@ Functional languages like F# tend to use far more symbols to express their logic
 C++ and Java both have operator overloading which makes their source code easy to read in code bases that use things like arbitrarily wide integers, vectors and matrices with complex mathematical operations. The problem is operator overloading is easily abused by hiding complex computations behind a simple looking operator. For example in the case of a two arbitrary length integers being multiplied, memory allocations and complex loops are invoked which isn't obvious from the call site. To help to programmer reason about the performance and create fast efficient code fur will opt for no function overloading.
 
 #### Syntax objectives
-* Parse the definition syntax
+* It must parse the definition syntax
   * Functions definitions such as `proc add :: int a, int b -> int`
-* Parse the statement syntax
+* It must parse the statement syntax
   * Declaration statements
     * In standard form such as `var int foo = 100`
     * With type inference such as `foo := 100`
@@ -83,7 +83,7 @@ C++ and Java both have operator overloading which makes their source code easy t
   * Block statements such as `{ foo := 100 }`
   * If statements such as `if foo > 100 {}`
   * For statements such as `for i := 0; i < 100; i++ {}`
-* Parse the expression syntax
+* It must parse the expression syntax
   * Literal expressions
     * Integers such as `123`
     * Floats such as `13.41`
