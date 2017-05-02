@@ -25,7 +25,6 @@ TEST_TYPE(CompileTypeF32, "f32", LLVMFloatType())
 TEST_TYPE(CompileTypeIntArray, "int[3]", LLVMArrayType(LLVMInt64Type(), 3))
 TEST_TYPE(CompileTypeFloatArray, "float[100]", LLVMArrayType(LLVMFloatType(), 100))
 
-// TOOD: remove replace parse_expression
 #define TEST_LITERAL(name, src, expectedType, expectedValue) TEST(IrgenTest, name) {    \
     parser *p = new_parser(Lex((char *)src));                                           \
     Exp *e = parse_expression(p, 0);                                                    \
@@ -83,7 +82,7 @@ int runLLVMModule(Irgen *irgen) {
     LLVMValueRef mainFunc; 
     LLVMFindFunction(engine, "main", &mainFunc);
 
-    int res = LLVMRunFunctionAsMain(engine, mainFunc, 0, nullptr, nullptr);
+    int res = LLVMRunFunctionAsMain(engine, mainFunc, 0, NULL, NULL);
 
     LLVMDisposeExecutionEngine(engine);
     return res;

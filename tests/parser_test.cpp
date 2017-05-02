@@ -128,7 +128,7 @@ TEST(ParserTest, ParseUnaryExpression) {
     ASSERT_EQ((int)unaryExp, (int)exp->type);
 }
 
-TEST(ParserTest, ParseUnaryMinuxExpression) {
+TEST(ParserTest, ParseUnaryMinusExpression) {
     Exp *exp = parse_expression_from_string((char *)"-a");
 
     ASSERT_EQ((int)unaryExp, (int)exp->type);

@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 	printf("Compile to bitcode\n");
 	
 	// Compile to assembly
-	string llc_command = string_new("llc ");
+	string llc_command = string_new("llc-3.9 ");
 	llc_command = string_append(llc_command, out_file);
 	system(llc_command);
 	printf("Compiled to assembly\n");

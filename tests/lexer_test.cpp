@@ -25,7 +25,7 @@ TEST(LexerTest, Identifier) {
     }
 }
 
-TEST(LexerTest, IntegerNumbers) {
+TEST(LexerTest, Numbers) {
     tcase cases[] = {
         tcase{ "1", INT, "1" },
         tcase{ "1204", INT, "1204" },
