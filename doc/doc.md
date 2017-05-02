@@ -1327,29 +1327,42 @@ When creating this project I used the test driven development workflow in which 
 | IrgenTest.I16ToFloat              | Tests cast from 16 bit integer to float           |
 | IrgenTest.FloatToDouble           | Tests cast from float to double                   |
 | IrgenTest.DoubleToI64             | Tests cast from double to 64 bit integer          |
-| IrgenTest.CompileFunctionLiteral  | Tests `literal.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionBinaryInt  | Tests `binaryInt.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionBinaryFloat  | Tests `binaryFloat.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionLongVar  | Tests `longVar.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionShortVar  | Tests `shortVar.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIf  | Tests `if.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIfElse  | Tests `ifElse.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIfElseIfElse  | Tests `ifElseIfelse.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionIfElseIfelseIfElse  | Tests `ifElseIfElseIfElse.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionFor  | Tests `for.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionArrayInit  | Tests `arrayInit.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionAdd  | Tests `add.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionUnary  | Tests `unary.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionReassignArg  | Tests `reassignArg.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionGCD  | Tests `gcd.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionFibbonanci  | Tests `fibbonanci.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionArraySum  | Tests `arraySum.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionNestedFor  | Tests `nestedFor.fur` compiles and returns the correct code |
-| IrgenTest.CompileFunctionBubblesort  | Tests `bubblesort.fur` compiles and returns the correct code |
 
 #### Irgen test implementation
 ```
 #import "../tests/irgen_test.cpp"
+```
+
+### Integration tests
+| Name | Description |
+| ----- | --- |
+| IntegrationTest.CompileFunctionLiteral  | Tests `literal.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionBinaryInt  | Tests `binaryInt.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionBinaryFloat  | Tests `binaryFloat.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionLongVar  | Tests `longVar.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionShortVar  | Tests `shortVar.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionIf  | Tests `if.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionIfElse  | Tests `ifElse.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionIfElseIfElse  | Tests `ifElseIfelse.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionIfElseIfelseIfElse  | Tests `ifElseIfElseIfElse.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionFor  | Tests `for.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionArrayInit  | Tests `arrayInit.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionAdd  | Tests `add.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionUnary  | Tests `unary.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionReassignArg  | Tests `reassignArg.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionGCD  | Tests `gcd.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionFibbonanci  | Tests `fibbonanci.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionArraySum  | Tests `arraySum.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionNestedFor  | Tests `nestedFor.fur` compiles and returns the correct code |
+| IntegrationTest.CompileFunctionBubblesort  | Tests `bubblesort.fur` compiles and returns the correct code |
+
+| Name  | Source    | Error |
+| ----- | --------  | ----- |
+
+
+#### Irgen test implementation
+```
+#import "../tests/integration_test.cpp"
 ```
 
 ## Evaluation
