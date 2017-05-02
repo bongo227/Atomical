@@ -20,6 +20,13 @@ Since then concurrent constructs such as callbacks and language level schedulers
 ### Research
 In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design decision behind them in order the judge what code should look like.
 
+### Structure
+Most compilers are three phase compilers which split the compilation into three parts: frount end, middle end and back end. The front end verifies the syntax and semantics, providing warnings if their are any issues. The front end is produces intermediate representation which is a lower level language more easily manipulated by the other phases than the higher level source language. This is the part of the compiler I will be creating, LLVM will be used for the middle and back end.
+
+The middle end preforms platform indepented optermizations such as dead code elimination, loop unrolling, constant propagation etc. LLVM does this by passing through the source code many times, each time performing a particular optermization.
+
+The back end performs target specific analysis and optermizations before producing the machine code for the target machine.
+
 ### Syntax
 Compared to C modern programming languages use a lot less characters to describe the instructions which make the final program. By using less character it becomes a lot faster to read through the source code in order to understand the logic, which intern makes the language easier to use and faster to develop in. With Fur, I wanted to explore some of these modern ideas and how they can be implemented. 
 
