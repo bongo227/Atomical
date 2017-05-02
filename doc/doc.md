@@ -143,6 +143,12 @@ This project was implemented in C which means their is alot of code which isnt i
 * `GOTO` goes to a label
 * `_` is equivilent to `NULL` in C 
 
+### BNF
+The syntax of the language can be described with the following BNF
+```
+
+```
+
 ### String
 Strings in C are represented by a pointer to some characters (that end with a null byte). This means that to append somthing to a string it would require a reallocation, which is slow. Additionaly to find the length of a C string, it requires a function call which loops until it reaches the null byte unlike most languages were it would be a constant time operation. It makes sence in this case to build a more dynamic string for when we dont know how long the string should be, and dont care about the additional memory.
 
@@ -241,7 +247,7 @@ FUNCTION poolCount(pool)
 ENDFUNCTION
 ```
 
-#### Expaning the pool
+#### Expanding the pool
 Expading the pool is quite involved since the pools memory may have been moved by the reallocation. First we must save some details about the old pool.
 ```
 oldCount <- pool.count
@@ -1607,7 +1613,32 @@ When creating this project I used the test driven development workflow in which 
 ```
 
 ## Evaluation
-In the analysis I stated that "simple algorithums like the greatest common devisor, bubble sort and fibbonanci sequence" should be able to be made in Fur. Each of these algorithums are included as part of the integrations tests, which all pass, so I would say the final program meets the requirements.
+In the analysis I stated that "simple algorithums like the greatest common devisor, bubble sort and fibbonanci sequence should be able to be made in Fur. Each of these algorithums are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
+
+### Syntax objectives
+As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions.
+
+### Memory management objectives
+Since their is no runtime at all, the is no managed memory, thus the memory management objective has been met
+
+### Command line interface objectives
+All flags were used during development to debug the compiler, so all flags exsist and the objectives have been met.
+
+### Feedback
+> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvments for this kind of project are endless including:
+> * Standard library
+> * More syntax
+> * Module system
+> * Cross platform builds
+> * Better distribution
+> * REPL
+> * etc
+
+If I had more time I would have liked to add some of these features. A module system would present an intresting oppertunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
+
+With a module system in place the implementation of a standard library would be trivial. When the compiler reaches an include/import statement it would first search the standard library before the working directory. All the standard library would be implemented in Fur, and eventually the compiler itself.
+
+Cross platform builds and better distribution would involve porting some of the OS code to windows, prehaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
 
 ## References
 1. The Rust Reference <a id="1">https://doc.rust-lang.org/reference.html</a>
