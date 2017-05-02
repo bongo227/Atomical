@@ -2,7 +2,7 @@
 
 ## Analysis
 
-In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithums like the greatest common devisor, bubble sort and fibbonanci sequence can be created.
+In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence can be created.
 
 ### Background
 The first recognizable modern computers were created in the 1940's. Their limited hardware meant programmers would write hand tuned assembly which had none of the abstraction of modern languages meaning programs were slow to develop and error-prone. Autocode, developed in the 1950's, was the first higher-level compiled language. The invention of a compiler meant programmers could write less code and rely on the compiler to make optermizations that had previously required a large amount of knowledge to implement.
@@ -13,53 +13,53 @@ The 1960's - 70's saw the invention of much of the syntax and paradigms used tod
 
 The 80's broght alot of refinement such as the idea of organizing code into modules which helped make large code bases more maintainable and generic programming which meant programmers could write functions that worked for many diffrent types rather than many functions for each possible type. Computer instrubtion sets got smaller and more efficent which lead way to many improvements in the speed of programs which meant more advance systems could be designed.
 
-The explosive growth of the internet in the 90's caused widespread devleopment and use of scripting languages, espsicaly javascript which powers almost all of the interactive portions of websites to this day. Other developments included the integrated development enviroment which packaged all the languages tool into a text editor which made programming easier and faster. Garbage collection meant that memory no longer needed to be managed by the programmer, instead the runtime would detect when data was not being used and recycle for when the programmer needed new memory.
+The explosive growth of the internet in the 90's caused widespread development and use of scripting languages, especially JavaScript which powers almost all of the interactive portions of websites to this day. Other developments included the integrated development environment which packaged all the languages tool into a text editor which made programming easier and faster. Garbage collection meant that memory no longer needed to be managed by the programmer, instead the run time would detect when data was not being used and recycle for when the programmer needed new memory.
 
-Since then concurrent constructs such as callbacks and langauge level scedulers for light weight threads meant that programs could more easily take advantage of a modern processor with many cores. The idea of open source where programmers would post the code online so anyone could use and improve the software. OpenCL and CUDA allowed programmers to write massively parralel software for the GPU.
+Since then concurrent constructs such as callbacks and language level schedulers for light weight threads meant that programs could more easily take advantage of a modern processor with many cores. The idea of open source where programmers would post the code online so anyone could use and improve the software. OpenCL and CUDA allowed programmers to write massively parallel software for the GPU.
 
 ### Research
-In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design disicions behind them in order the judge what code should look like.
+In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design decision behind them in order the judge what code should look like.
 
 ### Syntax
-Compared to C modern programming languages use a lot less characters to describe the instructions which make the final program. By using less character it becomes alot faster to read through the source code in order to understand the logic, which intern makes the language easier to use and faster to develop in. With Fur, I wanted to explore some of these modern ideas and how they can be implemented. 
+Compared to C modern programming languages use a lot less characters to describe the instructions which make the final program. By using less character it becomes a lot faster to read through the source code in order to understand the logic, which intern makes the language easier to use and faster to develop in. With Fur, I wanted to explore some of these modern ideas and how they can be implemented. 
 
 #### Type inference
-In go, most varibles dont need a type because their type can be infered:
+In go, most variables do not need a type because their type can be inferred:
 ```go
 foo := 123
 ```
-In this case foo will be an `int` type since the value on the right hand side is an integer. If you want to be more explicit you can use the longer form varible declaration:
+In this case foo will be an `int` type since the value on the right hand side is an integer. If you want to be more explicit you can use the longer form variable declaration:
 ```go
 var foo int = 123
 ``` 
-The infered type is much quicker to type and just as easy to read, healping to reduce the character count of the source code. 
+The inferred type is much quicker to type and just as easy to read, helping to reduce the character count of the source code. 
 
-#### Semicolons and parentiesis
-Most languages use semi colons to tell the compiler that the current statement has ended and everyting after the semicolon is interpreted as a seperate statment. In more modern languages like python, their are no semicolons anywhere in the language. Instead python uses spaces and new lines to signify the start and end of each statement and block.
+#### Semicolons and parenthesis
+Most languages use semi colons to tell the compiler that the current statement has ended and everything after the semicolon is interpreted as a separate statement. In more modern languages like python, their are no semicolons anywhere in the language. Instead python uses spaces and new lines to signify the start and end of each statement and block.
 
 Go uses semicolons only in a few places such as for loops:
 ```go
 for i := 0; i < 10; i++ {}
 ```
-Here each part of the for loop is seperate by semicolons just like C, however for most statements new lines are used as in python to signify the end of a statement.
+Here each part of the for loop is separate by semicolons just like C, however for most statements new lines are used as in python to signify the end of a statement.
 
-Another thing to note is the lack of parentiesis around the for loop. The lack of brackets helps to further eliminate useless syntax which only hinders the programmer. The side effect of ommiting semicolons and brackets is that the source code is much more complex to parse since the compiler must insert semicolons before the syntax can be parsed (or use some other method to deal with the lack of semicolons).
+Another thing to note is the lack of parenthesis around the for loop. The lack of brackets helps to further eliminate useless syntax which only hinders the programmer. The side effect of committing semicolons and brackets is that the source code is much more complex to parse since the compiler must insert semicolons before the syntax can be parsed (or use some other method to deal with the lack of semicolons).
 
 #### Function definitions
 I decided to create my own syntax for function definitions inspired partly by functional programming languages. 
 ```
 proc bar :: int foo -> float
 ```
-The double semi colon is used to provide a clear divider between the name and the arguments, this clear line of seperation helps when skimming though the source code in order to find a function with a certain name. Also the arrow that seperates the arguments and return type reinforces the consept of a function, to take input and transform it into output.
+The double semi colon is used to provide a clear divider between the name and the arguments, this clear line of separation helps when skimming though the source code in order to find a function with a certain name. Also the arrow that separates the arguments and return type reinforces the concept of a function, to take input and transform it into output.
 
 #### Keywords
-Golang has [25 keywords<sup>[2]</sup>](#2) which helps make it's easy/quick to learn, simple to read and less keywords are reserved so it's simpler to name some constructs. The obvious drawback is the reduced expressiveness compared to languages like C# and Java which have many more keywords. Fur will be closer to Go in terms of the small pool of keywords in favor of a more simpler and clearer expression of logic.
+Golang has [25 keywords<sup>[2]</sup>](#2) which helps make it's easy/quick to learn, simple to read and less keywords are reserved so it's simpler to name some constructs. The obvious drawback is the reduced expressiveness compared to languages like C# and Java which have many more keywords. Fur will be closer to Go in terms of the small pool of keywords in favour of a more simpler and clearer expression of logic.
 
 #### Symbols
 Functional languages like F# tend to use far more symbols to express their logic. Symbols make smaller code and less visual noise however they create a steeper learning curve since they are less descriptive and often unique to each language. Fur should feel familiar, sharing most of the symbols from C based languages.
 
 #### Operator overloading
-C++ and Java both have operator overloading which makes their source code easy to read in code bases that use things like arbitrarily wide integers, vectors and matrices with complex mathmatical operations. The problem is operator overloading is easily abused by hiding complex computations behind a simple looking operator. For example in the case of a two arbitrary length integers being multiplied, memory allocations and complex loops are invoked which isn't obvious from the call site. To help to programmer reason about the performance and create fast efficent code fur will opt for no function overloading.
+C++ and Java both have operator overloading which makes their source code easy to read in code bases that use things like arbitrarily wide integers, vectors and matrices with complex mathematical operations. The problem is operator overloading is easily abused by hiding complex computations behind a simple looking operator. For example in the case of a two arbitrary length integers being multiplied, memory allocations and complex loops are invoked which isn't obvious from the call site. To help to programmer reason about the performance and create fast efficient code fur will opt for no function overloading.
 
 #### Syntax objectives
 * Parse the definition syntax
@@ -80,9 +80,9 @@ C++ and Java both have operator overloading which makes their source code easy t
     * `<` (less than operator)
     * `<=` (less than or equal to operator)
   * Return statements such as `return foo`
-  * Block statments such as `{ foo := 100 }`
-  * If statments such as `if foo > 100 {}`
-  * For statments such as `for i := 0; i < 100; i++ {}`
+  * Block statements such as `{ foo := 100 }`
+  * If statements such as `if foo > 100 {}`
+  * For statements such as `for i := 0; i < 100; i++ {}`
 * Parse the expression syntax
   * Literal expressions
     * Integers such as `123`
@@ -109,15 +109,15 @@ C++ and Java both have operator overloading which makes their source code easy t
 ### Memory managment
 When a program needs memory to persist longer than the scope of a function, memory needs to be allocated from the heap. The heap is slower than stack but the program can choose at run-time how much memory it wants. This flexibility brings several problems such as: what if the operating system can't give you the memory you requested, what if you need more, what if the you never give it back. In languages with manual memory management the programmer must solve all these problems whenever they need to allocate memory on the heap, making the code more complex and error prone.
 
-One solution to this problem is a garbage collector. In languages such as Go and Java the run-time allocates blocks of memory, whenever the program requests memory a portion of that block is returned. The run-time then keeps track of where the memory is used, when the portion of memory is no longer in use its is marked and recycled ready for the next allocation. Over time these garbage collectors have been getting faster and much more sophisticated, one consequence of this is that it can be hard to understand their behavior.
+One solution to this problem is a garbage collector. In languages such as Go and Java the run-time allocates blocks of memory, whenever the program requests memory a portion of that block is returned. The run-time then keeps track of where the memory is used, when the portion of memory is no longer in use its is marked and recycled ready for the next allocation. Over time these garbage collectors have been getting faster and much more sophisticated, one consequence of this is that it can be hard to understand their behaviour.
 
-The problems arises in applications which have low latency requirements, such as games. With virtual reality and higher refresh rate monitors, games have less than 7 milliseconds to update and render the next frame. GC max pause times in Go are around [50µs<sup>[6]</sup>](#6) (with considerable CPU usage) and [50ms<sup>[7]</sup>](#7) in Java, what's worse is that they can happen at anytime causing the game to freeze and stutter. One workaround is to budget this into your frame time i.e. 5ms to update and render and 2ms for any GC pauses, this means reduced graphics, less realistic physics and simpler game mechanics. Even if you do not pause mid-frame there is still the problem of: higher read/write latency, less CPU performance and less data locality (hence less cache utilization). For these reason Fur will not have a garbage collector.
+The problems arises in applications which have low latency requirements, such as games. With virtual reality and higher refresh rate monitors, games have less than 7 milliseconds to update and render the next frame. GC max pause times in Go are around [50µs<sup>[6]</sup>](#6) (with considerable CPU usage) and [50ms<sup>[7]</sup>](#7) in Java, what's worse is that they can happen at anytime causing the game to freeze and stutter. One workaround is to budget this into your frame time i.e. 5ms to update and render and 2ms for any GC pauses, this means reduced graphics, less realistic physics and simpler game mechanics. Even if you do not pause mid-frame there is still the problem of: higher read/write latency, less CPU performance and less data locality (hence less cache utilisation). For these reason Fur will not have a garbage collector.
 
-#### Memory managment objectives
- * Compile programs should have no runtime managed memory.
+#### Memory management objectives
+ * Compile programs should have no run time managed memory.
 
 ### Command line interface
-Compilers normaly expose a command line interface to transform the syntax into an executable file. This makes it very easy to integrate the compiler with other build tools, text editors and IDE's. Fur doesn't require a large range of flags and options since it is a small language however some debug options could help the programmer (and the development of the compiler).
+Compilers normally expose a command line interface to transform the syntax into an executable file. This makes it very easy to integrate the compiler with other build tools, text editors and IDE's. Fur doesn't require a large range of flags and options since it is a small language however some debug options could help the programmer (and the development of the compiler).
 
 #### Command line interface objectives
 * Create an executable that invokes the compiler
@@ -137,19 +137,19 @@ Compilers normaly expose a command line interface to transform the syntax into a
 6. LLVM produces assembly which is can then be linked by a linker, producing an executable
 
 ### Psudocode
-This project was implemented in C which means their is alot of code which isnt important for an explanation on how each algoritum works. To help illustrate how the algorithums work I have opted to use psudocode so that it is easier to understand. The psudocode is close to the AQA psudocode spec with a few additions.
+This project was implemented in C which means their is a lot of code which is not important for an explanation on how each algorithm works. To help illustrate how the algorithms work I have opted to use psudocode so that it is easier to understand. The psudocode is close to the AQA psudocode spec with a few additions.
 
 * `LABEL` and `ENDLABEL` make a labeled section of code
 * `GOTO` goes to a label
 * `_` is equivilent to `NULL` in C 
 
 ### String
-Strings in C are represented by a pointer to some characters (that end with a null byte). This means that to append somthing to a string it would require a reallocation, which is slow. Additionaly to find the length of a C string, it requires a function call which loops until it reaches the null byte unlike most languages were it would be a constant time operation. It makes sence in this case to build a more dynamic string for when we dont know how long the string should be, and dont care about the additional memory.
+Strings in C are represented by a pointer to some characters (that end with a null byte). This means that to append something to a string it would require a reallocation, which is slow. Additionally to find the length of a C string, it requires a function call which loops until it reaches the null byte unlike most languages were it would be a constant time operation. It makes sense in this case to build a more dynamic string for when we do not know how long the string should be, and do not care about the additional memory.
 
-Strings have are split into two parts, the header and the characters. So that strings are compatible with the C standard library all the pointers returned by the string functions point to the characters so the header is hidden and must be accessed through the string functions. The header contains the length of the string (for fast direct access) and the capacity of the string (how many character can be stored before a reallocation must occor).
+Strings have are split into two parts, the header and the characters. So that strings are compatible with the C standard library all the pointers returned by the string functions point to the characters so the header is hidden and must be accessed through the string functions. The header contains the length of the string (for fast direct access) and the capacity of the string (how many character can be stored before a reallocation must occur).
 
 #### String equality
-One side effect of knowing the strings length without looping though the string is faster string equality checks. The C standard library compares two strings character by character, if their is a diffrence the function returns false (non-zero) however since we have constant time access to the string length we can first check if the two strings lengths are equal thus improving performance in the case where two strings are not the same length.
+One side effect of knowing the strings length without looping though the string is faster string equality checks. The C standard library compares two strings character by character, if their is a difference the function returns false (non-zero) however since we have constant time access to the string length we can first check if the two strings lengths are equal thus improving performance in the case where two strings are not the same length.
 
 ```
 FUNCTION string_equals(string a, string b)
@@ -207,7 +207,7 @@ bool string_equals(string s1, string s2);
 ```
 
 #### string.c
-This is the source file for the string implmentation
+This is the source file for the string implementation
 
 ```
 #include "includes/string.h"
@@ -328,7 +328,7 @@ bool string_equals(string s1, string s2) {
 ```
 
 ### Pool
-A compiler often allocates and frees many of the same structures. You could use the standard memory allocation function `malloc()` and `free()` however these are slow for many small allocations and the data has bad locality, so more cache misses occor when the data is read. The solution to this problem is a custom allocator, in this case a pool allocator.
+A compiler often allocates and frees many of the same structures. You could use the standard memory allocation function `malloc()` and `free()` however these are slow for many small allocations and the data has bad locality, so more cache misses occur when the data is read. The solution to this problem is a custom allocator, in this case a pool allocator.
 
 A pool allocator takes a large chunk of memory and divides it into equal parts. When ever a piece of memory is required, the pool allocator returns a section of this memory. When the memory is freed the pool allocator reclaims this memory ready to give out on the next request.
 
@@ -345,7 +345,7 @@ LOOP
 lastElement.next <- _
 ```
 
-Finaly we create a structure to save some details about the pool.
+Finally we create a structure to save some details about the pool.
 ```
 pool <- _
 pool.memory = memory
@@ -366,7 +366,7 @@ ENDFUNCTION
 ```
 
 #### Pool count
-For debugging purposes its often usefull to know how much elements are in the pool. To compute this, we walk the free list to find out how much slices are free, then subtract that from `elementCount`
+For debugging purposes its often useful to know how much elements are in the pool. To compute this, we walk the free list to find out how much slices are free, then subtract that from `elementCount`
 
 ```
 FUNCTION poolCount(pool)
@@ -387,7 +387,7 @@ ENDFUNCTION
 ```
 
 #### Expanding the pool
-Expading the pool is quite involved since the pools memory may have been moved by the reallocation. First we must save some details about the old pool.
+Expanding the pool is quite involved since the pools memory may have been moved by the reallocation. First we must save some details about the old pool.
 ```
 oldCount <- pool.count
 isFull <- poolFull(pool)
@@ -451,7 +451,7 @@ ENDFUNCTIO
 ```
 
 #### Releasing memory back to the pool
-Releasing memory back into the pool is as simple as adding the slice back into the free list. If the pool is full then the element starts a new freelist.
+Releasing memory back into the pool is as simple as adding the slice back into the free list. If the pool is full then the element starts a new free list.
 ```
 FUNCTION poolRelease(pool, element)
     IF poolFull(pool) THEN
@@ -645,10 +645,10 @@ void pool_destroy(pool *p) {
 ```
 
 ### Queue
-Queues are an important are another important data structure which the C standard library doesnt provide, so I implemented my own. This queue uses a double ended linked list on the back end allowing for fast insertions and deletions from either end of the queue. This is not strickly a queue, and can also be used as a stack.
+Queues are an important are another important data structure which the C standard library doesn't provide, so I implemented my own. This queue uses a double ended linked list on the back end allowing for fast insertions and deletions from either end of the queue. This is not strictly a queue, and can also be used as a stack.
 
 #### Queue push
-To push onto a queue, the queue allocates a new element with a header which is returned to the caller for populating with data. To push to the frount we add the new element at the start of the queue and link the new element and old element.
+To push onto a queue, the queue allocates a new element with a header which is returned to the caller for populating with data. To push to the front we add the new element at the start of the queue and link the new element and old element.
 
 ```
 FUNCTION queuePushFront(queue)
@@ -691,7 +691,7 @@ ENDFUNCTION
 ```
 
 #### Queue pop
-Popping from the queue is as simple as removing an item from the frount or back and updating the list.
+Popping from the queue is as simple as removing an item from the front or back and updating the list.
 ```
 FUNCTION queuePopFrount(queue)
     IF queue.first = _
@@ -868,7 +868,7 @@ void queue_destroy(queue *q) {
 ```
 
 ### Lexer
-The lexer's job is to turn the source code into a sequence of tokens. A token is the smallest possible bit of meaningfull source code such as a number or name. The following is all the possible types of token:
+The lexer's job is to turn the source code into a sequence of tokens. A token is the smallest possible bit of meaningful source code such as a number or name. The following is all the possible types of token:
 
 | Name | Example | Note |
 | --- | --- | --- |
@@ -950,7 +950,7 @@ The lexer's job is to turn the source code into a sequence of tokens. A token is
 
 
 #### Lexing
-To convert the source to token the lexer runs through the file character by character invoking diffrent procedures depending on which character the head points to. For example when a `"` is at the read pointer we know its the start of a string literal which end when we reach the closing `"` character. In psudocode this looks like the following.
+To convert the source to token the lexer runs through the file character by character invoking different procedures depending on which character the head points to. For example when a `"` is at the read pointer we know its the start of a string literal which end when we reach the closing `"` character. In psudocode this looks like the following.
 
 ```
 FUNCTION lex(readPointer) 
@@ -975,9 +975,9 @@ ENDFUNCTION
 ```
 
 #### Semicolon insertion
-In C every statement ends in a semi-colon. This tells the compiler that it is the end of a statement, and that the next tokens form a seperate statement. Most code only has a single statement per line so almost all semi-colons are at the end of a line, thus if the compiler was to insert semicolons at the end of all lines we could emit semicolons from the source code as in langauges like Go and javascript. 
+In C every statement ends in a semi-colon. This tells the compiler that it is the end of a statement, and that the next tokens form a separate statement. Most code only has a single statement per line so almost all semi-colons are at the end of a line, thus if the compiler was to insert semicolons at the end of all lines we could emit semicolons from the source code as in languages like Go and JavaScript. 
 
-To insert semi-colons in the correct place a simple `semi` flag tells the compiler weather to insert a semi at the end of the line. If this flag is false `clearWhitespace` (which moves the `readPointer` past all the whitespace characters) skips over the newline without inserting a semi colon, else the `\n` character is detected in the lex routine and a semi colon is inserted in its place.
+To insert semi-colons in the correct place a simple `semi` flag tells the compiler weather to insert a semi at the end of the line. If this flag is false `clearWhitespace` (which moves the `readPointer` past all the white space characters) skips over the newline without inserting a semi colon, else the `\n` character is detected in the lex routine and a semi colon is inserted in its place.
 
 ```
 FUNCTION clearWhitespace()
@@ -993,7 +993,7 @@ ENDFUNCTION
 ```
 
 #### Extracting a number
-Fur has four types of numerical literals: ints, floats, octals and hexedecimals. Instead of a seperate procedure for each one which would require backtracking/look-head and alot of code duplication we use a single procedure. Note this uses gotos which are normaly a terrible idea, in this case they make the code more efficent, cleaner and easier to follow. 
+Fur has four types of numerical literals: int's, floats, octal's and hexadecimals. Instead of a separate procedure for each one which would require backtracking/look-head and a lot of code duplication we use a single procedure. Note this uses goto's which are normally a terrible idea, in this case they make the code more efficient, cleaner and easier to follow. 
 
 The first part is `extractMantissa` which returns all the digits which are less than `base`. `isDigit` checks if a character literal is a digit (0-F) and `asDigit` converts a character literal to an integer. `character` is the current character the lexer is reading and `nextCharacter` moves the `character` pointer to the next character.  
 
@@ -1008,7 +1008,7 @@ FUNCTION extractMantissa(base)
 END FUNCTION
 ```
 
-This is the main part of the algortithum. If first checks for hexedecimals or octals then integers and floats, when we check for octals we may find that it was actualy an integer (or float) in which case we can jump to the appropriate point. 
+This is the main part of the algorithm. If first checks for hexadecimal's or octal's then integers and floats, when we check for octal's we may find that it was actually an integer (or float) in which case we can jump to the appropriate point. 
 ```
 FUNCTION number()
   number <- ""
@@ -1972,9 +1972,9 @@ Declare nodes are the top level parent nodes.
 
 #### Pratt Parser
 
-When it comes to language parsing their are many different options. A parser generator can automatically build a parser from a list of rules, however the error messages that they produce can be hard to understand and not very customizable. For this reason most languages opt to right their own parsers from scratch as I did with Fur. For this project I implemented a Top down operator precedence parser, also known as a Pratt parser, with a few modifications.
+When it comes to language parsing their are many different options. A parser generator can automatically build a parser from a list of rules, however the error messages that they produce can be hard to understand and not very customizable. For this reason most languages opt to right their own parser from scratch as I did with Fur. For this project I implemented a Top down operator precedence parser, also known as a Pratt parser, with a few modifications.
 
-The key parts of this algorithm is the `led` and `nud` procedures. `led` (short for left denotation) parses the next token in an infix context i.e. the token joins two expressions. The original Pratt parser was only designed for expressions however I have added a a `stmd` function which parses a statement in a simular style.
+The key parts of this algorithm is the `led` and `nud` procedures. `led` (short for left denotation) parses the next token in an infix context i.e. the token joins two expressions. The original Pratt parser was only designed for expressions however I have added a a `stmd` function which parses a statement in a similar style.
 
 ##### Nud method
 `nud` (short for null denotation) parser a token in a prefix context, i.e. the token starts a new expression.
@@ -2001,9 +2001,9 @@ CASE IDENT:
 ```
 
 ###### Unary expression
-A unary node is normaly somthing like `-14`, the operator in front changes the value to the right. To parse a unary node we treat the tokens after the operator as a sub-expression by calling `expression` (see below). 
+A unary node is normally something like `-14`, the operator in front changes the value to the right. To parse a unary node we treat the tokens after the operator as a sub-expression by calling `expression` (see below). 
 
-We parse in a value of 60 for the binding power of the sub expression, this is the other unique feature of a Pratt parser. To delay the parsing of infix tokens we use the consept of binding power, which is how well tokens should _bind_ to eachother. For example the binding power of `*` will be higher than the binding power of `-` since we alway multiply before subtracting. By calling `expression` we get the next subexpression where all the tokens are bound by a binding power higher than the right binding power (which is the parameter to expression).
+We parse in a value of 60 for the binding power of the sub expression, this is the other unique feature of a Pratt parser. To delay the parsing of infix tokens we use the concept of binding power, which is how well tokens should _bind_ to each other. For example the binding power of `*` will be higher than the binding power of `-` since we always multiply before subtracting. By calling `expression` we get the next sub expression where all the tokens are bound by a binding power higher than the right binding power (which is the parameter to expression).
 
 `expression` is what gives the ast its tree structure and allows us to parse expressions such as `-(14 + a)`, in this case the expression on the right wasnt a simple literal value but a binary expression.
 
@@ -2024,7 +2024,7 @@ but the keys may be ommited
 ```
 { 123, 2.4 }
 ```
-To parse a list of values we use a loop to parse each key value pair until we reach a `}` which is the end of list. Inside the loop we try to parse a key or a value, since we dont know if the item has a key we must check if the next token is a `:`. If it is then the `keyOrValue` was a key and the value expression is parsed, if their was no colon then `keyOrValue` must be a value. A `KeyValue` node is then appended to the `keyValues` array which will form the `KeyValueList` node. 
+To parse a list of values we use a loop to parse each key value pair until we reach a `}` which is the end of list. Inside the loop we try to parse a key or a value, since we do not know if the item has a key we must check if the next token is a `:`. If it is then the `keyOrValue` was a key and the value expression is parsed, if their was no colon then `keyOrValue` must be a value. A `KeyValue` node is then appended to the `keyValues` array which will form the `KeyValueList` node. 
 
 ```
 CASE LPAREN:
@@ -2054,7 +2054,7 @@ CASE LPAREN:
 ```
 
 ###### Array expression
-Array nodes are very simular to a `KeyValueList` expression however they can ommit the check for keys since array initilizers dont have keys
+Array nodes are very similar to a `KeyValueList` expression however they can omit the check for keys since array initialiser does not have keys
 
 ```
 CASE LPAREN:
@@ -2085,7 +2085,7 @@ END FUNCTION
 ###### Binary expression
 A binary expression is like a unary expression except the operator is in the middle of two values such as `41 + 2`. In this case `41` would have already been parsed and `+` is the current token. To finish the node the right hand side must be constructed by a call to `expression`.
 
-Assignment statements are also parsed here and then transformed into the correct node elsewhere otherwise some look ahead functionality would be required which would make the parser less efficent.
+Assignment statements are also parsed here and then transformed into the correct node elsewhere otherwise some look ahead functionality would be required which would make the parser less efficient.
 
 ```
 CASE ADD, SUB, MUL, QUO, REM, 
@@ -2096,7 +2096,7 @@ CASE ADD, SUB, MUL, QUO, REM,
 ```
 
 ###### Selector expression
-A selector expression is exactly the same as a binary expression except the two values are seperated by a `.`.
+A selector expression is exactly the same as a binary expression except the two values are separated by a `.`.
 
 ```
 CASE PERIOD:
@@ -2104,7 +2104,7 @@ CASE PERIOD:
 ```
 
 ###### Call expression
-A call expression is simular to a key value list expression.
+A call expression is similar to a key value list expression.
 
 ```
 CASE LPAREN:
@@ -2122,7 +2122,7 @@ CASE LPAREN:
 ```
 
 ##### Smtd method
-Statment parses the token in the context of the start of a _statement_, instead of a expression as in `nud`. This is an important distinction since the same token can mean diffrent things if it is at the start of an expression of statement.
+Statement parses the token in the context of the start of a _statement_, instead of a expression as in `nud`. This is an important distinction since the same token can mean different things if it is at the start of an expression of statement.
 
 ###### Return statement
 Return statements are simple nodes with a single expression being the value the statement returns.
@@ -2148,7 +2148,7 @@ CASE LBRACE:
 ```
 
 ###### If statement
-To parse an if statements we look for the `IF` token, then parse the condition as an expression and the block as a block. If their is an `ELSE` after the block, we check for an `IF`. If their is an `IF` we recursivly call `if()` to parse the next if, otherwise it must be a final else with no condition.
+To parse an if statements we look for the `IF` token, then parse the condition as an expression and the block as a block. If their is an `ELSE` after the block, we check for an `IF`. If their is an `IF` we recursively call `if()` to parse the next if, otherwise it must be a final else with no condition.
 
 ```
 CASE IF:
@@ -2169,7 +2169,7 @@ CASE IF:
 ```
 
 ###### For statement
-For statments are simular to if statements
+For statements are similar to if statements
 
 ```
 CASE FOR:
@@ -2180,7 +2180,7 @@ CASE FOR:
 ```
 
 ###### Variable declaration
-Varible declarations are normaly handled elsewhere however if it starts with the optional `var` then we can parse the varible declaration now (rather than later).
+Variable declarations are normally handled elsewhere however if it starts with the optional `var` then we can parse the variable declaration now (rather than later).
 
 ```
 CASE VAR:
@@ -2188,7 +2188,7 @@ CASE VAR:
 ```
 
 ###### Increment expression
-Increment statements dont start with a keyword, so we look for an identifier. If their is not a proceeding increment or decrement token then we know the expression is a assignment or declaration node so we let the caller handle it.
+Increment statements do not start with a keyword, so we look for an identifier. If their is not a proceeding increment or decrement token then we know the expression is a assignment or declaration node so we let the caller handle it.
 
 ```
 CASE IDENT:
@@ -2203,10 +2203,10 @@ CASE IDENT:
 ```
 
 ##### Declarations
-Their are only two declaration nodes, functions and varibles.
+Their are only two declaration nodes, functions and variables.
 
 ###### Function declaration
-Function declaration are more complicated than most nodes since they contain alot of infomation
+Function declaration are more complicated than most nodes since they contain a lot of information
 
 ```
 CASE PROC:
@@ -2232,8 +2232,8 @@ CASE PROC:
     RETURN Function{name, args, returnType, body}
 ```
 
-###### Varible declaration
-Variable declaration come in two forms, short form such as `foo := 123` and `var bar int = 199`. In the case of the long form declaration we know ahead of time that is a varible declaration since it starts with the var keyword.
+###### Variable declaration
+Variable declaration come in two forms, short form such as `foo := 123` and `var bar int = 199`. In the case of the long form declaration we know ahead of time that is a variable declaration since it starts with the var keyword.
 
 ```
 CASE VAR:
@@ -2243,7 +2243,7 @@ CASE VAR:
     RETURN VariableDcl{type, name, value}
 ```
 
-Otherwise the statement wrapper function first trys to parse it as a statement with `smtd()`, for short varible declarations this will return `NULL`. Next it trys parsing it as an expression, this will return a binary expression node where the operator is a assign or define type. From their the expression is converted into a statement.
+Otherwise the statement wrapper function first try's to parse it as a statement with `smtd()`, for short variable declarations this will return `NULL`. Next it try's parsing it as an expression, this will return a binary expression node where the operator is a assign or define type. From their the expression is converted into a statement.
 
 ```
 FUNCTION Statement()
@@ -2267,15 +2267,15 @@ ENDFUNCTION
 ```
 
 ##### Error handling
-Error handling inside a parser is particulaly difficult, if their an unexpect token anywhere, we cant parse the current expression, statement or declaration however their may be other errors further down. Most compilers will no halt at a single error, but continue so that any other errors can be reported in a single compilation which makes finding and fixing bugs much easier.
+Error handling inside a parser is particularly difficult, if their an unexpected token anywhere, we cant parse the current expression, statement or declaration however their may be other errors further down. Most compilers will no halt at a single error, but continue so that any other errors can be reported in a single compilation which makes finding and fixing bugs much easier.
 
-So whenever we call `expect()` we return the token we were expecting or `NULL` if the token was not what we expected. If the token was incorrect an error is produced and added to the array of errors. It is up to the caller how to handle and incorrect token, generaly their is three diffrent options.
+So whenever we call `expect()` we return the token we were expecting or `NULL` if the token was not what we expected. If the token was incorrect an error is produced and added to the array of errors. It is up to the caller how to handle and incorrect token, generally their is three different options.
 
-* If the token is non fatel such as a `::` in a function definition, the parser can continue from were it is.
-* If we are inside a statement and the token was fatel we can skip over the tokens until a `SEMI` token is reached, then the parser can continue safely.
+* If the token is non fatal such as a `::` in a function definition, the parser can continue from were it is.
+* If we are inside a statement and the token was fatal we can skip over the tokens until a `SEMI` token is reached, then the parser can continue safely.
 * Otherwise the whole block must be skipped.
 
-If the parser doesnt skip over the affected tokens, the same line of source code would have many confilicting errors which wouldnt make sence.
+If the parser doesn't skip over the affected tokens, the same line of source code would have many conflicting errors which wouldn't make sense.
 
 ```
 FUNCTION skipBlock()
@@ -3155,10 +3155,10 @@ Exp *parse_ident_exp(parser *p) {
 ```
 
 ### IR Generation
-Having converted the source code to tokens and the tokens to an abstract syntax tree we now can transform it into LLVM IR which LLVM will compile to machine code. LLVM IR is much lower level than Fur however the LLVM C API does alot of the heavy lifting for by constructuing the intemediantry language in memory.
+Having converted the source code to tokens and the tokens to an abstract syntax tree we now can transform it into LLVM IR which LLVM will compile to machine code. LLVM IR is much lower level than Fur however the LLVM C API does a lot of the heavy lifting for by constructing the intermediary language in memory.
 
 #### If statements
-LLVM IR does not have any if statements only conditional branches. To brach we must break the code into seperate blocks which end with a terminating statements (such as a branch, return etc). Since if statements can be chained it make sence for the transformation to be recursive hence we need a two functions, the recursive `compileIfBranch()` function and the `compileIf()` function to call into the recursive function.
+LLVM IR does not have any if statements only conditional branches. To branch we must break the code into separate blocks which end with a terminating statements (such as a branch, return etc). Since if statements can be chained it make sense for the transformation to be recursive hence we need a two functions, the recursive `compileIfBranch()` function and the `compileIf()` function to call into the recursive function.
 
 `compileIf()` just sets up a `endBlock` which is the block which the program will continue executing from.
 ```
@@ -3168,9 +3168,9 @@ FUNCTION compileIf(irgen, ifSmt)
 ENDFUNCTION
 ```
 
-`compileIfBranch()` takes four arguments: a refrence to irgen which holds some state about the ir generation, the if node, the block to branch from (will be `NULL` for root level if branches) and the block to continue execution from. 
+`compileIfBranch()` takes four arguments: a reference to irgen which holds some state about the ir generation, the if node, the block to branch from (will be `NULL` for root level if branches) and the block to continue execution from. 
 
-The first step is to check for a condition, if the condition is `NULL` then this branch must be an else branch therefore we compile the block and exit. `CompileBlockAt()` compiles a block statement and returns an `LLVMBlockRef` to were the execution should continue. We use `SetBlock()` to set it as are current block and check if its not terminated, if its not then we insert a branch to the endblock.
+The first step is to check for a condition, if the condition is `NULL` then this branch must be an else branch therefore we compile the block and exit. `CompileBlockAt()` compiles a block statement and returns an `LLVMBlockRef` to were the execution should continue. We use `SetBlock()` to set it as are current block and check if its not terminated, if its not then we insert a branch to the end block.
 ```
 condition <- ifSmt.condition
 IF condition = _ THEN
@@ -3227,7 +3227,7 @@ condition <- CompileExp(irgen, cond);
 LLVMBuildCondBr(irgen.builder, condition, block, falseBlock);
 ```
 
-Next we check for any chaining else if/else blocks. If their are we recursivly call this function to compile the whole chain.
+Next we check for any chaining else if/else blocks. If their are we recursively call this function to compile the whole chain.
 ```
 SetBlock(irgen, falseBlock)
 IF ifSmt.else != _ THEN
@@ -3235,7 +3235,7 @@ IF ifSmt.else != _ THEN
 ENDIF
 ```
 
-Finaly we set the endBlock as the current block so any further instructions execute from their.
+Finally we set the end block as the current block so any further instructions execute from their.
 ```
 SetBlock(irgen, endBlock)
 ```
@@ -3987,7 +3987,7 @@ LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
 ## Technical solution
 
 ### build/
-This folder is were the make file produces the executables and librarys for the project.
+This folder is were the make file produces the executable and library for the project.
 
 #### CMakeLists.txt
 This is the make file for the project
@@ -7727,7 +7727,7 @@ bool string_equals(string s1, string s2) {
 ```
 
 #### includes/uthash.h
-The only other external dependencie (apart from LLVM), uthash which is a single header hash table.
+The only other external dependency (apart from LLVM), uthash which is a single header hash table.
 ```
 /*
 Copyright (c) 2003-2017, Troy D. Hanson     http://troydhanson.github.com/uthash/
@@ -9040,7 +9040,7 @@ proc main :: -> int {
 ```
 
 #### irgen_test.cpp
-Contains unit tests for the ir generation and the integrations tests for the whole system
+Contains unit tests for the IR generation and the integrations tests for the whole system
 ```
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
@@ -10289,7 +10289,7 @@ int main(int argc, char **argv) {
 ```
 
 ## Testing
-When creating this project I used the test driven development workflow in which you write a test first, watch it fail, then write the code to make it parse. By following this I have constructed a test program which tests every unit of the compiler as well as intergration tests to test the whole system. This is so important when building software to ensure no new code breaks any features. 
+When creating this project I used the test driven development workflow in which you write a test first, watch it fail, then write the code to make it parse. By following this I have constructed a test program which tests every unit of the compiler as well as integration tests to test the whole system. This is so important when building software to ensure no new code breaks any features. 
 
 ### String test
 | Name | Description |
@@ -10449,7 +10449,7 @@ TEST(StringTest, StringNotEquals) {
 | PoolTest.FillPool                 | Tests the pool can be filled and `pool_full()` returns `true` |
 | PoolTest.ExtendPool               | Tests the pool capacity can be extended |
 | Pooltest.OverflowExtendPool       | Tests inserting into a full pool extends the pool |
-| PoolTest.ReleaseElementFromPool   | Tests an element is correclty released from the pool | 
+| PoolTest.ReleaseElementFromPool   | Tests an element is correctly released from the pool | 
 | PoolTest.ReusePool                | Tests that memory can be reclaimed and reused from the pool |
 
 #### Pool test implementation
@@ -10575,10 +10575,10 @@ TEST(PoolTest, ReusePool) {
 ### Queue test
 | Name | Description |
 | -------------------------- | --- |
-| QueueTest.NewQueue | Tests that a new queue is correclty constructed |
-| QueueTest.PushPopFrount | Tests that an element can be correcly pushed and popped from the frount |
-| QueueTest.PushPopBack | Tests that an element can be correcly pushed and popped from the back |
-| QueueTest.PushPopManyFrount | Tests that many elements can be pushed and popped off the frount in the correct order |
+| QueueTest.NewQueue | Tests that a new queue is correctly constructed |
+| QueueTest.PushPopFrount | Tests that an element can be correctly pushed and popped from the frount |
+| QueueTest.PushPopBack | Tests that an element can be correctly pushed and popped from the back |
+| QueueTest.PushPopManyFrount | Tests that many elements can be pushed and popped off the front in the correct order |
 | QueueTest.PushPopManyBack | Tests that many elements can be pushed and popped off the back in the correct order |
 
 #### Queue test implementation
@@ -10838,7 +10838,7 @@ TEST(LexerTest, SemiColonInsertion) {
 ### Parser test
 | Name | Description |
 | ----- | --- |
-| ParserTest.ScopeEnter | Test that a new scope is correcly entered |
+| ParserTest.ScopeEnter | Test that a new scope is correctly entered |
 | ParserTest.ScopeExit | Tests that a scope is correctly exited |
 | ParserTest.ScopeInsert | Tests that a new object is correctly inserted into the scope |
 | ParserTest.ScopeFind | Tests that an object can be found in scope |
@@ -10847,11 +10847,11 @@ TEST(LexerTest, SemiColonInsertion) {
 | ParserTest.ParseIdentExpressionWithNumber | Tests that a identifier expression, with a number, is parsed correctly |
 | ParserTest.ParseBinaryExpression | Tests that a binary expression is parsed correctly |
 | ParserTest.ParseBidmasBinaryExpression | Tests that the rules of BIDMAS when parsing binary expressions are followed |
-| ParserTest.ParseSelectorExpression | Tests that a selector expression is correclty parsed |
+| ParserTest.ParseSelectorExpression | Tests that a selector expression is correctly parsed |
 | ParserTest.ParseDoubleSelectorExpression | Tests that a double selector expression is correclty parsed |
 | ParserTest.ParseIndexExpression | Tests that an index expression is correctly parsed |
-| ParserTest.ParserightAssociativeBinaryOperators | Tests that right associative binary operators are parsed correclty |
-| ParserTest.ParseUnaryExpression | Tests that a unary expression is parsed correclty |
+| ParserTest.ParserightAssociativeBinaryOperators | Tests that right associative binary operators are parsed correctly |
+| ParserTest.ParseUnaryExpression | Tests that a unary expression is parsed correctly |
 | ParserTest.ParseUnaryMinusExpression | Tests that a unary minus expression works correctly |
 | ParserTest.ParseAssignmentOperator | Tests that a assignment expression works correctly |
 | ParserTest.ParseAddAssigmentOperator | Tests that a add assignment expression is parsed correctly |
@@ -10861,9 +10861,9 @@ TEST(LexerTest, SemiColonInsertion) {
 | ParserTest.ParseLongBlockSingleLine | Tests that a single line block with many statements is parsed correctly |
 | ParserTest.ParseIfStatment | Tests that an if statement is parsed correctly |
 | ParserTest.ParseIfElseStatment | Tests that an if else statement is parsed correctly |
-| ParserTest.ParseIfElseIfElseStatment | Tests that an if else if else statment is parsed correctly |
-| ParserTest.ParseShortVaribleDeclare | Tests that a short varible declaration is parsed correctly |
-| ParserTest.ParseLongVaribleDeclare | Tests that a long varible declaration is parsed correctly |
+| ParserTest.ParseIfElseIfElseStatment | Tests that an if else if else statement is parsed correctly |
+| ParserTest.ParseShortVaribleDeclare | Tests that a short variable declaration is parsed correctly |
+| ParserTest.ParseLongVaribleDeclare | Tests that a long variable declaration is parsed correctly |
 | ParserTest.ParseArrayType | Tests that an array type is parsed correctly |
 | ParserTest.ParseFunctionDefinition | Tests that a function definition is parsed correctly |
 | ParserTest.ParseEmptyCallExpression | Tests that a call expression is parsed correctly |
@@ -10881,10 +10881,10 @@ TEST(LexerTest, SemiColonInsertion) {
 | ParserTest.ParseFunctionDclWithoutArgTypeOrName | Tests that a function declaration without argument type or name is parsed correctly (and error is produced) |
 | ParserTest.ParseFunctionDclWithoutArrow | Tests that a function declaration without an arrow is parsed correctly (and error is produced) |
 | ParserTest.ParseNonDeclaration | Tests that an error is produced when a declaration is expected |
-| ParserTest.ParseVaribleDclWithoutType | Tests that a long varible declaration without a type is parsed correclty (and error is produced) |
+| ParserTest.ParseVaribleDclWithoutType | Tests that a long variable declaration without a type is parsed correclty (and error is produced) |
 | ParserTest.ParseVariableDclWithoutName | Tests that an error is produced when a varible declaration doesnt have a name |
-| ParserTest.ParseVaribleDclWithoutEquals | Tests that a long varible declaration without an equals is parsed correctly (and error is produced) |
-| ParserTest.ParseVaribleDclWithoutValue | Tests that a long varible declaration without a value produces error |
+| ParserTest.ParseVaribleDclWithoutEquals | Tests that a long variable declaration without an equals is parsed correctly (and error is produced) |
+| ParserTest.ParseVaribleDclWithoutValue | Tests that a long variable declaration without a value produces error |
 
 ### Parser test implementation
 ```
@@ -11642,19 +11642,19 @@ TEST(IrgenTest, CompileFunctionBubblesort) {
 ```
 
 ## Evaluation
-In the analysis I stated that "simple algorithums like the greatest common devisor, bubble sort and fibbonanci sequence should be able to be made in Fur. Each of these algorithums are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
+In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
 
 ### Syntax objectives
 As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions.
 
 ### Memory management objectives
-Since their is no runtime at all, the is no managed memory, thus the memory management objective has been met
+Since their is no run time at all, the is no managed memory, thus the memory management objective has been met
 
 ### Command line interface objectives
-All flags were used during development to debug the compiler, so all flags exsist and the objectives have been met.
+All flags were used during development to debug the compiler, so all flags exist and the objectives have been met.
 
 ### Feedback
-> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvments for this kind of project are endless including:
+> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvements for this kind of project are endless including:
 > * Standard library
 > * More syntax
 > * Module system
@@ -11663,11 +11663,11 @@ All flags were used during development to debug the compiler, so all flags exsis
 > * REPL
 > * etc
 
-If I had more time I would have liked to add some of these features. A module system would present an intresting oppertunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
+If I had more time I would have liked to add some of these features. A module system would present an interesting opportunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
 
 With a module system in place the implementation of a standard library would be trivial. When the compiler reaches an include/import statement it would first search the standard library before the working directory. All the standard library would be implemented in Fur, and eventually the compiler itself.
 
-Cross platform builds and better distribution would involve porting some of the OS code to windows, prehaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
+Cross platform builds and better distribution would involve porting some of the OS code to windows, perhaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
 
 ## References
 1. The Rust Reference <a id="1">https://doc.rust-lang.org/reference.html</a>
