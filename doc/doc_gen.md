@@ -5186,8 +5186,19 @@ TEST_CAST(DoubleToI64, LLVMConstRealOfString(LLVMDoubleType(), "1245.12"), LLVMI
 | IntegrationTest.CompileFunctionNestedFor  | Tests `nestedFor.fur` compiles and returns the correct code |
 | IntegrationTest.CompileFunctionBubblesort  | Tests `bubblesort.fur` compiles and returns the correct code |
 
-| Name  | Source    | Error |
-| ----- | --------  | ----- |
+| Name | Description  | In    | Out |
+| ----- | --- | --------  | ----- |
+| IntegrationTest.CompileFunctionProcColonError | Tests that functions without a double colon produce the correct error | 4 | 1 |
+| IntegrationTest.CompileFunctionProcArrowError | Tests that functions without an arrow prouduces the correct error | 5 | 2 |
+| IntegrationTest.CompileFunctionProcNameError | Tests that fuunctions without a name prouduces the correct error | 6 | 3 |
+
+1. ![](https://i.imgur.com/x0Eli3B.png)
+2. ![](https://i.imgur.com/9jX8bOH.png)
+3. ![](https://i.imgur.com/tyM40HK.png)
+
+4. ![](https://i.imgur.com/E72qXk5.png)
+5. ![](https://i.imgur.com/2JdgCDk.png)
+6. ![](https://i.imgur.com/tlPADNr.png)
 
 
 #### Irgen test implementation
