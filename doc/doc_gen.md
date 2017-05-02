@@ -7593,7 +7593,6 @@ int main(int argc, char *argv[]) {
 	printf("Parser done\n");
 	Irgen *irgen = NewIrgen();
 	printf("Irgen done\n");
-	// TODO: add a compile ast_unit method
 	for (int i = 0; i < ast->dclCount; i++) {
         CompileFunction(irgen, ast->dcls[i]);
     }
