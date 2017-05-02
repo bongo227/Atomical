@@ -143,12 +143,6 @@ This project was implemented in C which means their is alot of code which isnt i
 * `GOTO` goes to a label
 * `_` is equivilent to `NULL` in C 
 
-### BNF
-The syntax of the language can be described with the following BNF
-```
-
-```
-
 ### String
 Strings in C are represented by a pointer to some characters (that end with a null byte). This means that to append somthing to a string it would require a reallocation, which is slow. Additionaly to find the length of a C string, it requires a function call which loops until it reaches the null byte unlike most languages were it would be a constant time operation. It makes sence in this case to build a more dynamic string for when we dont know how long the string should be, and dont care about the additional memory.
 
