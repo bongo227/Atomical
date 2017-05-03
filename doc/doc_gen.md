@@ -5748,14 +5748,11 @@ TEST(IntegrationTest, CompileFunctionProcNameError) {
 ## Evaluation
 In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
 
-### Syntax objectives
-As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions.
-
-### Memory management objectives
-Since their is no run time at all, the is no managed memory, thus the memory management objective has been met
-
-### Command line interface objectives
-All flags were used during development to debug the compiler, so all flags exist and the objectives have been met.
+| Objective | Comment |
+| --- | --- |
+| Syntax objectives | As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions. |
+| Memory management objectives | Since their is no run time at all, the is no managed memory, thus the memory management objective has been met. |
+| Command line interface objectives | All flags were used during development to debug the compiler, so all flags exist and the objectives have been met. |
 
 ### Feedback
 > This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvements for this kind of project are endless including:
