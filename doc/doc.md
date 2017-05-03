@@ -2895,9 +2895,9 @@ TEST(IntegrationTest, CompileFunctionProcColonError) {
 #### IntegrationTest.CompileFunctionProcArrowError
 Tests that functions without an arrow prouduces the correct error
 
-![](https://i.imgur.com/9jX8bOH.png)
-
 ![](https://i.imgur.com/2JdgCDk.png)
+
+![](https://i.imgur.com/9jX8bOH.png)
 
 ```
 TEST(IntegrationTest, CompileFunctionProcArrowError) {
@@ -2908,9 +2908,9 @@ TEST(IntegrationTest, CompileFunctionProcArrowError) {
 #### IntegrationTest.CompileFunctionProcNameError
 Tests that fuunctions without a name prouduces the correct error
 
-![](https://i.imgur.com/tyM40HK.png)
-
 ![](https://i.imgur.com/tlPADNr.png)
+
+![](https://i.imgur.com/tyM40HK.png)
 
 ```
 TEST(IntegrationTest, CompileFunctionProcNameError) {
