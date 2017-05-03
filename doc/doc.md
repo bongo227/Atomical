@@ -3005,7 +3005,7 @@ TEST(IntegrationTest, CompileFunctionProcArrowError) {
 ![](https://i.imgur.com/9jX8bOH.png)
 
 #### IntegrationTest.CompileFunctionProcNameError
-Tests that fuunctions without a name prouduces the correct error
+Tests that functions without a name prouduces the correct error
 
 ```c
 #import "../tests/tests/procNameError.fur"
@@ -3018,6 +3018,36 @@ TEST(IntegrationTest, CompileFunctionProcNameError) {
 ```
 
 ![](https://i.imgur.com/tyM40HK.png)
+
+#### IntegrationTest.CompileFunctionVarEqualError
+Tests that varible definititions without an equals produces the correct error
+
+```c
+#import "../tests/tests/varEqualError.fur
+```
+
+```c
+TEST(IntegrationTest, CompileFunctionVarEqualError) {
+    TEST_ERROR(loadTest("varEqualError.fur"), ASSIGN);
+}
+```
+
+![](http://imgur.com/5CYpQya.png)
+
+#### IntegrationTest.CompileFunctionVarNameError
+Tests that a varible definition without a name produces the correct error
+
+```c
+#import "../tests/tests/varNameError.fur"
+```
+
+```c
+TEST(IntegrationTest, CompileFunctionVarNameError) {
+    TEST_ERROR(loadTest("varNameError.fur"), IDENT);
+}
+```
+
+![](http://imgur.com/k4chiNf.png)
 
 ## Evaluation
 In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.

@@ -188,3 +188,11 @@ TEST(IntegrationTest, CompileFunctionProcArrowError) {
 TEST(IntegrationTest, CompileFunctionProcNameError) {
     TEST_ERROR(loadTest("procNameError.fur"), IDENT);
 }
+
+TEST(IntegrationTest, CompileFunctionVarEqualError) {
+    TEST_ERROR(loadTest("varEqualError.fur"), ASSIGN);
+}
+
+TEST(IntegrationTest, CompileFunctionVarNameError) {
+    TEST_ERROR(loadTest("varNameError.fur"), IDENT);
+}
