@@ -6041,7 +6041,7 @@ This folder is were the make file produces the executable and library for the pr
 
 #### CMakeLists.txt
 This is the make file for the project
-```
+```cmake
 cmake_minimum_required(VERSION 2.6)
 
 # Use Clang
@@ -6209,7 +6209,7 @@ This is the folder were all the source files for the compiler reside.
 
 #### includes/all.h
 Contains a few helpfull defines for the whole project.
-```
+```c
 #pragma once
 
 #include <assert.h>
@@ -6226,7 +6226,7 @@ Contains a few helpfull defines for the whole project.
 
 #### includes/ast.h
 Typedefs for all the ast nodes.
-```
+```c
 #pragma once
 
 #include "all.h"
@@ -6390,7 +6390,7 @@ Exp *new_struct_type_exp(ast_unit *ast, Exp *fields, int count);
 
 #### ast.c
 Constructors for the AST nodes.
-```
+```c
 #include "includes/ast.h"
 
 ast_unit *new_ast_unit() {
@@ -6675,7 +6675,7 @@ Dcl *new_function_dcl(ast_unit *ast, char *name, Dcl *args, int argCount, Exp *r
 ```
 
 #### includes/error.h
-```
+```c
 #pragma once
 
 #include "all.h"
@@ -6689,7 +6689,7 @@ void error(char *src, int line, int start, int end, char *msg, ...);
 
 #### error.c
 Pretty prints errors to the terminal.
-```
+```c
 #include "includes/error.h"
 
 void verror(char *src, int line, int start, int end, char *msg, va_list args) {
@@ -6760,7 +6760,7 @@ void error(char *src, int line, int start, int end, char *msg, ...) {
 ```
 
 #### includes/irgen.h
-```
+```c
 #pragma once
 
 #include "all.h"
@@ -6792,7 +6792,7 @@ LLVMValueRef Cast(Irgen *irgen, LLVMValueRef value, LLVMTypeRef type);
 ```
 
 #### irgen.c
-```
+```c
 #include "includes/irgen.h"
 
 Irgen *NewIrgen() {
@@ -7502,7 +7502,7 @@ LLVMValueRef CompileExp(Irgen *irgen, Exp *e) {
 ```
 
 #### includes/lexer.h
-```
+```c
 #pragma once
 
 #include "all.h"
@@ -7616,7 +7616,7 @@ int get_binding_power(TokenType type);
 ```
 
 #### lexer.c
-```
+```c
 #include "includes/lexer.h"
 
 // Removes spaces, newlines and tabs
@@ -8338,7 +8338,7 @@ int get_binding_power(TokenType type) {
 
 #### lib.c
 Includes all the source files so the compiler can be exposed as a library (which we use in the unit tests).
-```
+```c
 #include "error.c"
 #include "lexer.c"
 #include "ast.c"
@@ -8351,7 +8351,7 @@ Includes all the source files so the compiler can be exposed as a library (which
 
 #### main.c
 Entry point for the compiler
-```
+```c
 #include "includes/error.h"
 #include "includes/lexer.h"
 #include "includes/ast.h"
@@ -8460,7 +8460,7 @@ int main(int argc, char *argv[]) {
 ```
 
 #### includes/parser.h
-```
+```c
 #pragma once
 
 #include "uthash.h"
@@ -8556,7 +8556,7 @@ Exp *parse_ident_exp(parser *parser);
 ```
 
 #### parser.c
-```
+```c
 #include "includes/parser.h"
 
 // new_parser creates a new parser
@@ -9308,7 +9308,7 @@ Exp *parse_ident_exp(parser *p) {
 ```
 
 #### includes/pool.h
-```
+```c
 #pragma once
 
 struct pool_element;
@@ -9338,7 +9338,7 @@ void pool_destroy(pool *p);
 ```
 
 #### pool.c
-```
+```c
 #include "includes/pool.h"
 
 // new_pool creates a new pool
@@ -9485,7 +9485,7 @@ void pool_destroy(pool *p) {
 ```
 
 #### includes/queue.h
-```
+```c
 #pragma once
 
 #include "all.h"
@@ -9516,7 +9516,7 @@ void queue_destroy(queue *q);
 ```
 
 #### queue.c
-```
+```c
 #include "includes/queue.h"
 
 queue *new_queue(size_t element_size) {
@@ -9603,7 +9603,7 @@ void queue_destroy(queue *q) {
 ```
 
 #### includes/string.h
-```
+```c
 #pragma once
 
 typedef struct {
@@ -9639,7 +9639,7 @@ bool string_equals(string s1, string s2);
 ```
 
 #### string.c
-```
+```c
 #include "includes/string.h"
 
 #define STRING_HEADER(s) ((string_header *)s - 1)
@@ -9759,7 +9759,7 @@ bool string_equals(string s1, string s2) {
 
 #### includes/uthash.h
 The only other external dependency (apart from LLVM), uthash which is a single header hash table.
-```
+```c
 /*
 Copyright (c) 2003-2017, Troy D. Hanson     http://troydhanson.github.com/uthash/
 All rights reserved.
@@ -10841,7 +10841,7 @@ typedef struct UT_hash_handle {
 This folder contains the C++ program that tests the compiler
 
 #### tests/add.fur
-```
+```markdown
 proc add :: int a, int b -> int {
     return a + b
 }
@@ -10852,7 +10852,7 @@ proc main :: -> int {
 ```
 
 #### tests/arrayInit.fur
-```
+```markdown
 proc main :: -> int {
     a := [100, 20, 3]
     return a[0] + a[1] + a[2]
@@ -10860,7 +10860,7 @@ proc main :: -> int {
 ```
 
 #### tests/arraySum.fur
-```
+```markdown
 proc sum :: int[3] nums -> int {
     s := 0
     for i := 0; i < 3; i++ {
@@ -10877,21 +10877,21 @@ proc main :: -> int {
 ```
 
 #### tests/binaryFloat.fur
-```
+```markdown
 proc main :: -> int {
     return 130.75 - 7.75
 }
 ```
 
 #### tests/binaryInt.fur
-```
+```markdown
 proc main :: -> int {
     return 120 + 3
 }
 ```
 
 #### tests/bubbleSort.fur
-```
+```markdown
 proc sort :: int[5] items -> int[5] {
     n := 5
     for i := 0; i < n-1; i++ {
@@ -10921,7 +10921,7 @@ proc main :: -> int {
 ```
 
 #### tests/fibbonanci.fur
-```
+```markdown
 proc fib :: int n -> int {
     if n < 2 {
         return n
@@ -10936,7 +10936,7 @@ proc main :: -> int {
 ```
 
 #### tests/for.fur
-```
+```markdown
 proc main :: -> int {
     a := 0
     for i := 0; i < 123; i++ {
@@ -10947,7 +10947,7 @@ proc main :: -> int {
 ```
 
 #### tests/gcd.fur
-```
+```markdown
 proc gcd :: int a, int b -> int {
     if b == 0 {
         return a
@@ -10962,7 +10962,7 @@ proc main :: -> int {
 ```
 
 #### tests/if.fur
-```
+```markdown
 proc main :: -> int {
     if true { 
         return 123 
@@ -10972,7 +10972,7 @@ proc main :: -> int {
 ```
 
 #### tests/ifElse.fur
-```
+```markdown
 proc main :: -> int {
     if true {
         return 123
@@ -10983,7 +10983,7 @@ proc main :: -> int {
 ```
 
 #### tests/ifElseIfElse.fur
-```
+```markdown
 proc main :: -> int {
     if false {
         return 321
@@ -10996,7 +10996,7 @@ proc main :: -> int {
 ```
 
 #### tests/ifElseIfElseIfElse.fur
-```
+```markdown
 proc main :: -> int {
     if false {
         return 321
@@ -11011,14 +11011,14 @@ proc main :: -> int {
 ```
 
 #### tests/literal.fur
-```
+```markdown
 proc main :: -> int {
     return 123
 }
 ```
 
 #### tests/longVar.fur
-```
+```markdown
 proc main :: -> int {
     var int a = 123
     return a
@@ -11026,7 +11026,7 @@ proc main :: -> int {
 ```
 
 #### tests/nestedFor.fur
-```
+```markdown
 proc main :: -> int {
     s := 0
     for i := 0; i < 3; i++ {
@@ -11040,7 +11040,7 @@ proc main :: -> int {
 ```
 
 #### tests/reassignArg.fur
-```
+```markdown
 proc test :: int n -> int {
     n = 123
     return n
@@ -11052,7 +11052,7 @@ proc main :: -> int {
 ```
 
 #### tests/shortVar.fur
-```
+```markdown
 proc main :: -> int {
     a := 123
     return a
@@ -11060,7 +11060,7 @@ proc main :: -> int {
 ```
 
 #### tests/unary.fur
-```
+```markdown
 proc neg :: int n -> int {
     return -n
 }
@@ -11072,7 +11072,7 @@ proc main :: -> int {
 
 #### irgen_test.cpp
 Contains unit tests for the IR generation and the integrations tests for the whole system
-```
+```cpp
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
 #include <llvm-c/Target.h>
@@ -11132,7 +11132,7 @@ TEST_CAST(DoubleToI64, LLVMConstRealOfString(LLVMDoubleType(), "1245.12"), LLVMI
 
 #### lexer_test.cpp
 Unit tests for the lexer
-```
+```cpp
 #include <gtest/gtest.h>
 
 struct tcase {
@@ -11307,7 +11307,7 @@ TEST(LexerTest, SemiColonInsertion) {
 
 #### parser_test.cpp
 Unit tests for the parser
-```
+```cpp
 TEST(ParserTest, ScopeEnter) {
     parser *p = new_parser(NULL);
     scope *outer = p->scope;
@@ -11801,7 +11801,7 @@ TEST(ParserTest, ParseVaribleDclWithoutValue) {
 
 #### pool_test.cpp
 Unit tests for the pool
-```
+```cpp
 #include <gtest/gtest.h>
 
 TEST(PoolTest, NewPool) {
@@ -11922,7 +11922,7 @@ TEST(PoolTest, ReusePool) {
 
 #### queue_test.cpp
 Unit tests for the queue
-```
+```cpp
 #include <gtest/gtest.h>
 
 TEST(QueueTest, NewQueue) {
@@ -11992,7 +11992,7 @@ TEST(QueueTest, PushPopManyBack) {
 
 #### string_test.cpp
 Unit tests for the string
-```
+```cpp
 #define STRING_HEADER(s) ((string_header *)s - 1)
 
 TEST(StringTest, CreateNewString) {
@@ -12123,7 +12123,7 @@ TEST(StringTest, StringNotEquals) {
 
 #### test.cpp
 Test program entry point
-```
+```cpp
 #include <gtest/gtest.h>
 
 #include <stdio.h>
