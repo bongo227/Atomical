@@ -3023,7 +3023,7 @@ TEST(IntegrationTest, CompileFunctionProcNameError) {
 Tests that varible definititions without an equals produces the correct error
 
 ```c
-#import "../tests/tests/varEqualError.fur
+#import "../tests/tests/varEqualError.fur"
 ```
 
 ```c
