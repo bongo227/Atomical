@@ -2729,6 +2729,11 @@ char *loadTest(std::string name) {
 
 #### IntegrationTest.CompileFunctionLiteral
 Tests `literal.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/literal.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionLiteral){ 
     TEST_MODULE(loadTest("literal.fur"), 123);
@@ -2737,6 +2742,11 @@ TEST(IntegrationTest, CompileFunctionLiteral){
 
 #### IntegrationTest.CompileFunctionBinaryInt
 Tests `binaryInt.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/binaryInt.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionBinaryInt){ 
     TEST_MODULE(loadTest("binaryInt.fur"), 123);
@@ -2745,6 +2755,11 @@ TEST(IntegrationTest, CompileFunctionBinaryInt){
 
 #### IntegrationTest.CompileFunctionBinaryFloat
 Tests `binaryFloat.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/binaryFloat.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionBinaryFloat){ 
     TEST_MODULE(loadTest("binaryFloat.fur"), 123);
@@ -2753,6 +2768,11 @@ TEST(IntegrationTest, CompileFunctionBinaryFloat){
 
 #### IntegrationTest.CompileFunctionLongVar
 Tests `longVar.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/longVar.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionLongVar){ 
     TEST_MODULE(loadTest("longVar.fur"), 123);
@@ -2761,6 +2781,11 @@ TEST(IntegrationTest, CompileFunctionLongVar){
 
 #### IntegrationTest.CompileFunctionShortVar
 Tests `shortVar.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/shortVar.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionShortVar){ 
     TEST_MODULE(loadTest("shortVar.fur"), 123);
@@ -2769,6 +2794,11 @@ TEST(IntegrationTest, CompileFunctionShortVar){
 
 #### IntegrationTest.CompileFunctionIf
 Tests `if.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/if.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIf){ 
     TEST_MODULE(loadTest("if.fur"), 123);
@@ -2777,6 +2807,11 @@ TEST(IntegrationTest, CompileFunctionIf){
 
 #### IntegrationTest.CompileFunctionIfElse
 Tests `ifElse.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/ifElse.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIfElse){ 
     TEST_MODULE(loadTest("ifElse.fur"), 123);
@@ -2785,6 +2820,11 @@ TEST(IntegrationTest, CompileFunctionIfElse){
 
 #### IntegrationTest.CompileFunctionIfElseIfElse
 Tests `ifElseIfelse.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/ifElseIfelse.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIfElseIfElse){ 
     TEST_MODULE(loadTest("ifElseIfElse.fur"), 123);
@@ -2793,6 +2833,11 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElse){
 
 #### IntegrationTest.CompileFunctionIfElseIfelseIfElse
 Tests `ifElseIfElseIfElse.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/ifElseIfElseIfElse.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){ 
     TEST_MODULE(loadTest("ifElseIfElseIfElse.fur"), 123);
@@ -2801,6 +2846,11 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){
 
 #### IntegrationTest.CompileFunctionFor
 Tests `for.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/for.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionFor){ 
     TEST_MODULE(loadTest("for.fur"), 123);
@@ -2809,6 +2859,11 @@ TEST(IntegrationTest, CompileFunctionFor){
 
 #### IntegrationTest.CompileFunctionArrayInit
 Tests `arrayInit.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/arrayInit.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionArrayInit){ 
     TEST_MODULE(loadTest("arrayInit.fur"), 123);
@@ -2817,6 +2872,11 @@ TEST(IntegrationTest, CompileFunctionArrayInit){
 
 #### IntegrationTest.CompileFunctionAdd
 Tests `add.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/add.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionAdd){ 
     TEST_MODULE(loadTest("add.fur"), 123);
@@ -2825,6 +2885,11 @@ TEST(IntegrationTest, CompileFunctionAdd){
 
 #### IntegrationTest.CompileFunctionUnary
 Tests `unary.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/unary.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionUnary){ 
     TEST_MODULE(loadTest("unary.fur"), 123); 
@@ -2833,6 +2898,11 @@ TEST(IntegrationTest, CompileFunctionUnary){
 
 #### IntegrationTest.CompileFunctionReassignArg
 Tests `reassignArg.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/reassignArg.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionReassignArg){ 
     TEST_MODULE(loadTest("reassignArg.fur"), 123);
@@ -2841,6 +2911,11 @@ TEST(IntegrationTest, CompileFunctionReassignArg){
 
 #### IntegrationTest.CompileFunctionGCD
 Tests `gcd.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/gcd.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionGCD){ 
     TEST_MODULE(loadTest("gcd.fur"), 139);
@@ -2849,6 +2924,11 @@ TEST(IntegrationTest, CompileFunctionGCD){
 
 #### IntegrationTest.CompileFunctionFibbonanci
 Tests `fibbonanci.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/fibbonanci.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionFibbonanci) {
     TEST_MODULE(loadTest("fibbonanci.fur"), 144);
@@ -2857,6 +2937,11 @@ TEST(IntegrationTest, CompileFunctionFibbonanci) {
 
 #### IntegrationTest.CompileFunctionArraySum
 Tests `arraySum.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/arraySum.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionArraySum) {
     TEST_MODULE(loadTest("arraySum.fur"), 123);
@@ -2865,6 +2950,11 @@ TEST(IntegrationTest, CompileFunctionArraySum) {
 
 #### IntegrationTest.CompileFunctionNestedFor
 Tests `nestedFor.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/nestedFor.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionNestedFor) {
     TEST_MODULE(loadTest("nestedFor.fur"), 123);
@@ -2873,6 +2963,11 @@ TEST(IntegrationTest, CompileFunctionNestedFor) {
 
 #### IntegrationTest.CompileFunctionBubblesort
 Tests `bubblesort.fur` compiles and returns the correct code
+
+```
+#import "../tests/tests/bubblesort.fur"
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionBubblesort) {
     TEST_MODULE(loadTest("bubblesort.fur"), 123);

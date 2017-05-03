@@ -5544,6 +5544,13 @@ char *loadTest(std::string name) {
 
 #### IntegrationTest.CompileFunctionLiteral
 Tests `literal.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    return 123
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionLiteral){ 
     TEST_MODULE(loadTest("literal.fur"), 123);
@@ -5552,6 +5559,13 @@ TEST(IntegrationTest, CompileFunctionLiteral){
 
 #### IntegrationTest.CompileFunctionBinaryInt
 Tests `binaryInt.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    return 120 + 3
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionBinaryInt){ 
     TEST_MODULE(loadTest("binaryInt.fur"), 123);
@@ -5560,6 +5574,13 @@ TEST(IntegrationTest, CompileFunctionBinaryInt){
 
 #### IntegrationTest.CompileFunctionBinaryFloat
 Tests `binaryFloat.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    return 130.75 - 7.75
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionBinaryFloat){ 
     TEST_MODULE(loadTest("binaryFloat.fur"), 123);
@@ -5568,6 +5589,14 @@ TEST(IntegrationTest, CompileFunctionBinaryFloat){
 
 #### IntegrationTest.CompileFunctionLongVar
 Tests `longVar.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    var int a = 123
+    return a
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionLongVar){ 
     TEST_MODULE(loadTest("longVar.fur"), 123);
@@ -5576,6 +5605,14 @@ TEST(IntegrationTest, CompileFunctionLongVar){
 
 #### IntegrationTest.CompileFunctionShortVar
 Tests `shortVar.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    a := 123
+    return a
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionShortVar){ 
     TEST_MODULE(loadTest("shortVar.fur"), 123);
@@ -5584,6 +5621,16 @@ TEST(IntegrationTest, CompileFunctionShortVar){
 
 #### IntegrationTest.CompileFunctionIf
 Tests `if.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    if true { 
+        return 123 
+    }
+    return 321
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIf){ 
     TEST_MODULE(loadTest("if.fur"), 123);
@@ -5592,6 +5639,17 @@ TEST(IntegrationTest, CompileFunctionIf){
 
 #### IntegrationTest.CompileFunctionIfElse
 Tests `ifElse.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    if true {
+        return 123
+    } else {
+        return 321
+    }
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIfElse){ 
     TEST_MODULE(loadTest("ifElse.fur"), 123);
@@ -5599,7 +5657,20 @@ TEST(IntegrationTest, CompileFunctionIfElse){
 ```
 
 #### IntegrationTest.CompileFunctionIfElseIfElse
-Tests `ifElseIfelse.fur` compiles and returns the correct code
+Tests `ifElseIfElse.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    if false {
+        return 321
+    } else if true {
+        return 123
+    } else {
+        return 0
+    }
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIfElseIfElse){ 
     TEST_MODULE(loadTest("ifElseIfElse.fur"), 123);
@@ -5608,6 +5679,21 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElse){
 
 #### IntegrationTest.CompileFunctionIfElseIfelseIfElse
 Tests `ifElseIfElseIfElse.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    if false {
+        return 321
+    } else if false {
+        return 23
+    } else if false {
+        return 21
+    } else {
+        return 123
+    }
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){ 
     TEST_MODULE(loadTest("ifElseIfElseIfElse.fur"), 123);
@@ -5616,6 +5702,17 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){
 
 #### IntegrationTest.CompileFunctionFor
 Tests `for.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    a := 0
+    for i := 0; i < 123; i++ {
+        a += 1
+    }
+    return a
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionFor){ 
     TEST_MODULE(loadTest("for.fur"), 123);
@@ -5624,6 +5721,14 @@ TEST(IntegrationTest, CompileFunctionFor){
 
 #### IntegrationTest.CompileFunctionArrayInit
 Tests `arrayInit.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    a := [100, 20, 3]
+    return a[0] + a[1] + a[2]
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionArrayInit){ 
     TEST_MODULE(loadTest("arrayInit.fur"), 123);
@@ -5632,6 +5737,17 @@ TEST(IntegrationTest, CompileFunctionArrayInit){
 
 #### IntegrationTest.CompileFunctionAdd
 Tests `add.fur` compiles and returns the correct code
+
+```
+proc add :: int a, int b -> int {
+    return a + b
+}
+
+proc main :: -> int {
+    return add(120, 3)
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionAdd){ 
     TEST_MODULE(loadTest("add.fur"), 123);
@@ -5640,6 +5756,17 @@ TEST(IntegrationTest, CompileFunctionAdd){
 
 #### IntegrationTest.CompileFunctionUnary
 Tests `unary.fur` compiles and returns the correct code
+
+```
+proc neg :: int n -> int {
+    return -n
+}
+
+proc main :: -> int {
+    return neg(-123)
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionUnary){ 
     TEST_MODULE(loadTest("unary.fur"), 123); 
@@ -5648,6 +5775,18 @@ TEST(IntegrationTest, CompileFunctionUnary){
 
 #### IntegrationTest.CompileFunctionReassignArg
 Tests `reassignArg.fur` compiles and returns the correct code
+
+```
+proc test :: int n -> int {
+    n = 123
+    return n
+}
+
+proc main :: -> int {
+    return test(321)
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionReassignArg){ 
     TEST_MODULE(loadTest("reassignArg.fur"), 123);
@@ -5656,6 +5795,21 @@ TEST(IntegrationTest, CompileFunctionReassignArg){
 
 #### IntegrationTest.CompileFunctionGCD
 Tests `gcd.fur` compiles and returns the correct code
+
+```
+proc gcd :: int a, int b -> int {
+    if b == 0 {
+        return a
+    } 
+    
+    return gcd(b, a % b)
+}
+
+proc main :: -> int {
+    return gcd(1529, 14039)
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionGCD){ 
     TEST_MODULE(loadTest("gcd.fur"), 139);
@@ -5664,6 +5818,21 @@ TEST(IntegrationTest, CompileFunctionGCD){
 
 #### IntegrationTest.CompileFunctionFibbonanci
 Tests `fibbonanci.fur` compiles and returns the correct code
+
+```
+proc fib :: int n -> int {
+    if n < 2 {
+        return n
+    }
+
+    return fib(n - 1) + fib(n - 2)
+}
+
+proc main :: -> int {
+    return fib(12)
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionFibbonanci) {
     TEST_MODULE(loadTest("fibbonanci.fur"), 144);
@@ -5672,6 +5841,23 @@ TEST(IntegrationTest, CompileFunctionFibbonanci) {
 
 #### IntegrationTest.CompileFunctionArraySum
 Tests `arraySum.fur` compiles and returns the correct code
+
+```
+proc sum :: int[3] nums -> int {
+    s := 0
+    for i := 0; i < 3; i++ {
+        s += nums[i]
+    }
+
+    return s
+}
+
+proc main :: -> int {
+    a := [100, 20, 3]
+    return sum(a)
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionArraySum) {
     TEST_MODULE(loadTest("arraySum.fur"), 123);
@@ -5680,6 +5866,20 @@ TEST(IntegrationTest, CompileFunctionArraySum) {
 
 #### IntegrationTest.CompileFunctionNestedFor
 Tests `nestedFor.fur` compiles and returns the correct code
+
+```
+proc main :: -> int {
+    s := 0
+    for i := 0; i < 3; i++ {
+        for j := 0; j < 41; j++ {
+            s += 1
+        }
+    }
+
+    return s
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionNestedFor) {
     TEST_MODULE(loadTest("nestedFor.fur"), 123);
@@ -5688,6 +5888,36 @@ TEST(IntegrationTest, CompileFunctionNestedFor) {
 
 #### IntegrationTest.CompileFunctionBubblesort
 Tests `bubblesort.fur` compiles and returns the correct code
+
+```
+proc sort :: int[5] items -> int[5] {
+    n := 5
+    for i := 0; i < n-1; i++ {
+        for j := 0; j < n-i-1; j++ {
+            if items[j] > items[j+1] {
+                temp := items[j]
+                items[j] = items[j+1]
+                items[j+1] = temp
+            }
+        }
+        n = 5
+    }
+
+    return items
+}
+
+proc main :: -> int {
+    a := [54, 2, 42, 5, 6]
+    a = sort(a)
+
+    if a[0] < a[1] < a[2] < a[3] < a[4] < a[5] {
+        return 123
+    }
+    
+    return 0
+}
+```
+
 ```
 TEST(IntegrationTest, CompileFunctionBubblesort) {
     TEST_MODULE(loadTest("bubblesort.fur"), 123);
