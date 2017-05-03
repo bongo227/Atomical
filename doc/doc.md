@@ -1380,7 +1380,7 @@ TEST(StringTest, StringNotEquals) {
 ### Pool test
 
 #### PoolTest.NewPool
-Tests that a new pool is correctly constructed |
+Tests that a new pool is correctly constructed
 ```
 TEST(PoolTest, NewPool) {
     pool *int_pool = new_pool(sizeof(int), 5);
@@ -1392,7 +1392,7 @@ TEST(PoolTest, NewPool) {
 ```
 
 #### PoolTest.InsertPool
-Tests that an item is correctly inserted into the pool |
+Tests that an item is correctly inserted into the pool
 ```
 TEST(PoolTest, InsertPool) {
     pool *int_pool = new_pool(sizeof(int), 5);
@@ -1409,7 +1409,7 @@ TEST(PoolTest, InsertPool) {
 ```
 
 #### PoolTest.FillPool
-Tests the pool can be filled and `pool_full()` returns `true` |
+Tests the pool can be filled and `pool_full()` returns `true`
 ```
 TEST(PoolTest, FillPool) {
     pool *int_pool = new_pool(sizeof(int), 5);
@@ -1426,7 +1426,7 @@ TEST(PoolTest, FillPool) {
 ```
 
 #### PoolTest.ExtendPool
-Tests the pool capacity can be extended |
+Tests the pool capacity can be extended
 ```
 TEST(PoolTest, ExtendPool) {
     pool *int_pool = new_pool(sizeof(int), 5);
@@ -1440,7 +1440,7 @@ TEST(PoolTest, ExtendPool) {
 ```
 
 #### Pooltest.OverflowExtendPool
-Tests inserting into a full pool extends the pool |
+Tests inserting into a full pool extends the pool
 ```
 TEST(PoolTest, OverflowExtendPool) {
     pool *int_pool = new_pool(sizeof(int), 5);
@@ -1457,7 +1457,7 @@ TEST(PoolTest, OverflowExtendPool) {
 ```
 
 #### PoolTest.ReleaseElementFromPool
-Tests an element is correctly released from the pool | 
+Tests an element is correctly released from the pool 
 ```
 TEST(PoolTest, ReleaseElementFromPool) {
     pool *int_pool = new_pool(sizeof(int), 5);
@@ -1485,7 +1485,7 @@ TEST(PoolTest, ReleaseElementFromPool) {
 ```
 
 #### PoolTest.ReusePool
-Tests that memory can be reclaimed and reused from the pool |
+Tests that memory can be reclaimed and reused from the pool
 ```
 TEST(PoolTest, ReusePool) {
     pool *int_pool = new_pool(sizeof(int), 3);
@@ -2316,7 +2316,7 @@ TEST(ParserTest, ParseFunctionDclWithoutProc) {
 ```
 
 #### ParserTest.ParseFunctionDclWithoutName
-Tests that a function declaration is parsed without a name (and error is produced) |
+Tests that a function declaration is parsed without a name (and error is produced)
 ```
 TEST(ParserTest, ParseFunctionDclWithoutName) {
     parser *p = new_parser(Lex((char *)"proc :: -> int {}"));
@@ -2333,7 +2333,7 @@ TEST(ParserTest, ParseFunctionDclWithoutName) {
 ```
 
 #### ParserTest.ParseFunctionDclWithoutArgumentSeperator
-Tests that a function declaration without an argument seperator (and error is produced) |
+Tests that a function declaration without an argument seperator (and error is produced)
 ```
 TEST(ParserTest, ParseFunctionDclWithoutArgumentSeperator) {
     parser *p = new_parser(Lex((char *)"proc add -> int {}"));
@@ -2350,7 +2350,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArgumentSeperator) {
 ```
 
 #### ParserTest.ParseFunctionDclWithoutCommas
-Tests that a function declaration without commas are passed correctly (and error is produced) |
+Tests that a function declaration without commas are passed correctly (and error is produced)
 ```
 TEST(ParserTest, ParseFunctionDclWithoutCommas) {
     parser *p = new_parser(Lex((char *)"proc add :: int a int b int c -> int {}"));
@@ -2369,7 +2369,7 @@ TEST(ParserTest, ParseFunctionDclWithoutCommas) {
 ```
 
 #### ParserTest.ParseFunctionDclWithoutArgTypeOrName
-Tests that a function declaration without argument type or name is parsed correctly (and error is produced) |
+Tests that a function declaration without argument type or name is parsed correctly (and error is produced)
 ```
 TEST(ParserTest, ParseFunctionDclWithoutArgTypeOrName) {
     parser *p = new_parser(Lex((char *)"proc add :: int, int a -> int {}"));
@@ -2386,7 +2386,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArgTypeOrName) {
 ```
 
 #### ParserTest.ParseFunctionDclWithoutArrow
-Tests that a function declaration without an arrow is parsed correctly (and error is produced) |
+Tests that a function declaration without an arrow is parsed correctly (and error is produced)
 ```
 TEST(ParserTest, ParseFunctionDclWithoutArrow) {
     parser *p = new_parser(Lex((char *)"proc add :: int a {}"));
@@ -2403,7 +2403,7 @@ TEST(ParserTest, ParseFunctionDclWithoutArrow) {
 ```
 
 #### ParserTest.ParseNonDeclaration
-Tests that an error is produced when a declaration is expected |
+Tests that an error is produced when a declaration is expected
 ```
 TEST(ParserTest, ParseNonDecleration) {
     parser *p = new_parser(Lex((char *)"return a"));
@@ -2419,7 +2419,7 @@ TEST(ParserTest, ParseNonDecleration) {
 ```
 
 #### ParserTest.ParseVaribleDclWithoutType
-Tests that a long variable declaration without a type is parsed correclty (and error is produced) |
+Tests that a long variable declaration without a type is parsed correclty (and error is produced)
 ```
 TEST(ParserTest, ParseVaribleDclWithoutType) {
     parser *p = new_parser(Lex((char *)"var = 100"));
@@ -2435,7 +2435,7 @@ TEST(ParserTest, ParseVaribleDclWithoutType) {
 ```
 
 #### ParserTest.ParseVariableDclWithoutName
-Tests that an error is produced when a varible declaration doesnt have a name |
+Tests that an error is produced when a varible declaration doesnt have a name
 ```
 TEST(ParserTest, ParseVariableDclWithoutName) {
     parser *p = new_parser(Lex((char *)"var int = 100"));
@@ -2452,7 +2452,7 @@ TEST(ParserTest, ParseVariableDclWithoutName) {
 ```
 
 #### ParserTest.ParseVaribleDclWithoutEquals
-Tests that a long variable declaration without an equals is parsed correctly (and error is produced) |
+Tests that a long variable declaration without an equals is parsed correctly (and error is produced)
 ```
 TEST(ParserTest, ParseVaribleDclWithoutEquals) {
     parser *p = new_parser(Lex((char *)"var int a 100"));
@@ -2469,7 +2469,7 @@ TEST(ParserTest, ParseVaribleDclWithoutEquals) {
 ```
 
 #### ParserTest.ParseVaribleDclWithoutValue
-Tests that a long variable declaration without a value produces error |
+Tests that a long variable declaration without a value produces error
 ```
 TEST(ParserTest, ParseVaribleDclWithoutValue) {
     parser *p = new_parser(Lex((char *)"var int a = "));
@@ -2800,7 +2800,7 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){
 ```
 
 #### IntegrationTest.CompileFunctionFor
-Tests `for.fur` compiles and returns the correct code |
+Tests `for.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionFor){ 
     TEST_MODULE(loadTest("for.fur"), 123);
@@ -2808,7 +2808,7 @@ TEST(IntegrationTest, CompileFunctionFor){
 ```
 
 #### IntegrationTest.CompileFunctionArrayInit
-Tests `arrayInit.fur` compiles and returns the correct code |
+Tests `arrayInit.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionArrayInit){ 
     TEST_MODULE(loadTest("arrayInit.fur"), 123);
@@ -2816,7 +2816,7 @@ TEST(IntegrationTest, CompileFunctionArrayInit){
 ```
 
 #### IntegrationTest.CompileFunctionAdd
-Tests `add.fur` compiles and returns the correct code |
+Tests `add.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionAdd){ 
     TEST_MODULE(loadTest("add.fur"), 123);
@@ -2824,7 +2824,7 @@ TEST(IntegrationTest, CompileFunctionAdd){
 ```
 
 #### IntegrationTest.CompileFunctionUnary
-Tests `unary.fur` compiles and returns the correct code |
+Tests `unary.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionUnary){ 
     TEST_MODULE(loadTest("unary.fur"), 123); 
@@ -2832,7 +2832,7 @@ TEST(IntegrationTest, CompileFunctionUnary){
 ```
 
 #### IntegrationTest.CompileFunctionReassignArg
-Tests `reassignArg.fur` compiles and returns the correct code |
+Tests `reassignArg.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionReassignArg){ 
     TEST_MODULE(loadTest("reassignArg.fur"), 123);
@@ -2840,7 +2840,7 @@ TEST(IntegrationTest, CompileFunctionReassignArg){
 ```
 
 #### IntegrationTest.CompileFunctionGCD
-Tests `gcd.fur` compiles and returns the correct code |
+Tests `gcd.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionGCD){ 
     TEST_MODULE(loadTest("gcd.fur"), 139);
@@ -2848,7 +2848,7 @@ TEST(IntegrationTest, CompileFunctionGCD){
 ```
 
 #### IntegrationTest.CompileFunctionFibbonanci
-Tests `fibbonanci.fur` compiles and returns the correct code |
+Tests `fibbonanci.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionFibbonanci) {
     TEST_MODULE(loadTest("fibbonanci.fur"), 144);
@@ -2856,7 +2856,7 @@ TEST(IntegrationTest, CompileFunctionFibbonanci) {
 ```
 
 #### IntegrationTest.CompileFunctionArraySum
-Tests `arraySum.fur` compiles and returns the correct code |
+Tests `arraySum.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionArraySum) {
     TEST_MODULE(loadTest("arraySum.fur"), 123);
@@ -2864,7 +2864,7 @@ TEST(IntegrationTest, CompileFunctionArraySum) {
 ```
 
 #### IntegrationTest.CompileFunctionNestedFor
-Tests `nestedFor.fur` compiles and returns the correct code |
+Tests `nestedFor.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionNestedFor) {
     TEST_MODULE(loadTest("nestedFor.fur"), 123);
@@ -2872,7 +2872,7 @@ TEST(IntegrationTest, CompileFunctionNestedFor) {
 ```
 
 #### IntegrationTest.CompileFunctionBubblesort
-Tests `bubblesort.fur` compiles and returns the correct code |
+Tests `bubblesort.fur` compiles and returns the correct code
 ```
 TEST(IntegrationTest, CompileFunctionBubblesort) {
     TEST_MODULE(loadTest("bubblesort.fur"), 123);
@@ -2880,9 +2880,12 @@ TEST(IntegrationTest, CompileFunctionBubblesort) {
 ```
 
 #### IntegrationTest.CompileFunctionProcColonError
-Tests that functions without a double colon produce the correct error | 4 | 1 |
+Tests that functions without a double colon produce the correct error
+
 ![](https://i.imgur.com/E72qXk5.png)
+
 ![](https://i.imgur.com/x0Eli3B.png)
+
 ```
 TEST(IntegrationTest, CompileFunctionProcColonError) {
     TEST_ERROR(loadTest("procColonError.fur"), DOUBLE_COLON);
@@ -2890,9 +2893,12 @@ TEST(IntegrationTest, CompileFunctionProcColonError) {
 ```
 
 #### IntegrationTest.CompileFunctionProcArrowError
-Tests that functions without an arrow prouduces the correct error | 5 | 2 |
+Tests that functions without an arrow prouduces the correct error
+
 ![](https://i.imgur.com/9jX8bOH.png)
+
 ![](https://i.imgur.com/2JdgCDk.png)
+
 ```
 TEST(IntegrationTest, CompileFunctionProcArrowError) {
     TEST_ERROR(loadTest("procArrowError.fur"), ARROW);
@@ -2900,9 +2906,12 @@ TEST(IntegrationTest, CompileFunctionProcArrowError) {
 ```
 
 #### IntegrationTest.CompileFunctionProcNameError
-Tests that fuunctions without a name prouduces the correct error | 6 | 3 |
+Tests that fuunctions without a name prouduces the correct error
+
 ![](https://i.imgur.com/tyM40HK.png)
+
 ![](https://i.imgur.com/tlPADNr.png)
+
 ```
 TEST(IntegrationTest, CompileFunctionProcNameError) {
     TEST_ERROR(loadTest("procNameError.fur"), IDENT);
