@@ -2819,10 +2819,10 @@ TEST(IntegrationTest, CompileFunctionIfElse){
 ```
 
 #### IntegrationTest.CompileFunctionIfElseIfElse
-Tests `ifElseIfelse.fur` compiles and returns the correct code
+Tests `ifElseIfElse.fur` compiles and returns the correct code
 
 ```
-#import "../tests/tests/ifElseIfelse.fur"
+#import "../tests/tests/ifElseIfElse.fur"
 ```
 
 ```
