@@ -5697,9 +5697,11 @@ TEST(IntegrationTest, CompileFunctionBubblesort) {
 #### IntegrationTest.CompileFunctionProcColonError
 Tests that functions without a double colon produce the correct error
 
-![](https://i.imgur.com/E72qXk5.png)
-
-![](https://i.imgur.com/x0Eli3B.png)
+```
+proc main -> int {
+    return 123
+}
+```
 
 ```
 TEST(IntegrationTest, CompileFunctionProcColonError) {
@@ -5707,12 +5709,16 @@ TEST(IntegrationTest, CompileFunctionProcColonError) {
 }
 ```
 
+![](https://i.imgur.com/x0Eli3B.png)
+
 #### IntegrationTest.CompileFunctionProcArrowError
 Tests that functions without an arrow prouduces the correct error
 
-![](https://i.imgur.com/2JdgCDk.png)
-
-![](https://i.imgur.com/9jX8bOH.png)
+```
+proc main :: int a {
+    return 123
+}
+```
 
 ```
 TEST(IntegrationTest, CompileFunctionProcArrowError) {
@@ -5720,18 +5726,24 @@ TEST(IntegrationTest, CompileFunctionProcArrowError) {
 }
 ```
 
+![](https://i.imgur.com/9jX8bOH.png)
+
 #### IntegrationTest.CompileFunctionProcNameError
 Tests that fuunctions without a name prouduces the correct error
 
-![](https://i.imgur.com/tlPADNr.png)
-
-![](https://i.imgur.com/tyM40HK.png)
+```
+proc :: -> int {
+    return 123
+}
+```
 
 ```
 TEST(IntegrationTest, CompileFunctionProcNameError) {
     TEST_ERROR(loadTest("procNameError.fur"), IDENT);
 }
 ```
+
+![](https://i.imgur.com/tyM40HK.png)
 
 ## Evaluation
 In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
