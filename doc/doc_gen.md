@@ -5556,6 +5556,26 @@ TEST(IntegrationTest, CompileFunctionLiteral){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/literal.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionBinaryInt
 Tests `binaryInt.fur` compiles and returns the correct code
 
@@ -5571,6 +5591,26 @@ TEST(IntegrationTest, CompileFunctionBinaryInt){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/binaryInt.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionBinaryFloat
 Tests `binaryFloat.fur` compiles and returns the correct code
 
@@ -5584,6 +5624,26 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionBinaryFloat){ 
     TEST_MODULE(loadTest("binaryFloat.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/binaryFloat.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionLongVar
@@ -5602,6 +5662,27 @@ TEST(IntegrationTest, CompileFunctionLongVar){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/longVar.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	$123, -8(%rsp)
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionShortVar
 Tests `shortVar.fur` compiles and returns the correct code
 
@@ -5616,6 +5697,27 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionShortVar){ 
     TEST_MODULE(loadTest("shortVar.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/shortVar.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	$123, -8(%rsp)
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionIf
@@ -5634,6 +5736,26 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionIf){ 
     TEST_MODULE(loadTest("if.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/if.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %if
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionIfElse
@@ -5655,6 +5777,26 @@ TEST(IntegrationTest, CompileFunctionIfElse){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/ifElse.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %if
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionIfElseIfElse
 Tests `ifElseIfElse.fur` compiles and returns the correct code
 
@@ -5674,6 +5816,26 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionIfElseIfElse){ 
     TEST_MODULE(loadTest("ifElseIfElse.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/ifElseIfElse.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %if1
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionIfElseIfelseIfElse
@@ -5699,6 +5861,26 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/ifElseIfElseIfElse.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %else4
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionFor
 Tests `for.fur` compiles and returns the correct code
 
@@ -5718,6 +5900,41 @@ TEST(IntegrationTest, CompileFunctionFor){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/for.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	$0, -8(%rsp)
+	movq	$0, -16(%rsp)
+	xorl	%eax, %eax
+	testb	%al, %al
+	jne	.LBB0_2
+	.align	16, 0x90
+.LBB0_1:                                # %for
+                                        # =>This Inner Loop Header: Depth=1
+	incq	-8(%rsp)
+	movq	-16(%rsp), %rax
+	incq	%rax
+	movq	%rax, -16(%rsp)
+	cmpq	$123, %rax
+	jl	.LBB0_1
+.LBB0_2:                                # %endfor
+	movq	-8(%rsp), %rax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionArrayInit
 Tests `arrayInit.fur` compiles and returns the correct code
 
@@ -5732,6 +5949,31 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionArrayInit){ 
     TEST_MODULE(loadTest("arrayInit.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/arrayInit.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	$100, -24(%rsp)
+	movq	$20, -16(%rsp)
+	movq	$3, -8(%rsp)
+	movq	-24(%rsp), %rax
+	movq	-16(%rsp), %rcx
+	leaq	3(%rax,%rcx), %rax
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionAdd
@@ -5753,6 +5995,47 @@ TEST(IntegrationTest, CompileFunctionAdd){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/add.ll"
+	.globl	add
+	.align	16, 0x90
+	.type	add,@function
+add:                                    # @add
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	%rdi, -8(%rsp)
+	movq	%rsi, -16(%rsp)
+	addq	-8(%rsp), %rsi
+	movq	%rsi, %rax
+	retq
+.Lfunc_end0:
+	.size	add, .Lfunc_end0-add
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rax
+.Ltmp0:
+	.cfi_def_cfa_offset 16
+	movl	$120, %edi
+	movl	$3, %esi
+	callq	add
+	popq	%rcx
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionUnary
 Tests `unary.fur` compiles and returns the correct code
 
@@ -5770,6 +6053,45 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionUnary){ 
     TEST_MODULE(loadTest("unary.fur"), 123); 
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/unary.ll"
+	.globl	neg
+	.align	16, 0x90
+	.type	neg,@function
+neg:                                    # @neg
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	%rdi, -8(%rsp)
+	negq	%rdi
+	movq	%rdi, %rax
+	retq
+.Lfunc_end0:
+	.size	neg, .Lfunc_end0-neg
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rax
+.Ltmp0:
+	.cfi_def_cfa_offset 16
+	movq	$-123, %rdi
+	callq	neg
+	popq	%rcx
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionReassignArg
@@ -5790,6 +6112,45 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionReassignArg){ 
     TEST_MODULE(loadTest("reassignArg.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/reassignArg.ll"
+	.globl	test
+	.align	16, 0x90
+	.type	test,@function
+test:                                   # @test
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	%rdi, -8(%rsp)
+	movq	$123, -8(%rsp)
+	movl	$123, %eax
+	retq
+.Lfunc_end0:
+	.size	test, .Lfunc_end0-test
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rax
+.Ltmp0:
+	.cfi_def_cfa_offset 16
+	movl	$321, %edi              # imm = 0x141
+	callq	test
+	popq	%rcx
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionGCD
@@ -5815,6 +6176,62 @@ TEST(IntegrationTest, CompileFunctionGCD){
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/gcd.ll"
+	.globl	gcd
+	.align	16, 0x90
+	.type	gcd,@function
+gcd:                                    # @gcd
+	.cfi_startproc
+# BB#0:                                 # %entry
+	subq	$24, %rsp
+.Ltmp0:
+	.cfi_def_cfa_offset 32
+	movq	%rdi, 16(%rsp)
+	movq	%rsi, 8(%rsp)
+	testq	%rsi, %rsi
+	je	.LBB0_2
+# BB#1:                                 # %endBlock
+	movq	8(%rsp), %rdi
+	movq	16(%rsp), %rax
+	cqto
+	idivq	%rdi
+	movq	%rdx, %rsi
+	callq	gcd
+	addq	$24, %rsp
+	retq
+.LBB0_2:                                # %if
+	movq	16(%rsp), %rax
+	addq	$24, %rsp
+	retq
+.Lfunc_end0:
+	.size	gcd, .Lfunc_end0-gcd
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rax
+.Ltmp1:
+	.cfi_def_cfa_offset 16
+	movl	$1529, %edi             # imm = 0x5F9
+	movl	$14039, %esi            # imm = 0x36D7
+	callq	gcd
+	popq	%rcx
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionFibbonanci
 Tests `fibbonanci.fur` compiles and returns the correct code
 
@@ -5836,6 +6253,68 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionFibbonanci) {
     TEST_MODULE(loadTest("fibbonanci.fur"), 144);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/fibbonanci.ll"
+	.globl	fib
+	.align	16, 0x90
+	.type	fib,@function
+fib:                                    # @fib
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rbx
+.Ltmp0:
+	.cfi_def_cfa_offset 16
+	subq	$16, %rsp
+.Ltmp1:
+	.cfi_def_cfa_offset 32
+.Ltmp2:
+	.cfi_offset %rbx, -16
+	movq	%rdi, 8(%rsp)
+	cmpq	$2, %rdi
+	jge	.LBB0_1
+# BB#2:                                 # %if
+	movq	8(%rsp), %rax
+	jmp	.LBB0_3
+.LBB0_1:                                # %endBlock
+	movq	8(%rsp), %rdi
+	decq	%rdi
+	callq	fib
+	movq	%rax, %rbx
+	movq	8(%rsp), %rdi
+	addq	$-2, %rdi
+	callq	fib
+	addq	%rbx, %rax
+.LBB0_3:                                # %if
+	addq	$16, %rsp
+	popq	%rbx
+	retq
+.Lfunc_end0:
+	.size	fib, .Lfunc_end0-fib
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rax
+.Ltmp3:
+	.cfi_def_cfa_offset 16
+	movl	$12, %edi
+	callq	fib
+	popq	%rcx
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionArraySum
@@ -5863,6 +6342,68 @@ TEST(IntegrationTest, CompileFunctionArraySum) {
 }
 ```
 
+```assembly
+	.text
+	.file	"../tests/tests/arraySum.ll"
+	.globl	sum
+	.align	16, 0x90
+	.type	sum,@function
+sum:                                    # @sum
+	.cfi_startproc
+# BB#0:                                 # %entry
+	movq	%rdx, -8(%rsp)
+	movq	%rsi, -16(%rsp)
+	movq	%rdi, -24(%rsp)
+	movq	$0, -32(%rsp)
+	movq	$0, -40(%rsp)
+	xorl	%eax, %eax
+	testb	%al, %al
+	jne	.LBB0_2
+	.align	16, 0x90
+.LBB0_1:                                # %for
+                                        # =>This Inner Loop Header: Depth=1
+	movq	-40(%rsp), %rax
+	movq	-24(%rsp,%rax,8), %rax
+	addq	%rax, -32(%rsp)
+	movq	-40(%rsp), %rax
+	incq	%rax
+	movq	%rax, -40(%rsp)
+	cmpq	$3, %rax
+	jl	.LBB0_1
+.LBB0_2:                                # %endfor
+	movq	-32(%rsp), %rax
+	retq
+.Lfunc_end0:
+	.size	sum, .Lfunc_end0-sum
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	subq	$24, %rsp
+.Ltmp0:
+	.cfi_def_cfa_offset 32
+	movq	$100, (%rsp)
+	movq	$20, 8(%rsp)
+	movq	$3, 16(%rsp)
+	movq	(%rsp), %rdi
+	movq	8(%rsp), %rsi
+	movl	$3, %edx
+	callq	sum
+	addq	$24, %rsp
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
+```
+
 #### IntegrationTest.CompileFunctionNestedFor
 Tests `nestedFor.fur` compiles and returns the correct code
 
@@ -5883,6 +6424,72 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionNestedFor) {
     TEST_MODULE(loadTest("nestedFor.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/nestedFor.ll"
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rbp
+.Ltmp0:
+	.cfi_def_cfa_offset 16
+.Ltmp1:
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+.Ltmp2:
+	.cfi_def_cfa_register %rbp
+	subq	$16, %rsp
+	movq	$0, -8(%rbp)
+	movq	$0, -16(%rbp)
+	xorl	%eax, %eax
+	testb	%al, %al
+	jne	.LBB0_5
+# BB#1:
+	xorl	%eax, %eax
+	.align	16, 0x90
+.LBB0_2:                                # %for
+                                        # =>This Loop Header: Depth=1
+                                        #     Child Loop BB0_3 Depth 2
+	movq	%rsp, %rdx
+	leaq	-16(%rdx), %rcx
+	movq	%rcx, %rsp
+	movq	$0, -16(%rdx)
+	testb	%al, %al
+	jne	.LBB0_4
+	.align	16, 0x90
+.LBB0_3:                                # %for1
+                                        #   Parent Loop BB0_2 Depth=1
+                                        # =>  This Inner Loop Header: Depth=2
+	incq	-8(%rbp)
+	movq	(%rcx), %rdx
+	incq	%rdx
+	movq	%rdx, (%rcx)
+	cmpq	$41, %rdx
+	jl	.LBB0_3
+.LBB0_4:                                # %endfor
+                                        #   in Loop: Header=BB0_2 Depth=1
+	movq	-16(%rbp), %rcx
+	incq	%rcx
+	movq	%rcx, -16(%rbp)
+	cmpq	$3, %rcx
+	jl	.LBB0_2
+.LBB0_5:                                # %endfor7
+	movq	-8(%rbp), %rax
+	movq	%rbp, %rsp
+	popq	%rbp
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionBubblesort
@@ -5921,6 +6528,172 @@ proc main :: -> int {
 TEST(IntegrationTest, CompileFunctionBubblesort) {
     TEST_MODULE(loadTest("bubblesort.fur"), 123);
 }
+```
+
+```assembly
+	.text
+	.file	"../tests/tests/bubblesort.ll"
+	.globl	sort
+	.align	16, 0x90
+	.type	sort,@function
+sort:                                   # @sort
+	.cfi_startproc
+# BB#0:                                 # %entry
+	pushq	%rbp
+.Ltmp0:
+	.cfi_def_cfa_offset 16
+.Ltmp1:
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+.Ltmp2:
+	.cfi_def_cfa_register %rbp
+	subq	$64, %rsp
+	movq	%r9, -8(%rbp)
+	movq	%r8, -16(%rbp)
+	movq	%rcx, -24(%rbp)
+	movq	%rdx, -32(%rbp)
+	movq	%rsi, -40(%rbp)
+	movq	$5, -48(%rbp)
+	movq	$0, -56(%rbp)
+	movq	-48(%rbp), %rax
+	decq	%rax
+	testq	%rax, %rax
+	jle	.LBB0_5
+	.align	16, 0x90
+.LBB0_1:                                # %for
+                                        # =>This Loop Header: Depth=1
+                                        #     Child Loop BB0_2 Depth 2
+	movq	%rsp, %rcx
+	leaq	-16(%rcx), %rax
+	movq	%rax, %rsp
+	movq	$0, -16(%rcx)
+	movq	-48(%rbp), %rcx
+	subq	-56(%rbp), %rcx
+	decq	%rcx
+	testq	%rcx, %rcx
+	jle	.LBB0_4
+	.align	16, 0x90
+.LBB0_2:                                # %for1
+                                        #   Parent Loop BB0_1 Depth=1
+                                        # =>  This Inner Loop Header: Depth=2
+	movq	(%rax), %rcx
+	movq	-40(%rbp,%rcx,8), %rdx
+	cmpq	-32(%rbp,%rcx,8), %rdx
+	jle	.LBB0_3
+# BB#6:                                 # %if
+                                        #   in Loop: Header=BB0_2 Depth=2
+	movq	(%rax), %rcx
+	movq	-40(%rbp,%rcx,8), %rcx
+	movq	%rsp, %rdx
+	leaq	-16(%rdx), %rsp
+	movq	%rcx, -16(%rdx)
+	movq	(%rax), %rcx
+	movq	-32(%rbp,%rcx,8), %rsi
+	movq	%rsi, -40(%rbp,%rcx,8)
+	movq	(%rax), %rcx
+	movq	-16(%rdx), %rdx
+	movq	%rdx, -32(%rbp,%rcx,8)
+.LBB0_3:                                # %endBlock
+                                        #   in Loop: Header=BB0_2 Depth=2
+	movq	(%rax), %rcx
+	incq	%rcx
+	movq	%rcx, (%rax)
+	movq	-48(%rbp), %rdx
+	subq	-56(%rbp), %rdx
+	decq	%rdx
+	cmpq	%rdx, %rcx
+	jl	.LBB0_2
+.LBB0_4:                                # %endfor
+                                        #   in Loop: Header=BB0_1 Depth=1
+	movq	$5, -48(%rbp)
+	movq	-56(%rbp), %rax
+	incq	%rax
+	movq	%rax, -56(%rbp)
+	movq	-48(%rbp), %rcx
+	decq	%rcx
+	cmpq	%rcx, %rax
+	jl	.LBB0_1
+.LBB0_5:                                # %endfor30
+	movq	-40(%rbp), %r8
+	movq	-32(%rbp), %rcx
+	movq	-24(%rbp), %rdx
+	movq	-16(%rbp), %rsi
+	movq	-8(%rbp), %rax
+	movq	%rax, 32(%rdi)
+	movq	%rsi, 24(%rdi)
+	movq	%rdx, 16(%rdi)
+	movq	%rcx, 8(%rdi)
+	movq	%r8, (%rdi)
+	movq	%rdi, %rax
+	movq	%rbp, %rsp
+	popq	%rbp
+	retq
+.Lfunc_end0:
+	.size	sort, .Lfunc_end0-sort
+	.cfi_endproc
+
+	.globl	main
+	.align	16, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# BB#0:                                 # %entry
+	subq	$88, %rsp
+.Ltmp3:
+	.cfi_def_cfa_offset 96
+	movq	$54, 48(%rsp)
+	movq	$2, 56(%rsp)
+	movq	$42, 64(%rsp)
+	movq	$5, 72(%rsp)
+	movq	$6, 80(%rsp)
+	movq	72(%rsp), %r8
+	movq	64(%rsp), %rcx
+	movq	48(%rsp), %rsi
+	movq	56(%rsp), %rdx
+	leaq	8(%rsp), %rdi
+	movl	$6, %r9d
+	callq	sort
+	movq	8(%rsp), %rax
+	movq	16(%rsp), %rcx
+	movq	24(%rsp), %rdx
+	movq	32(%rsp), %rsi
+	movq	40(%rsp), %rdi
+	movq	%rdi, 80(%rsp)
+	movq	%rsi, 72(%rsp)
+	movq	%rdx, 64(%rsp)
+	movq	%rcx, 56(%rsp)
+	movq	%rax, 48(%rsp)
+	movq	48(%rsp), %rax
+	xorl	%ecx, %ecx
+	cmpq	56(%rsp), %rax
+	movq	$-1, %rax
+	movl	$0, %edx
+	cmovlq	%rax, %rdx
+	cmpq	64(%rsp), %rdx
+	movl	$0, %edx
+	cmovlq	%rax, %rdx
+	cmpq	72(%rsp), %rdx
+	movl	$0, %edx
+	cmovlq	%rax, %rdx
+	cmpq	80(%rsp), %rdx
+	cmovlq	%rax, %rcx
+	cmpq	88(%rsp), %rcx
+	jge	.LBB1_1
+# BB#2:                                 # %if
+	movl	$123, %eax
+	addq	$88, %rsp
+	retq
+.LBB1_1:                                # %endBlock
+	xorl	%eax, %eax
+	addq	$88, %rsp
+	retq
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+	.cfi_endproc
+
+
+	.section	".note.GNU-stack","",@progbits
+
 ```
 
 #### IntegrationTest.CompileFunctionProcColonError

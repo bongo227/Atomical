@@ -2740,6 +2740,10 @@ TEST(IntegrationTest, CompileFunctionLiteral){
 }
 ```
 
+```assembly
+#import "../tests/tests/literal.s"
+```
+
 #### IntegrationTest.CompileFunctionBinaryInt
 Tests `binaryInt.fur` compiles and returns the correct code
 
@@ -2751,6 +2755,10 @@ Tests `binaryInt.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionBinaryInt){ 
     TEST_MODULE(loadTest("binaryInt.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/binaryInt.s"
 ```
 
 #### IntegrationTest.CompileFunctionBinaryFloat
@@ -2766,6 +2774,10 @@ TEST(IntegrationTest, CompileFunctionBinaryFloat){
 }
 ```
 
+```assembly
+#import "../tests/tests/binaryFloat.s"
+```
+
 #### IntegrationTest.CompileFunctionLongVar
 Tests `longVar.fur` compiles and returns the correct code
 
@@ -2777,6 +2789,10 @@ Tests `longVar.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionLongVar){ 
     TEST_MODULE(loadTest("longVar.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/longVar.s"
 ```
 
 #### IntegrationTest.CompileFunctionShortVar
@@ -2792,6 +2808,10 @@ TEST(IntegrationTest, CompileFunctionShortVar){
 }
 ```
 
+```assembly
+#import "../tests/tests/shortVar.s"
+```
+
 #### IntegrationTest.CompileFunctionIf
 Tests `if.fur` compiles and returns the correct code
 
@@ -2803,6 +2823,10 @@ Tests `if.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionIf){ 
     TEST_MODULE(loadTest("if.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/if.s"
 ```
 
 #### IntegrationTest.CompileFunctionIfElse
@@ -2818,6 +2842,10 @@ TEST(IntegrationTest, CompileFunctionIfElse){
 }
 ```
 
+```assembly
+#import "../tests/tests/ifElse.s"
+```
+
 #### IntegrationTest.CompileFunctionIfElseIfElse
 Tests `ifElseIfElse.fur` compiles and returns the correct code
 
@@ -2829,6 +2857,10 @@ Tests `ifElseIfElse.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionIfElseIfElse){ 
     TEST_MODULE(loadTest("ifElseIfElse.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/ifElseIfElse.s"
 ```
 
 #### IntegrationTest.CompileFunctionIfElseIfelseIfElse
@@ -2844,6 +2876,10 @@ TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){
 }
 ```
 
+```assembly
+#import "../tests/tests/ifElseIfElseIfElse.s"
+```
+
 #### IntegrationTest.CompileFunctionFor
 Tests `for.fur` compiles and returns the correct code
 
@@ -2855,6 +2891,10 @@ Tests `for.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionFor){ 
     TEST_MODULE(loadTest("for.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/for.s"
 ```
 
 #### IntegrationTest.CompileFunctionArrayInit
@@ -2870,6 +2910,10 @@ TEST(IntegrationTest, CompileFunctionArrayInit){
 }
 ```
 
+```assembly
+#import "../tests/tests/arrayInit.s"
+```
+
 #### IntegrationTest.CompileFunctionAdd
 Tests `add.fur` compiles and returns the correct code
 
@@ -2881,6 +2925,10 @@ Tests `add.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionAdd){ 
     TEST_MODULE(loadTest("add.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/add.s"
 ```
 
 #### IntegrationTest.CompileFunctionUnary
@@ -2896,6 +2944,10 @@ TEST(IntegrationTest, CompileFunctionUnary){
 }
 ```
 
+```assembly
+#import "../tests/tests/unary.s"
+```
+
 #### IntegrationTest.CompileFunctionReassignArg
 Tests `reassignArg.fur` compiles and returns the correct code
 
@@ -2907,6 +2959,10 @@ Tests `reassignArg.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionReassignArg){ 
     TEST_MODULE(loadTest("reassignArg.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/reassignArg.s"
 ```
 
 #### IntegrationTest.CompileFunctionGCD
@@ -2922,6 +2978,10 @@ TEST(IntegrationTest, CompileFunctionGCD){
 }
 ```
 
+```assembly
+#import "../tests/tests/gcd.s"
+```
+
 #### IntegrationTest.CompileFunctionFibbonanci
 Tests `fibbonanci.fur` compiles and returns the correct code
 
@@ -2933,6 +2993,10 @@ Tests `fibbonanci.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionFibbonanci) {
     TEST_MODULE(loadTest("fibbonanci.fur"), 144);
 }
+```
+
+```assembly
+#import "../tests/tests/fibbonanci.s"
 ```
 
 #### IntegrationTest.CompileFunctionArraySum
@@ -2948,6 +3012,10 @@ TEST(IntegrationTest, CompileFunctionArraySum) {
 }
 ```
 
+```assembly
+#import "../tests/tests/arraySum.s"
+```
+
 #### IntegrationTest.CompileFunctionNestedFor
 Tests `nestedFor.fur` compiles and returns the correct code
 
@@ -2961,6 +3029,10 @@ TEST(IntegrationTest, CompileFunctionNestedFor) {
 }
 ```
 
+```assembly
+#import "../tests/tests/nestedFor.s"
+```
+
 #### IntegrationTest.CompileFunctionBubblesort
 Tests `bubblesort.fur` compiles and returns the correct code
 
@@ -2972,6 +3044,10 @@ Tests `bubblesort.fur` compiles and returns the correct code
 TEST(IntegrationTest, CompileFunctionBubblesort) {
     TEST_MODULE(loadTest("bubblesort.fur"), 123);
 }
+```
+
+```assembly
+#import "../tests/tests/bubblesort.s"
 ```
 
 #### IntegrationTest.CompileFunctionProcColonError
