@@ -8430,7 +8430,7 @@ int main(int argc, char *argv[]) {
 	printf("Compile to bitcode\n");
 	
 	// Compile to assembly
-	string llc_command = string_new("llc-3.8 ");
+	string llc_command = string_new("llc-3.9 ");
 	llc_command = string_append(llc_command, out_file);
 	system(llc_command);
 	printf("Compiled to assembly\n");
@@ -8447,8 +8447,8 @@ int main(int argc, char *argv[]) {
 	// Remove temporary files
 	string rm_command = string_new("rm ");
 	rm_command = string_append(rm_command, out_file);
-	// rm_command = string_append_cstring(rm_command, " ");
-	// rm_command = string_append(rm_command, llc_file);
+	rm_command = string_append_cstring(rm_command, " ");
+	rm_command = string_append(rm_command, llc_file);
 	system(rm_command);
 	printf("Removed temporary files\n");
 
@@ -12150,7 +12150,7 @@ extern "C" {
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
-    ::testing::GTEST_FLAG(filter) = "*StringWeird";
+    // ::testing::GTEST_FLAG(filter) = "*Pool";
     return RUN_ALL_TESTS();
 }
 
