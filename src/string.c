@@ -31,8 +31,7 @@ string string_new_file(FILE *f) {
 	int file_length = ftell (f);
 	fseek (f, 0, SEEK_SET);
 
-    string s = string_new("");
-    string_expand(s, file_length + 1);
+    string s = string_new_length("", file_length);
     fread(s, 1, file_length, f);
     s[file_length] = '\0';
     STRING_HEADER(s)->length = file_length;
