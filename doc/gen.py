@@ -31,14 +31,14 @@ def get_imports(source):
 
         # End clip
         clip_end = i
-        print source[clip_start:clip_end]
+        print(source[clip_start:clip_end])
         imports.append((clip_start, clip_end, import_value))
     
     return imports
 
 source = ""
 
-for part in ['all.md', 'analysis.md', 'documented_design.md', 'technical_solution.md', 'testing.md', 'evaluation.md', 'references.md']:
+for part in ['introduction.md', 'analysis.md', 'documented_design.md', 'technical_solution.md', 'testing.md', 'evaluation.md', 'references.md']:
     
     with open(part) as source_doc:
         source = source_doc.read()
@@ -46,7 +46,7 @@ for part in ['all.md', 'analysis.md', 'documented_design.md', 'technical_solutio
     imports = get_imports(source)
     offset = 0
     for (start, end, value) in imports:
-        print "Importing: {}".format(value)
+        print("Importing: {}".format(value))
         with open(value, 'r') as import_file:
             insert = import_file.read()
             source = source[:start-offset] + insert + source[end-offset:]
