@@ -1,8 +1,7 @@
-# Furlang: An investigation into modern programming languages and compilers
+# Furlang
 
 ## Analysis
-
-In this investigation the aim is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence can be created.
+The aim of this project is to design a programming language and implement a compiler to create executable programs. Due to the time constraints it would be infeasible to implement all aspects of a modern programming language, standard library and language tooling. Instead the focus will be on implementing a sizeable subset such that simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence can be created.
 
 ### Background
 The first recognizable modern computers were created in the 1940's. Their limited hardware meant programmers would write hand tuned assembly which had none of the abstraction of modern languages meaning programs were slow to develop and error-prone. Autocode, developed in the 1950's, was the first higher-level compiled language. The invention of a compiler meant programmers could write less code and rely on the compiler to make optermizations that had previously required a large amount of knowledge to implement.
@@ -1174,6 +1173,267 @@ This is the header file for the IR generation implementation
 This is the source file for the IR generation implementation
 ```c
 #import "../src/irgen.c"
+```
+
+## Technical solution
+
+### build/
+This folder is were the make file produces the executable and library for the project.
+
+#### CMakeLists.txt
+This is the make file for the project
+```cmake
+#import "../build/CMakeLists.txt"
+```
+
+### src/
+This is the folder were all the source files for the compiler reside.
+
+#### includes/all.h
+Contains a few helpfull defines for the whole project.
+```c
+#import "../src/includes/all.h"
+```
+
+#### includes/ast.h
+Typedefs for all the ast nodes.
+```c
+#import "../src/includes/ast.h"
+```
+
+#### ast.c
+Constructors for the AST nodes.
+```c
+#import "../src/ast.c"
+```
+
+#### includes/error.h
+```c
+#import "../src/includes/error.h"
+```
+
+#### error.c
+Pretty prints errors to the terminal.
+```c
+#import "../src/error.c"
+```
+
+#### includes/irgen.h
+```c
+#import "../src/includes/irgen.h"
+```
+
+#### irgen.c
+```c
+#import "../src/irgen.c"
+```
+
+#### includes/lexer.h
+```c
+#import "../src/includes/lexer.h"
+```
+
+#### lexer.c
+```c
+#import "../src/lexer.c"
+```
+
+#### lib.c
+Includes all the source files so the compiler can be exposed as a library (which we use in the unit tests).
+```c
+#import "../src/lib.c"
+```
+
+#### main.c
+Entry point for the compiler
+```c
+#import "../src/main.c"
+```
+
+#### includes/parser.h
+```c
+#import "../src/includes/parser.h"
+```
+
+#### parser.c
+```c
+#import "../src/parser.c"
+```
+
+#### includes/pool.h
+```c
+#import "../src/includes/pool.h"
+```
+
+#### pool.c
+```c
+#import "../src/pool.c"
+```
+
+#### includes/queue.h
+```c
+#import "../src/includes/queue.h"
+```
+
+#### queue.c
+```c
+#import "../src/queue.c"
+```
+
+#### includes/string.h
+```c
+#import "../src/includes/string.h"
+```
+
+#### string.c
+```c
+#import "../src/string.c"
+```
+
+#### includes/uthash.h
+The only other external dependency (apart from LLVM), uthash which is a single header hash table.
+```c
+#import "../src/includes/uthash.h"
+```
+
+### tests/
+This folder contains the C++ program that tests the compiler
+
+#### tests/add.fur
+```markdown
+#import "../tests/tests/add.fur"
+```
+
+#### tests/arrayInit.fur
+```markdown
+#import "../tests/tests/arrayInit.fur"
+```
+
+#### tests/arraySum.fur
+```markdown
+#import "../tests/tests/arraySum.fur"
+```
+
+#### tests/binaryFloat.fur
+```markdown
+#import "../tests/tests/binaryFloat.fur"
+```
+
+#### tests/binaryInt.fur
+```markdown
+#import "../tests/tests/binaryInt.fur"
+```
+
+#### tests/bubbleSort.fur
+```markdown
+#import "../tests/tests/bubblesort.fur"
+```
+
+#### tests/fibbonanci.fur
+```markdown
+#import "../tests/tests/fibbonanci.fur"
+```
+
+#### tests/for.fur
+```markdown
+#import "../tests/tests/for.fur"
+```
+
+#### tests/gcd.fur
+```markdown
+#import "../tests/tests/gcd.fur"
+```
+
+#### tests/if.fur
+```markdown
+#import "../tests/tests/if.fur"
+```
+
+#### tests/ifElse.fur
+```markdown
+#import "../tests/tests/ifElse.fur"
+```
+
+#### tests/ifElseIfElse.fur
+```markdown
+#import "../tests/tests/ifElseIfElse.fur"
+```
+
+#### tests/ifElseIfElseIfElse.fur
+```markdown
+#import "../tests/tests/ifElseIfElseIfElse.fur"
+```
+
+#### tests/literal.fur
+```markdown
+#import "../tests/tests/literal.fur"
+```
+
+#### tests/longVar.fur
+```markdown
+#import "../tests/tests/longVar.fur"
+```
+
+#### tests/nestedFor.fur
+```markdown
+#import "../tests/tests/nestedFor.fur"
+```
+
+#### tests/reassignArg.fur
+```markdown
+#import "../tests/tests/reassignArg.fur"
+```
+
+#### tests/shortVar.fur
+```markdown
+#import "../tests/tests/shortVar.fur"
+```
+
+#### tests/unary.fur
+```markdown
+#import "../tests/tests/unary.fur"
+```
+
+#### irgen_test.cpp
+Contains unit tests for the IR generation and the integrations tests for the whole system
+```cpp
+#import "../tests/irgen_test.cpp"
+```
+
+#### lexer_test.cpp
+Unit tests for the lexer
+```cpp
+#import "../tests/lexer_test.cpp"
+```
+
+#### parser_test.cpp
+Unit tests for the parser
+```cpp
+#import "../tests/parser_test.cpp"
+```
+
+#### pool_test.cpp
+Unit tests for the pool
+```cpp
+#import "../tests/pool_test.cpp"
+```
+
+#### queue_test.cpp
+Unit tests for the queue
+```cpp
+#import "../tests/queue_test.cpp"
+```
+
+#### string_test.cpp
+Unit tests for the string
+```cpp
+#import "../tests/string_test.cpp"
+```
+
+#### test.cpp
+Test program entry point
+```cpp
+#import "../tests/test.cpp"
 ```
 
 ## Testing
@@ -3125,291 +3385,6 @@ TEST(IntegrationTest, CompileFunctionVarNameError) {
 
 ![](http://imgur.com/k4chiNf.png)
 
-## Evaluation
-In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
-
-| Objective | Comment |
-| --- | --- |
-| Syntax objectives | As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions. |
-| Memory management objectives | Since their is no run time at all, the is no managed memory, thus the memory management objective has been met. |
-| Command line interface objectives | All flags were used during development to debug the compiler, so all flags exist and the objectives have been met. |
-
-### Feedback
-> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvements for this kind of project are endless including:
-> * Standard library
-> * More syntax
-> * Module system
-> * Cross platform builds
-> * Better distribution
-> * REPL
-> * etc
-
-If I had more time I would have liked to add some of these features. A module system would present an interesting opportunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
-
-With a module system in place the implementation of a standard library would be trivial. When the compiler reaches an include/import statement it would first search the standard library before the working directory. All the standard library would be implemented in Fur, and eventually the compiler itself.
-
-Cross platform builds and better distribution would involve porting some of the OS code to windows, perhaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
-
-## Technical solution
-
-### build/
-This folder is were the make file produces the executable and library for the project.
-
-#### CMakeLists.txt
-This is the make file for the project
-```cmake
-#import "../build/CMakeLists.txt"
-```
-
-### src/
-This is the folder were all the source files for the compiler reside.
-
-#### includes/all.h
-Contains a few helpfull defines for the whole project.
-```c
-#import "../src/includes/all.h"
-```
-
-#### includes/ast.h
-Typedefs for all the ast nodes.
-```c
-#import "../src/includes/ast.h"
-```
-
-#### ast.c
-Constructors for the AST nodes.
-```c
-#import "../src/ast.c"
-```
-
-#### includes/error.h
-```c
-#import "../src/includes/error.h"
-```
-
-#### error.c
-Pretty prints errors to the terminal.
-```c
-#import "../src/error.c"
-```
-
-#### includes/irgen.h
-```c
-#import "../src/includes/irgen.h"
-```
-
-#### irgen.c
-```c
-#import "../src/irgen.c"
-```
-
-#### includes/lexer.h
-```c
-#import "../src/includes/lexer.h"
-```
-
-#### lexer.c
-```c
-#import "../src/lexer.c"
-```
-
-#### lib.c
-Includes all the source files so the compiler can be exposed as a library (which we use in the unit tests).
-```c
-#import "../src/lib.c"
-```
-
-#### main.c
-Entry point for the compiler
-```c
-#import "../src/main.c"
-```
-
-#### includes/parser.h
-```c
-#import "../src/includes/parser.h"
-```
-
-#### parser.c
-```c
-#import "../src/parser.c"
-```
-
-#### includes/pool.h
-```c
-#import "../src/includes/pool.h"
-```
-
-#### pool.c
-```c
-#import "../src/pool.c"
-```
-
-#### includes/queue.h
-```c
-#import "../src/includes/queue.h"
-```
-
-#### queue.c
-```c
-#import "../src/queue.c"
-```
-
-#### includes/string.h
-```c
-#import "../src/includes/string.h"
-```
-
-#### string.c
-```c
-#import "../src/string.c"
-```
-
-#### includes/uthash.h
-The only other external dependency (apart from LLVM), uthash which is a single header hash table.
-```c
-#import "../src/includes/uthash.h"
-```
-
-### tests/
-This folder contains the C++ program that tests the compiler
-
-#### tests/add.fur
-```markdown
-#import "../tests/tests/add.fur"
-```
-
-#### tests/arrayInit.fur
-```markdown
-#import "../tests/tests/arrayInit.fur"
-```
-
-#### tests/arraySum.fur
-```markdown
-#import "../tests/tests/arraySum.fur"
-```
-
-#### tests/binaryFloat.fur
-```markdown
-#import "../tests/tests/binaryFloat.fur"
-```
-
-#### tests/binaryInt.fur
-```markdown
-#import "../tests/tests/binaryInt.fur"
-```
-
-#### tests/bubbleSort.fur
-```markdown
-#import "../tests/tests/bubblesort.fur"
-```
-
-#### tests/fibbonanci.fur
-```markdown
-#import "../tests/tests/fibbonanci.fur"
-```
-
-#### tests/for.fur
-```markdown
-#import "../tests/tests/for.fur"
-```
-
-#### tests/gcd.fur
-```markdown
-#import "../tests/tests/gcd.fur"
-```
-
-#### tests/if.fur
-```markdown
-#import "../tests/tests/if.fur"
-```
-
-#### tests/ifElse.fur
-```markdown
-#import "../tests/tests/ifElse.fur"
-```
-
-#### tests/ifElseIfElse.fur
-```markdown
-#import "../tests/tests/ifElseIfElse.fur"
-```
-
-#### tests/ifElseIfElseIfElse.fur
-```markdown
-#import "../tests/tests/ifElseIfElseIfElse.fur"
-```
-
-#### tests/literal.fur
-```markdown
-#import "../tests/tests/literal.fur"
-```
-
-#### tests/longVar.fur
-```markdown
-#import "../tests/tests/longVar.fur"
-```
-
-#### tests/nestedFor.fur
-```markdown
-#import "../tests/tests/nestedFor.fur"
-```
-
-#### tests/reassignArg.fur
-```markdown
-#import "../tests/tests/reassignArg.fur"
-```
-
-#### tests/shortVar.fur
-```markdown
-#import "../tests/tests/shortVar.fur"
-```
-
-#### tests/unary.fur
-```markdown
-#import "../tests/tests/unary.fur"
-```
-
-#### irgen_test.cpp
-Contains unit tests for the IR generation and the integrations tests for the whole system
-```cpp
-#import "../tests/irgen_test.cpp"
-```
-
-#### lexer_test.cpp
-Unit tests for the lexer
-```cpp
-#import "../tests/lexer_test.cpp"
-```
-
-#### parser_test.cpp
-Unit tests for the parser
-```cpp
-#import "../tests/parser_test.cpp"
-```
-
-#### pool_test.cpp
-Unit tests for the pool
-```cpp
-#import "../tests/pool_test.cpp"
-```
-
-#### queue_test.cpp
-Unit tests for the queue
-```cpp
-#import "../tests/queue_test.cpp"
-```
-
-#### string_test.cpp
-Unit tests for the string
-```cpp
-#import "../tests/string_test.cpp"
-```
-
-#### test.cpp
-Test program entry point
-```cpp
-#import "../tests/test.cpp"
-```
 
 ## References
 1. The Rust Reference <a id="1">https://doc.rust-lang.org/reference.html</a>

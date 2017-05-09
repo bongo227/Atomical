@@ -38,17 +38,19 @@ def get_imports(source):
 
 source = ""
 
-with open('doc.md') as source_doc:
-    source = source_doc.read()
+for part in ['all.md', 'analysis.md', 'documented_design.md', 'technical_solution.md', 'testing.md', 'references.md']:
+    
+    with open(part) as source_doc:
+        source = source_doc.read()
 
-imports = get_imports(source)
-offset = 0
-for (start, end, value) in imports:
-    print "Importing: {}".format(value)
-    with open(value, 'r') as import_file:
-        insert = import_file.read()
-        source = source[:start-offset] + insert + source[end-offset:]
-        offset += end - start - len(insert)
+    imports = get_imports(source)
+    offset = 0
+    for (start, end, value) in imports:
+        print "Importing: {}".format(value)
+        with open(value, 'r') as import_file:
+            insert = import_file.read()
+            source = source[:start-offset] + insert + source[end-offset:]
+            offset += end - start - len(insert)
 
-with open('doc_gen.md', 'w') as doc:
-    doc.write(source)
+    with open('gen/' + part, 'w') as doc:
+        doc.write(source)
