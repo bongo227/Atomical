@@ -1,5 +1,25 @@
 ## Documented design
 
+### Proposed solution
+The structure of the furlang compiler will look like this:
+
+![](https://i.imgur.com/dA6xCKY.png)
+
+1. Source code is parsed into the compiler
+    
+    To find the file, we will parse the command line arguments, any flags will be recorded and the file name read. From then we can read the files contents into memory, and the compilation can begin.
+2. The lexer turns the source code into tokens, the smallest pieces of syntax.
+    
+    Once the source code is in memory we can start 'collecting' the individual characters into tokens, this will allow us to think more generally about the structure of the high level sourcecode.
+3. The parser turns the tokens into an abstract syntax tree
+    
+    Having transformed the source code into a sequence of tokens, the next transformation will recover the structure of the higher level program in the form of a tree where each nested node represents the nesting in the higher level source code.
+4. The AST is transformed into LLVM IR, which is a lower level language.
+    
+    This is the final stage for the first-phase. With the AST now in place we can lower the program into LLVM IR.
+5. LLVM uses lots of parses through the IR to optermize the code.
+6. LLVM produces an executable.
+
 ### Psudocode
 This project was implemented in C which means their is a lot of code which is not important for an explanation on how each algorithm works. To help illustrate how the algorithms work I have opted to use psudocode so that it is easier to understand. The psudocode is close to the AQA psudocode spec with a few additions.
 
