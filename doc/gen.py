@@ -38,7 +38,7 @@ def get_imports(source):
 
 source = ""
 
-for part in ['all.md', 'analysis.md', 'documented_design.md', 'technical_solution.md', 'testing.md', 'references.md']:
+for part in ['all.md', 'analysis.md', 'documented_design.md', 'technical_solution.md', 'testing.md', 'evaluation.md', 'references.md']:
     
     with open(part) as source_doc:
         source = source_doc.read()

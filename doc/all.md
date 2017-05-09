@@ -8,4 +8,6 @@
 
 #import "testing.md"
 
+#import "evaluation.md"
+
 #import "references.md"
