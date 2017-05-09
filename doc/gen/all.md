@@ -20,11 +20,30 @@ Since then concurrent constructs such as callbacks and language level schedulers
 In terms of the languages design I looked at several languages with similar goals as mine and read through their specifications including: [Rust<sup>[1]</sup>](#1), [Go<sup>[2]</sup>](#2), [D<sup>[3]</sup>](#3) and [F#<sup>[4]</sup>](#4). I looked at their syntax and the design decision behind them in order the judge what code should look like.
 
 ### Structure
-Most compilers are three phase compilers which split the compilation into three parts: frount end, middle end and back end. The front end verifies the syntax and semantics, providing warnings if their are any issues. The front end is produces intermediate representation which is a lower level language more easily manipulated by the other phases than the higher level source language. This is the part of the compiler I will be creating, LLVM will be used for the middle and back end.
+Most compilers are three phase compilers which split the compilation into three parts: frount end, middle end and back end. 
+
+The front end verifies the syntax and semantics, providing warnings if their are any issues. The front end stops after it produces intermediate representation which is a lower level language more easily manipulated by the other phases than the higher level source language. This is the part of the compiler I will be creating, LLVM will be used for the middle and back end.
 
 The middle end preforms platform indepented optermizations such as dead code elimination, loop unrolling, constant propagation etc. LLVM does this by passing through the source code many times, each time performing a particular optermization.
 
 The back end performs target specific analysis and optermizations before producing the machine code for the target machine.
+
+#### Furlang structure
+The structure of the furlang compiler will look like this:
+
+![](https://i.imgur.com/dA6xCKY.png)
+
+1. Source code is parsed into the compiler
+    To find the file, we will parse the command line arguments, any flags will be recorded and the file name read. From then we can read the files contents into memory, and the compilation can begin.
+2. The lexer turns the source code into tokens, the smallest pieces of syntax.
+    Once the source code is in memory we can start 'collecting' the individual characters into tokens, this will allow us to think more generally about the structure of the high level sourcecode.
+3. The parser turns the tokens into an abstract syntax tree
+    Having transformed the source code into a sequence of tokens, the next transformation will recover the structure of the higher level program in the form of a tree where each nested node represents the nesting in the higher level source code.
+4. The AST is transformed into LLVM IR, which is a lower level language.
+    This is the final stage for the first-phase. With the AST now in place we can lower the program into LLVM IR.
+5. LLVM uses lots of parses through the IR to optermize the code.
+6. LLVM produces an executable.
+
 
 ### Syntax
 Compared to C modern programming languages use a lot less characters to describe the instructions which make the final program. By using less character it becomes a lot faster to read through the source code in order to understand the logic, which intern makes the language easier to use and faster to develop in. With Fur, I wanted to explore some of these modern ideas and how they can be implemented. 
@@ -113,7 +132,8 @@ C++ and Java both have operator overloading which makes their source code easy t
     * `float` (platform specific fastest float)
 
 ### Memory managment
-When a program needs memory to persist longer than the scope of a function, memory needs to be allocated from the heap. The heap is slower than stack but the program can choose at run-time how much memory it wants. This flexibility brings several problems such as: what if the operating system can't give you the memory you requested, what if you need more, what if the you never give it back. In languages with manual memory management the programmer must solve all these problems whenever they need to allocate memory on the heap, making the code more complex and error prone.
+When a program needs memory to persist longer than the scope of a function, memory needs to be allocated from the heap. The heap is slower than stack but the program can choose at run-time how much memory it wants. This flexibility brings several problems such as: what if the operating system can't give you the memory you requested, what if you need more, what if the you never give it back. In languages with manual memory management the programmer must solve all these problems whenever they nee
+##d to allocate memory on the heap, making the code more complex and error prone.
 
 One solution to this problem is a garbage collector. In languages such as Go and Java the run-time allocates blocks of memory, whenever the program requests memory a portion of that block is returned. The run-time then keeps track of where the memory is used, when the portion of memory is no longer in use its is marked and recycled ready for the next allocation. Over time these garbage collectors have been getting faster and much more sophisticated, one consequence of this is that it can be hard to understand their behaviour.
 
@@ -129,7 +149,8 @@ Compilers normally expose a command line interface to transform the syntax into 
 * Create an executable that invokes the compiler
 * `-o`, `--output` flag should control the path of the compiled executable
 * `-t`, `--tokens` produces a file with a list of the tokens (for debugging)
-* `-i`, `--ircode` produces a file with the LLVM IR code for the program (for debugging)  
+* `-i`, `--ircode` produces a file with the LLVM IR code for the program (for debugging)
+  
 
 ## Documented design
 
@@ -3385,6 +3406,31 @@ TEST(IntegrationTest, CompileFunctionVarNameError) {
 
 ![](http://imgur.com/k4chiNf.png)
 
+
+## Evaluation
+In the analysis I stated that "simple algorithms like the greatest common divisor, bubble sort and Fibonacci sequence should be able to be made in Fur. Each of these algorithms are included as part of the integrations tests, which all pass, so I would say the final program meets the original requirements.
+
+| Objective | Comment |
+| --- | --- |
+| Syntax objectives | As my tests show all syntax objectives are successfully understood by the parser, including all definition, statements and expressions. |
+| Memory management objectives | Since their is no run time at all, the is no managed memory, thus the memory management objective has been met. |
+| Command line interface objectives | All flags were used during development to debug the compiler, so all flags exist and the objectives have been met. |
+
+### Feedback
+> This project is most impressive. His extensive tests show the whole system has met the original objectives, and that the compiler is capable of some basic algorithms. The improvements for this kind of project are endless including:
+> * Standard library
+> * More syntax
+> * Module system
+> * Cross platform builds
+> * Better distribution
+> * REPL
+> * etc
+
+If I had more time I would have liked to add some of these features. A module system would present an interesting opportunity to parralize the compiler. For every included file an instance of the compiler would compile them to an AST, from their the AST's would be joined into a single tree which would be lowered into LLVM IR.
+
+With a module system in place the implementation of a standard library would be trivial. When the compiler reaches an include/import statement it would first search the standard library before the working directory. All the standard library would be implemented in Fur, and eventually the compiler itself.
+
+Cross platform builds and better distribution would involve porting some of the OS code to windows, perhaps even abstracting out the OS as an interface to the rest of the compiler. A dedicated website with automated builds would ensure anyone could get a copy of the compiler.
 
 ## References
 1. The Rust Reference <a id="1">https://doc.rust-lang.org/reference.html</a>

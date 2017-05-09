@@ -1,5 +1,14 @@
 ## Documented design
 
+### Overview
+![](https://i.imgur.com/dA6xCKY.png)
+1. Source code is parsed into the compiler
+2. The lexer turns the source code into tokens, the smallest pieces of syntax
+3. The parser turns the tokens into an abstract syntax tree
+4. The AST is transformed into LLVM IR, which is a lower level language
+5. LLVM uses lots of parses through the IR to optermize the code
+6. LLVM produces assembly which is can then be linked by a linker, producing an executable
+
 ### Psudocode
 This project was implemented in C which means their is a lot of code which is not important for an explanation on how each algorithm works. To help illustrate how the algorithms work I have opted to use psudocode so that it is easier to understand. The psudocode is close to the AQA psudocode spec with a few additions.
 
