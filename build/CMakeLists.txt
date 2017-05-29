@@ -6,7 +6,7 @@ set(CMAKE_C_COMPILER /usr/bin/clang-3.9)
 add_definitions("-fPIC")
 
 
-project(Furlang)
+project(Atomical)
 
 # Locate GTest
 find_package(GTest REQUIRED)
@@ -142,19 +142,20 @@ set(LLVM_LIBS
 set(CMAKE_BUILD_TYPE Debug)
 
 # Compiler library
-add_library(furlib ../src/lib.c)
-target_link_libraries(furlib ${LLVM_LIBS})
-target_compile_options(furlib PRIVATE "-Werror")
-target_compile_options(furlib PRIVATE "-std=c11")
+add_library(atomical ../src/lib.c)
+target_link_libraries(atomical ${LLVM_LIBS})
+target_compile_options(atomical PRIVATE "-Werror")
+target_compile_options(atomical PRIVATE "-std=c11")
 
 # Compiler executable
-add_executable(fur ../src/main.c)
-target_link_libraries(fur ${LLVM_LIBS} furlib)
-target_compile_options(fur PRIVATE "-Werror")
-target_compile_options(fur PRIVATE "-std=c11")
+add_executable(atomical-bin ../src/main.c)
+target_link_libraries(atomical-bin ${LLVM_LIBS} atomical)
+target_compile_options(atomical-bin PRIVATE "-Werror")
+target_compile_options(atomical-bin PRIVATE "-std=c11")
+set_target_properties(atomical-bin PROPERTIES OUTPUT_NAME atomical)
 
 # Test executable 
-add_executable(fur_tests ../tests/test.cpp)
-target_link_libraries(fur_tests ${GTEST_LIBRARIES} pthread ${LLVM_LIBS} furlib)
-target_compile_options(fur_tests PRIVATE "-fpermissive") # required by GTEST
-target_compile_options(fur_tests PRIVATE "-Werror")
+add_executable(atomical-test ../tests/test.cpp)
+target_link_libraries(atomical-test ${GTEST_LIBRARIES} pthread ${LLVM_LIBS} atomical)
+target_compile_options(atomical-test PRIVATE "-fpermissive") # required by GTEST
+target_compile_options(atomical-test PRIVATE "-Werror")
