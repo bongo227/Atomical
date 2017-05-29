@@ -39,13 +39,6 @@ void TEST_ERROR(char *src, TokenType type) {
     ASSERT_EQ(queue_size(p->error_queue), 1);
     parser_error *err = (parser_error *)queue_pop_back(p->error_queue);
     ASSERT_EQ(err->expect_token.type, type);
-    error(
-        src, 
-        err->start->line, 
-        err->start->column, 
-        err->start->column + err->length, 
-        (char *)"Expected token %s", 
-        TokenName(err->expect_token.type));
 }
 
 void TEST_MODULE(char *src, int out) {
