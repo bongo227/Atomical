@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 void print_usage() {
-	printf("usage: fur filename <flags>\n");
+	printf("usage: atomical filename <flags>\n");
 	exit(1);
 }
 
@@ -24,10 +24,10 @@ int main(int argc, char *argv[]) {
 	// Check for no/incorrect input file
 	if (argc < 2 || argv[0][0] == '-') print_usage();
 	
-	// Check input file has .fur extension
+	// Check input file has .acl extension
 	int in_len = string_length(in_file);
 	if(in_len < 4) print_usage();
-	if(strcmp(in_file + in_len - 4, ".fur") != 0) print_usage();
+	if(strcmp(in_file + in_len - 4, ".acl") != 0) print_usage();
 	
 	// Create default out name
 	out_file = string_append_length(out_file, in_file, in_len - 4);

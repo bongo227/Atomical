@@ -17,11 +17,11 @@ TEST(StringTest, CreateNewStringLength) {
 }
 
 TEST(StringTest, CreateNewStringFile) {
-    FILE *f = fopen("/tmp/string_test_file.fur", "w");
+    FILE *f = fopen("/tmp/string_test_file.txt", "w");
     fprintf(f, "test");
     fclose(f);
 
-    f = fopen("/tmp/string_test_file.fur", "r");
+    f = fopen("/tmp/string_test_file.txt", "r");
     string s = string_new_file(f);
     fclose(f);
 

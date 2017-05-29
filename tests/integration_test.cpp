@@ -39,13 +39,6 @@ void TEST_ERROR(char *src, TokenType type) {
     ASSERT_EQ(queue_size(p->error_queue), 1);
     parser_error *err = (parser_error *)queue_pop_back(p->error_queue);
     ASSERT_EQ(err->expect_token.type, type);
-    error(
-        src, 
-        err->start->line, 
-        err->start->column, 
-        err->start->column + err->length, 
-        (char *)"Expected token %s", 
-        TokenName(err->expect_token.type));
 }
 
 void TEST_MODULE(char *src, int out) {
@@ -102,97 +95,97 @@ char *loadTest(std::string name) {
 }
 
 TEST(IntegrationTest, CompileFunctionLiteral){ 
-    TEST_MODULE(loadTest("literal.fur"), 123);
+    TEST_MODULE(loadTest("literal.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionBinaryInt){ 
-    TEST_MODULE(loadTest("binaryInt.fur"), 123);
+    TEST_MODULE(loadTest("binaryInt.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionBinaryFloat){ 
-    TEST_MODULE(loadTest("binaryFloat.fur"), 123);
+    TEST_MODULE(loadTest("binaryFloat.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionLongVar){ 
-    TEST_MODULE(loadTest("longVar.fur"), 123);
+    TEST_MODULE(loadTest("longVar.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionShortVar){ 
-    TEST_MODULE(loadTest("shortVar.fur"), 123);
+    TEST_MODULE(loadTest("shortVar.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionIf){ 
-    TEST_MODULE(loadTest("if.fur"), 123);
+    TEST_MODULE(loadTest("if.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionIfElse){ 
-    TEST_MODULE(loadTest("ifElse.fur"), 123);
+    TEST_MODULE(loadTest("ifElse.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionIfElseIfElse){ 
-    TEST_MODULE(loadTest("ifElseIfElse.fur"), 123);
+    TEST_MODULE(loadTest("ifElseIfElse.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionIfElseIfElseIfElse){ 
-    TEST_MODULE(loadTest("ifElseIfElseIfElse.fur"), 123);
+    TEST_MODULE(loadTest("ifElseIfElseIfElse.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionFor){ 
-    TEST_MODULE(loadTest("for.fur"), 123);
+    TEST_MODULE(loadTest("for.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionArrayInit){ 
-    TEST_MODULE(loadTest("arrayInit.fur"), 123);
+    TEST_MODULE(loadTest("arrayInit.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionAdd){ 
-    TEST_MODULE(loadTest("add.fur"), 123);
+    TEST_MODULE(loadTest("add.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionUnary){ 
-    TEST_MODULE(loadTest("unary.fur"), 123); 
+    TEST_MODULE(loadTest("unary.acl"), 123); 
 }
 
 TEST(IntegrationTest, CompileFunctionReassignArg){ 
-    TEST_MODULE(loadTest("reassignArg.fur"), 123);
+    TEST_MODULE(loadTest("reassignArg.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionGCD){ 
-    TEST_MODULE(loadTest("gcd.fur"), 139);
+    TEST_MODULE(loadTest("gcd.acl"), 139);
 }
 
 TEST(IntegrationTest, CompileFunctionFibbonanci) {
-    TEST_MODULE(loadTest("fibbonanci.fur"), 144);
+    TEST_MODULE(loadTest("fibbonanci.acl"), 144);
 }
 
 TEST(IntegrationTest, CompileFunctionArraySum) {
-    TEST_MODULE(loadTest("arraySum.fur"), 123);
+    TEST_MODULE(loadTest("arraySum.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionNestedFor) {
-    TEST_MODULE(loadTest("nestedFor.fur"), 123);
+    TEST_MODULE(loadTest("nestedFor.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionBubblesort) {
-    TEST_MODULE(loadTest("bubblesort.fur"), 123);
+    TEST_MODULE(loadTest("bubblesort.acl"), 123);
 }
 
 TEST(IntegrationTest, CompileFunctionProcColonError) {
-    TEST_ERROR(loadTest("procColonError.fur"), DOUBLE_COLON);
+    TEST_ERROR(loadTest("procColonError.acl"), DOUBLE_COLON);
 }
 
 TEST(IntegrationTest, CompileFunctionProcArrowError) {
-    TEST_ERROR(loadTest("procArrowError.fur"), ARROW);
+    TEST_ERROR(loadTest("procArrowError.acl"), ARROW);
 }
 
 TEST(IntegrationTest, CompileFunctionProcNameError) {
-    TEST_ERROR(loadTest("procNameError.fur"), IDENT);
+    TEST_ERROR(loadTest("procNameError.acl"), IDENT);
 }
 
 TEST(IntegrationTest, CompileFunctionVarEqualError) {
-    TEST_ERROR(loadTest("varEqualError.fur"), ASSIGN);
+    TEST_ERROR(loadTest("varEqualError.acl"), ASSIGN);
 }
 
 TEST(IntegrationTest, CompileFunctionVarNameError) {
-    TEST_ERROR(loadTest("varNameError.fur"), IDENT);
+    TEST_ERROR(loadTest("varNameError.acl"), IDENT);
 }
