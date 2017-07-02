@@ -142,20 +142,23 @@ set(LLVM_LIBS
 set(CMAKE_BUILD_TYPE Debug)
 
 # Compiler library
-add_library(atomical ../src/lib.c)
-target_link_libraries(atomical ${LLVM_LIBS})
-target_compile_options(atomical PRIVATE "-Werror")
-target_compile_options(atomical PRIVATE "-std=c11")
+add_library(atomical ../src/lib.cpp)
+# target_link_libraries(atomical ${LLVM_LIBS})
+target_compile_options(atomical PRIVATE "-fpermissive")
+target_compile_options(atomical PRIVATE "-w")
+# target_compile_options(atomical PRIVATE "-std=c11")
+# target_compile_options(atomical PRIVATE "-Werror")
 
 # Compiler executable
-add_executable(atomical-bin ../src/main.c)
-target_link_libraries(atomical-bin ${LLVM_LIBS} atomical)
-target_compile_options(atomical-bin PRIVATE "-Werror")
-target_compile_options(atomical-bin PRIVATE "-std=c11")
-set_target_properties(atomical-bin PROPERTIES OUTPUT_NAME atomical)
+# add_executable(atomical-bin ../src/main.cpp)
+# target_link_libraries(atomical-bin ${LLVM_LIBS} atomical)
+# # target_compile_options(atomical-bin PRIVATE "-Werror")
+# # target_compile_options(atomical-bin PRIVATE "-std=c11")
+# set_target_properties(atomical-bin PROPERTIES OUTPUT_NAME atomical)
 
 # Test executable 
 add_executable(atomical-test ../tests/test.cpp)
-target_link_libraries(atomical-test ${GTEST_LIBRARIES} pthread ${LLVM_LIBS} atomical)
+# ${LLVM_LIBS}
+target_link_libraries(atomical-test ${GTEST_LIBRARIES} pthread atomical)
 target_compile_options(atomical-test PRIVATE "-fpermissive") # required by GTEST
 target_compile_options(atomical-test PRIVATE "-Werror")

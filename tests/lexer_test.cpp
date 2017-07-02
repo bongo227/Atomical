@@ -1,170 +1,158 @@
-#include <gtest/gtest.h>
+TEST(LexerTest, WhitespaceIsIgnored) {
+    Lexer *lexer = new Lexer("   \t\n\r\n  ");
+    std::vector<Token> tokens = lexer->lex();
+    ASSERT_EQ(0, tokens.size());
+}
 
-struct tcase {
-    const char *input;
-    TokenType expectedType;
-    const char *expectedValue;
-};
+TEST(LexerTest, Ident) {
+    auto cases = {"foo", "a", "bar100"};
 
-TEST(LexerTest, Identifier) {
-
-    tcase cases[] = {
-        tcase{"test", IDENT, "test"},
-        tcase{"a", IDENT, "a" },
-        tcase{"test123", IDENT, "test123"},
-    };
-
-    for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
-        tcase c = cases[i];
-
-        Token *tokens = Lex((char *)c.input);
-
-        ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
-        ASSERT_STREQ(c.expectedValue, tokens[0].value);
-        ASSERT_STREQ(TokenName(END), TokenName(tokens[1].type));
+    for (auto c : cases) {
+        Lexer *lexer = new Lexer(c);
+        std::vector<Token> tokens = lexer->lex();
+        ASSERT_EQ(1, tokens.size());
+        ASSERT_EQ(TokenType::IDENT, tokens[0].type);
+        ASSERT_EQ(c, tokens[0].value);
     }
 }
 
 TEST(LexerTest, Numbers) {
-    tcase cases[] = {
-        tcase{ "1", INT, "1" },
-        tcase{ "1204", INT, "1204" },
-
-        tcase{ "213.42", FLOAT, "213.42"},
-        tcase{ "0.5", FLOAT, ".5" },
-        
-        tcase{"0x1000", HEX, "1000"},
-        tcase{"0600", OCTAL, "600"},
+    auto cases = {
+        std::make_tuple("1", INT, "1"),
+        std::make_tuple("1204", INT, "1204"),
+        std::make_tuple("213.42", FLOAT, "213.42"),
+        std::make_tuple("0.5", FLOAT, ".5"),
+        std::make_tuple("0x1000", HEX, "1000"),
+        std::make_tuple("0600", OCTAL, "600"),
     };
 
-    for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
-        tcase c = cases[i];
-
-        Token *tokens = Lex((char *)c.input);
-
-        ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
-        ASSERT_STREQ(c.expectedValue, tokens[0].value);
-        ASSERT_STREQ(TokenName(END), TokenName(tokens[1].type));
+    for (auto c : cases) {
+        Lexer *lexer = new Lexer(std::get<0>(c));
+        std::vector<Token> tokens = lexer->lex();
+        ASSERT_EQ(1, tokens.size());
+        ASSERT_EQ(std::get<1>(c), tokens[0].type);
+        ASSERT_EQ(std::get<2>(c), tokens[0].value);    
     }
 }
 
 TEST(LexerTest, Strings) {
-    tcase cases[] = {
-        tcase{ "\"test\"", STRING, "test" },
-        tcase{ "\"\"", STRING, "" },
-
-        tcase{ "\"\n\"", STRING, "\n" },
-        tcase{ "\"\021\"", STRING, "\021" },
-        tcase{ "\"\x41\"", STRING, "\x41" },
-        tcase{ "\"\u1000\"", STRING, "\u1000" },
-        tcase{ "\"\u10001000\"", STRING, "\u10001000" },
+    auto cases = {
+        std::make_tuple("\"test\"", STRING, "test"),
+        std::make_tuple("\"\"", STRING, ""),
+        std::make_tuple("\"\n\"", STRING, "\n"),
+        std::make_tuple("\"\021\"", STRING, "\021"),
+        std::make_tuple("\"\x41\"", STRING, "\x41"),
+        std::make_tuple("\"\u1000\"", STRING, "\u1000"),
+        std::make_tuple("\"\u10001000\"", STRING, "\u10001000"),
     };
 
-    for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
-        tcase c = cases[i];
-
-        Token *tokens = Lex((char *)c.input);
-
-        ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
-        ASSERT_STREQ(c.expectedValue, tokens[0].value);
-        ASSERT_STREQ(TokenName(END), TokenName(tokens[1].type));
+    for (auto c : cases) {
+        Lexer *lexer = new Lexer(std::get<0>(c));
+        auto tokens = lexer->lex();
+        ASSERT_EQ(1, tokens.size());
+        ASSERT_EQ(std::get<1>(c), tokens[0].type);
+        ASSERT_EQ(std::get<2>(c), tokens[0].value);
     }
 }
 
 TEST(LexerTest, Symbols) {
-    tcase cases[] = {
-        tcase{ ":", COLON, "" },
-        tcase{ ":=", DEFINE, "" },
-        tcase{ "::", DOUBLE_COLON, "" },
+    auto cases = {
+        std::make_tuple(":", COLON, "" ),
+        std::make_tuple(":=", DEFINE, "" ),
+        std::make_tuple("::", DOUBLE_COLON, "" ),
 
-        tcase{ ".", PERIOD, "" },
-        tcase{ "...", ELLIPSE, "" },
+        std::make_tuple(".", PERIOD, "" ),
+        std::make_tuple("...", ELLIPSE, "" ),
 
-        tcase{ ",", COMMA, "" },
+        std::make_tuple(",", COMMA, "" ),
 
-        tcase{ "(", LPAREN, "" },
-        tcase{ ")", RPAREN, "" },
-        tcase{ "[", LBRACK, "" },
-        tcase{ "]", RBRACK, "" },
-        tcase{ "{", LBRACE, "" },
-        tcase{ "}", RBRACE, "" },
+        std::make_tuple("(", LPAREN, "" ),
+        std::make_tuple(")", RPAREN, "" ),
+        std::make_tuple("[", LBRACK, "" ),
+        std::make_tuple("]", RBRACK, "" ),
+        std::make_tuple("{", LBRACE, "" ),
+        std::make_tuple("}", RBRACE, "" ),
 
-        tcase{ "+", ADD, "" },
-        tcase{ "+=", ADD_ASSIGN, "" },
-        tcase{ "++", INC, "" },
+        std::make_tuple("+", ADD, "" ),
+        std::make_tuple("+=", ADD_ASSIGN, "" ),
+        std::make_tuple("++", INC, "" ),
 
-        tcase{ "-", SUB, "" },
-        tcase{ "-=", SUB_ASSIGN, "" },
-        tcase{ "--", DEC, "" },
-        tcase{ "->", ARROW, "" },
+        std::make_tuple("-", SUB, "" ),
+        std::make_tuple("-=", SUB_ASSIGN, "" ),
+        std::make_tuple("--", DEC, "" ),
+        std::make_tuple("->", ARROW, "" ),
 
-        tcase{ "*", MUL, "" },
-        tcase{ "*=", MUL_ASSIGN, "" },
+        std::make_tuple("*", MUL, "" ),
+        std::make_tuple("*=", MUL_ASSIGN, "" ),
 
-        tcase{ "/", QUO, "" },
-        tcase{ "/=", QUO_ASSIGN, "" },
+        std::make_tuple("/", QUO, "" ),
+        std::make_tuple("/=", QUO_ASSIGN, "" ),
 
-        tcase{ "%", REM, "" },
-        tcase{ "%=", REM_ASSIGN, "" },
+        std::make_tuple("%", REM, "" ),
+        std::make_tuple("%=", REM_ASSIGN, "" ),
 
-        tcase{ "^", XOR, "" },
-        tcase{ "^=", XOR_ASSIGN, "" },
+        std::make_tuple("^", XOR, "" ),
+        std::make_tuple("^=", XOR_ASSIGN, "" ),
 
-        tcase{ "<", LSS, "" },
-        tcase{ "<=", LEQ, "" },
-        tcase{ "<<", SHL, "" },
-        tcase{ "<<=", SHL_ASSIGN, "" },
+        std::make_tuple("<", LSS, "" ),
+        std::make_tuple("<=", LEQ, "" ),
+        std::make_tuple("<<", SHL, "" ),
+        std::make_tuple("<<=", SHL_ASSIGN, "" ),
 
-        tcase{ ">", GTR, "" },
-        tcase{ ">=", GEQ, "" },
-        tcase{ ">>", SHR, "" },
-        tcase{ ">>=", SHR_ASSIGN, "" },
+        std::make_tuple(">", GTR, "" ),
+        std::make_tuple(">=", GEQ, "" ),
+        std::make_tuple(">>", SHR, "" ),
+        std::make_tuple(">>=", SHR_ASSIGN, "" ),
 
-        tcase{ "=", ASSIGN, "" },
-        tcase{ "==", EQL, "" },
+        std::make_tuple("=", ASSIGN, "" ),
+        std::make_tuple("==", EQL, "" ),
 
-        tcase{ "!", NOT, "" },
-        tcase{ "!=", NEQ, "" },
+        std::make_tuple("!", NOT, "" ),
+        std::make_tuple("!=", NEQ, "" ),
 
-        tcase{ "&", AND, "" },
-        tcase{ "&=", AND_ASSIGN, "" },
-        tcase{ "&&", LAND, "" },
-        tcase{ "&^", AND_NOT, "" },
-        tcase{ "&^=", AND_NOT_ASSIGN, "" },
+        std::make_tuple("&", AND, "" ),
+        std::make_tuple("&=", AND_ASSIGN, "" ),
+        std::make_tuple("&&", LAND, "" ),
+        std::make_tuple("&^", AND_NOT, "" ),
+        std::make_tuple("&^=", AND_NOT_ASSIGN, "" ),
     
-        tcase{"|", OR, ""},
-        tcase{"||", LOR, ""},
-        tcase{"|=", OR_ASSIGN, ""},
+        std::make_tuple("|", OR, ""),
+        std::make_tuple("||", LOR, ""),
+        std::make_tuple("|=", OR_ASSIGN, ""),
     };
 
-    for (int i = 0; i < sizeof(cases) / sizeof(tcase); i++) {
-        tcase c = cases[i];
-
-        Token *tokens = Lex((char *)c.input);
-
-        ASSERT_STREQ(TokenName(c.expectedType), TokenName(tokens[0].type));
-        ASSERT_STREQ(c.expectedValue, tokens[0].value);
-        ASSERT_STREQ(TokenName(END), TokenName(tokens[1].type));
+    for (auto c : cases) {
+        Lexer *lexer = new Lexer(std::get<0>(c));
+        std::vector<Token> tokens = lexer->lex();
+        ASSERT_EQ(1, tokens.size());
+        ASSERT_EQ(std::get<1>(c), tokens[0].type);
+        ASSERT_EQ(std::get<2>(c), tokens[0].value);
     }
 }
 
 TEST(LexerTest, LineNumbers) {
-    Token *tokens = Lex((char *)"1\n2\n3");
-    
-    for (int i = 0; i < 3; i++) {
-        ASSERT_EQ(i+1, tokens[i].line);	
+    Lexer *lexer = new Lexer("1\n2\n3");
+    std::vector<Token> tokens = lexer->lex();
+    ASSERT_EQ(5, tokens.size());
+    for (int i = 0; i < 0; i++) {
+        ASSERT_EQ(i+1, tokens[i].line);
     }
 }
 
 TEST(LexerTest, ColumnNumbers) {
-    Token *tokens = Lex((char *)"foo bar baz");
-
+    Lexer *lexer = new Lexer("foo bar baz");
+    std::vector<Token> tokens = lexer->lex();
+ 
+    ASSERT_EQ(3, tokens.size());
     ASSERT_EQ(1, tokens[0].column);
     ASSERT_EQ(5, tokens[1].column);
     ASSERT_EQ(9, tokens[2].column);
 }
 
 TEST(LexerTest, SemiColonInsertion) {
-    Token *tokens = Lex((char *)"foo\nbar");
-    ASSERT_STREQ(TokenName(SEMI), TokenName(tokens[1].type));
+    Lexer *lexer = new Lexer("foo\nbar");
+    std::vector<Token> tokens = lexer->lex();
+
+    ASSERT_EQ(3, tokens.size());
+    ASSERT_EQ(SEMI, tokens[1].type);
 }
