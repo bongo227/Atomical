@@ -6,3 +6,4 @@
 #include "pool.c"
 #include "queue.c"
 #include "string.c"
+#include "ssa.c"

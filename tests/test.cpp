@@ -13,6 +13,7 @@ extern "C" {
     #include "../src/includes/pool.h"
     #include "../src/includes/queue.h"
     #include "../src/includes/string.h"
+    #include "../src/includes/ssa.h"
 }
 
 // test files
@@ -23,9 +24,10 @@ extern "C" {
 #include "parser_test.cpp"
 #include "irgen_test.cpp"
 #include "integration_test.cpp"
+#include "ssa_test.cpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
-    // ::testing::GTEST_FLAG(filter) = "*Pool";
+    ::testing::GTEST_FLAG(filter) = "Ssa*";
     return RUN_ALL_TESTS();
 }
