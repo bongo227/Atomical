@@ -1,4 +1,5 @@
 #include <string>
+#include <assert.h>
 
 enum TokenType {
     ILLEGAL,
@@ -91,4 +92,64 @@ struct Token {
     int line;
     int column;
     std::string value;
+
+    public:
+        int get_binding_power();
 };
+
+int Token::get_binding_power() {
+    switch(type) {
+        case SEMI:
+            return 0;
+
+        // Assign / define
+        case ASSIGN:
+        case ADD_ASSIGN:
+        case SUB_ASSIGN:
+        case MUL_ASSIGN:
+        case REM_ASSIGN:
+        case OR_ASSIGN:
+        case SHR_ASSIGN:
+        case DEFINE:
+            return 10;
+
+        // Logical operators
+        case LAND:
+        case LOR:
+            return 20;
+            
+        // Equality operators
+        case EQL:
+        case NEQ:
+        case LSS:
+        case GTR:
+        case LEQ:
+        case GEQ:
+            return 30;
+
+        // Math operators
+        case ADD:
+        case SUB:
+            return 40;
+
+        case MUL:
+        case QUO:
+        case REM:
+            return 50;
+
+        // Special unary
+        case NOT:
+            return 60;
+
+        // Strongly bound
+        case PERIOD:
+        case LBRACK:
+        case LPAREN:
+            return 70;
+
+        // Unknown token
+        default:
+            assert(false);
+            return 0;
+    }
+}
