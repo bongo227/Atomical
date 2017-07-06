@@ -20,6 +20,7 @@ TEST_CASE("identifiers") {
 
 TEST_CASE("numbers") {
     auto cases = {
+        std::make_tuple("0", TokenType::INT, "0"),
         std::make_tuple("1", TokenType::INT, "1"),
         std::make_tuple("1204", TokenType::INT, "1204"),
         std::make_tuple("213.42", TokenType::FLOAT, "213.42"),

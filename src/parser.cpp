@@ -97,7 +97,8 @@ IfStatement *Parser::parse_if_statement() {
 ForStatement *Parser::parse_for_statement() {
     expect(TokenType::FOR);
 
-    Statement *declaration = parse_statement();
+    AssignStatement *declaration = parse_assign_statement();
+    expect(TokenType::SEMI);
     Expression *condition = parse_expression(0);
     expect(TokenType::SEMI);
     Statement *increment = parse_statement();

@@ -117,6 +117,10 @@ fraction:
         number += next_mantissa(base);
     }
 exit:
+    if(type == TokenType::OCTAL && number == "") {
+        type = TokenType::INT;
+        number = "0";
+    }
     return std::make_tuple(type, number);
 
     return std::make_tuple(TokenType::ILLEGAL, "");

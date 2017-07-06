@@ -3,21 +3,21 @@ TEST_SUITE_BEGIN("Parser");
 #define TEST_EXPRESSION(source, expected) {                                 \
     SUBCASE(#source) {                                                      \
         auto exp = Parser((source)).parse_expression(0);                    \
-        CHECK_EQ(*exp, (expected));                                         \
+        CHECK_EQ((expected), *exp);                                         \
     }                                                                       \
 }                                                                           \
 
 #define TEST_STATEMENT(source, expected) {                                  \
     SUBCASE(#source) {                                                      \
         auto smt = Parser((source)).parse_statement();                      \
-        CHECK_EQ(*smt, (expected));                                         \
+        CHECK_EQ((expected), *smt);                                         \
     }                                                                       \
 }                                                                           \
 
 #define TEST_FUNCTION(source, expected) {                                   \
     SUBCASE(#source) {                                                      \
         auto func = Parser((source)).parse_function();                      \
-        CHECK_EQ(*func, (expected));                                        \
+        CHECK_EQ((expected), *func);                                        \
     }                                                                       \
 }                                                                           \
 
@@ -252,17 +252,21 @@ TEST_CASE("if statement") {
 }
 
 TEST_CASE("for statement") {
-    TEST_STATEMENT("for return a; a < 20; return a {}", ForStatement(
-        new ReturnStatement(
-            new IdentExpression("a")
+    TEST_STATEMENT("for a := 0; a < 20; a += 1 {}", ForStatement(
+        new AssignStatement(
+            new IdentExpression("a"),
+            TokenType::DEFINE,
+            new LiteralExpression(TokenType::INT, "0")
         ),
         new BinaryExpression(
             TokenType::LSS,
             new IdentExpression("a"),
             new LiteralExpression(TokenType::INT, "20")
         ),
-        new ReturnStatement(
-            new IdentExpression("a")
+        new AssignStatement(
+            new IdentExpression("a"),
+            TokenType::ADD_ASSIGN,
+            new LiteralExpression(TokenType::INT, "1")
         ),
         new BlockStatement({})
     ))

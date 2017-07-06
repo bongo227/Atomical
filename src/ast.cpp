@@ -231,33 +231,6 @@ struct IfStatement : Statement {
     PRINT_OP(IfStatement)
 };
 
-struct ForStatement : Statement {
-    Statement *declaration; // Change to assigment/define statement
-    Expression *condition;
-    Statement *increment;
-    BlockStatement *body;
-
-    ForStatement(Statement *declaration, Expression *condition, Statement *increment, 
-        BlockStatement *body) : declaration(declaration), condition(condition), 
-        increment(increment), body(body) {}
-
-    private:
-        virtual bool is_equal(const Statement& smt) const override {
-            auto e = static_cast<const ForStatement&>(smt);
-            return *this->declaration == *e.declaration &&
-                *this->condition == *e.condition &&
-                *this->increment == *e.increment &&
-                *this->body == *e.body;
-        }
-
-        virtual void print_node(std::ostream& os) const override {
-            os << "for " << *declaration << "; " << *condition << "; " 
-                << *increment << " " << *body;
-        }
-
-    PRINT_OP(ForStatement)
-};
-
 struct AssignStatement : Statement {
     IdentExpression *variable;
     TokenType assign_type;
@@ -279,6 +252,33 @@ struct AssignStatement : Statement {
         }
 
     PRINT_OP(AssignStatement)
+};
+
+struct ForStatement : Statement {
+    AssignStatement *declaration;
+    Expression *condition;
+    Statement *increment;
+    BlockStatement *body;
+
+    ForStatement(AssignStatement *declaration, Expression *condition, Statement *increment, 
+        BlockStatement *body) : declaration(declaration), condition(condition), 
+        increment(increment), body(body) {}
+
+    private:
+        virtual bool is_equal(const Statement& smt) const override {
+            auto e = static_cast<const ForStatement&>(smt);
+            return *this->declaration == *e.declaration &&
+                *this->condition == *e.condition &&
+                *this->increment == *e.increment &&
+                *this->body == *e.body;
+        }
+
+        virtual void print_node(std::ostream& os) const override {
+            os << "for " << *declaration << "; " << *condition << "; " 
+                << *increment << " " << *body;
+        }
+
+    PRINT_OP(ForStatement)
 };
 
 struct Type {
