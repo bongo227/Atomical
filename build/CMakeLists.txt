@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 # Use Clang
+set(CMAKE_CXX_COMPILER /usr/bin/clang++-3.9)
 set(CMAKE_C_COMPILER /usr/bin/clang-3.9)
-# set(CMAKE_C_COMPILER /usr/bin/clang++-3.9)
 add_definitions("-fPIC")
 
 project(Atomical)
