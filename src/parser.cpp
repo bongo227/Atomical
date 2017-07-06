@@ -107,11 +107,11 @@ ForStatement *Parser::parse_for_statement() {
 }
 
 AssignStatement *Parser::parse_assign_statement() {
-    auto ident = parse_expression(0); // TODO: change to parse_ident_expression()
-    auto type = tokens.front();
+    IdentExpression *ident = new IdentExpression(expect(TokenType::IDENT).value);
+    Token type = tokens.front();
     tokens.pop_front();
-    auto *value = parse_expression(0);
-    return new AssignStatement(static_cast<IdentExpression *>(ident), type.type, value); 
+    Expression *value = parse_expression(0);
+    return new AssignStatement(ident, type.type, value); 
 }
 
 Statement *Parser::parse_statement() {
