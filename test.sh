@@ -2,4 +2,4 @@ cd build &&
 make clean &&
 cmake CMakeLists.txt && 
 make && 
-./atomical-test
+./atomical-test -s -tc="functions"

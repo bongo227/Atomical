@@ -59,7 +59,7 @@ TEST_CASE("functions") {
                 new BinaryExpression(
                     TokenType::ADD,
                     new IdentExpression("a"),
-                    new LiteralExpression(TokenType::INT, "u")
+                    new LiteralExpression(TokenType::FLOAT, "u") // TODO: this should fail u != 1
                 )
             )
         })

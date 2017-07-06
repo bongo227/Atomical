@@ -351,13 +351,15 @@ struct Function {
             if(i > 0) os << ", ";
             os << "[TYPE] " << std::get<1>(arg);
         }
-        os << " -> ";
+        if(func.arguments.size() != 0) os << " ";
+        os << "-> ";
         for (size_t i = 0; i < func.returns.size(); i++) {
             auto ret = func.returns[i];
             // TODO: add type printing
             if(i > 0) os << ", ";
             os << "[TYPE] " << std::get<1>(ret);
         }
+         if(func.returns.size() != 0) os << " ";
         os << *func.body;
         return os;
     }
