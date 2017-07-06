@@ -414,14 +414,14 @@ struct Function {
             }
 
             // Check bodys are equal
-            if(static_cast<Statement>(*this->body) != static_cast<Statement>(*func.body)) 
+            if(*static_cast<Statement *>(this->body) != *static_cast<Statement *>(func.body)) 
                 return false;
             
             return true;
         }
 
     friend std::ostream& operator<<(std::ostream& os, const Function& func) {
-        os << func.name << " :: ";
+        os << "proc " << func.name << " :: ";
         for (size_t i = 0; i < func.arguments.size(); i++) {
             auto arg = func.arguments[i];
             // TODO: add type printing
@@ -444,4 +444,3 @@ struct Function {
     EQUAL_OP(Function);
     NOT_EQUAL_OP(Function);
 };
-

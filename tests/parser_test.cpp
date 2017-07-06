@@ -2,18 +2,24 @@ TEST_SUITE_BEGIN("Parser");
 
 // TODO: make thes SUBCASE for better error messages
 #define TEST_EXPRESSION(source, expected) {                                 \
-    auto exp = Parser((source)).parse_expression(0);                        \
-    CHECK_EQ(*exp, (expected));                                             \
+    SUBCASE(#source) {                                                      \
+        auto exp = Parser((source)).parse_expression(0);                    \
+        CHECK_EQ(*exp, (expected));                                         \
+    }                                                                       \
 }                                                                           \
 
 #define TEST_STATEMENT(source, expected) {                                  \
-    auto smt = Parser((source)).parse_statement();                          \
-    CHECK_EQ(*smt, (expected));                                             \
+    SUBCASE(#source) {                                                      \
+        auto smt = Parser((source)).parse_statement();                      \
+        CHECK_EQ(*smt, (expected));                                         \
+    }                                                                       \
 }                                                                           \
 
 #define TEST_FUNCTION(source, expected) {                                   \
-    auto func = Parser((source)).parse_function();                          \
-    CHECK_EQ(*func, (expected));                                            \
+    SUBCASE(#source) {                                                      \
+        auto func = Parser((source)).parse_function();                      \
+        CHECK_EQ(*func, (expected));                                        \
+    }                                                                       \
 }                                                                           \
 
 TEST_CASE("functions") {
@@ -60,7 +66,7 @@ TEST_CASE("functions") {
                 new BinaryExpression(
                     TokenType::ADD,
                     new IdentExpression("a"),
-                    new LiteralExpression(TokenType::FLOAT, "u") // TODO: this should fail u != 1
+                    new LiteralExpression(TokenType::INT, "1")
                 )
             )
         })

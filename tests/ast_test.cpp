@@ -625,6 +625,45 @@ TEST_CASE("functions equal") {
         )
     );
 
+    CHECK_NE(
+        Function(
+            "foo",
+            {
+                std::make_tuple(new PrimitiveType(Primitive::INT), "a"),
+            },
+            {
+                std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
+            },
+            new BlockStatement({
+                new ReturnStatement(
+                    new BinaryExpression(
+                        TokenType::ADD,
+                        new IdentExpression("a"),
+                        new LiteralExpression(TokenType::FLOAT, "u")
+                    )
+                )
+            })
+        ),
+        Function(
+            "foo",
+            {
+                std::make_tuple(new PrimitiveType(Primitive::INT), "a"),
+            },
+            {
+                std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
+            },
+            new BlockStatement({
+                new ReturnStatement(
+                    new BinaryExpression(
+                        TokenType::ADD,
+                        new IdentExpression("a"),
+                        new LiteralExpression(TokenType::FLOAT, "1")
+                    )
+                )
+            })
+        )
+    );
+
 }
 
 TEST_SUITE_END();
