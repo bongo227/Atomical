@@ -1,9 +1,3 @@
-#include <typeinfo>
-#include <iostream>
-#include <vector>
-#include <tuple>
-#include <deque>
-
 #define PRINT_OP(type)                                                              \
 friend std::ostream& operator<<(std::ostream& os, const type& obj) {                \
     obj.print_node(os);                                                             \
@@ -114,22 +108,7 @@ struct BinaryExpression : Expression {
         }
 
         virtual void print_node(std::ostream &os) const override {
-            os << *left << " ";
-            switch (type) {
-                case TokenType::ADD: os << "+"; break;
-                case TokenType::SUB: os << "-"; break;
-                case TokenType::MUL: os << "*"; break;
-                case TokenType::QUO: os << "/"; break;
-                case TokenType::REM: os << "%"; break;
-                case TokenType::EQL: os << "=="; break;
-                case TokenType::NEQ: os << "!="; break;
-                case TokenType::GTR: os << ">"; break;
-                case TokenType::LSS: os << "<"; break;
-                case TokenType::GEQ: os << ">="; break;
-                case TokenType::LEQ: os << "<="; break;
-                default: assert(false);
-            }
-            os << " " << *right;
+            os << *left << " " << type << " " << *right;
         }
 
     PRINT_OP(BinaryExpression)
@@ -298,25 +277,7 @@ struct AssignStatement : Statement {
         }
 
         virtual void print_node(std::ostream &os) const override {
-            os << *variable << " ";
-            // TODO: add << operator to TokenType
-            switch (assign_type) {
-                case TokenType::DEFINE: os << ":="; break;
-                case TokenType::ASSIGN: os << "="; break;
-                case TokenType::ADD_ASSIGN: os << "+="; break;
-                case TokenType::SUB_ASSIGN: os << "-="; break;
-                case TokenType::MUL_ASSIGN: os << "*="; break;
-                case TokenType::QUO_ASSIGN: os << "/="; break;
-                case TokenType::REM_ASSIGN: os << "%="; break;
-                case TokenType::XOR_ASSIGN: os << "^="; break;
-                case TokenType::SHL_ASSIGN: os << "<<="; break;
-                case TokenType::SHR_ASSIGN: os << ">>="; break;
-                case TokenType::AND_NOT_ASSIGN: os << "&^="; break;
-                case TokenType::AND_ASSIGN: os << "&="; break;
-                case TokenType::OR_ASSIGN: os << "|="; break;
-                default: assert(false); // expected assignment operator
-            }
-            os << " " << *value;
+            os << *variable << " " << assign_type << " " << *value;
         }
 
     PRINT_OP(AssignStatement)
@@ -348,6 +309,20 @@ enum class Primitive {
     FLOAT,
 };
 
+std::ostream &operator<<(std::ostream &os, const Primitive &prim) {
+    switch(prim) {
+        case Primitive::I8: os << "i8"; break;
+        case Primitive::I16: os << "i16"; break;
+        case Primitive::I32: os << "i32"; break;
+        case Primitive::I64: os << "i64"; break;
+        case Primitive::INT: os << "int"; break;
+        case Primitive::F32: os << "f32"; break;
+        case Primitive::F64: os << "f64"; break;
+        case Primitive::FLOAT: os << "float"; break;
+    }
+    return os;
+}
+
 struct PrimitiveType : Type {
     Primitive prim;
 
@@ -360,16 +335,7 @@ struct PrimitiveType : Type {
         }
 
         virtual void print_node(std::ostream& os) const override {
-            switch(prim) {
-                case Primitive::I8: os << "i8"; break;
-                case Primitive::I16: os << "i16"; break;
-                case Primitive::I32: os << "i32"; break;
-                case Primitive::I64: os << "i64"; break;
-                case Primitive::INT: os << "int"; break;
-                case Primitive::F32: os << "f32"; break;
-                case Primitive::F64: os << "f64"; break;
-                case Primitive::FLOAT: os << "float"; break;
-            }
+            os << prim;
         }
 };
 

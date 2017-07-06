@@ -1,6 +1,3 @@
-#include <string>
-#include <assert.h>
-
 enum class TokenType {
     ILLEGAL,
 	IDENT,
@@ -86,6 +83,91 @@ enum class TokenType {
 	// eof token
 	END,
 };
+
+std::ostream &operator<<(std::ostream &os, const TokenType &type) {
+	switch(type) {
+		case TokenType::ILLEGAL: os << "[ILLEGAL TOKEN]"; break;
+		case TokenType::IDENT: os << "[IDENT]"; break;
+		
+		case TokenType::INT: os << "[INT]"; break;
+		case TokenType::FLOAT: os << "[FLOAT]"; break;
+		case TokenType::HEX: os << "[HEX]"; break;
+		case TokenType::OCTAL: os << "[OCTAL]"; break;
+		case TokenType::STRING: os << "[STRING]"; break;
+		
+		case TokenType::BREAK: os << "break"; break;
+		case TokenType::CASE: os << "case"; break;
+		case TokenType::CONST: os << "const"; break;
+		case TokenType::CONTINUE: os << "continue"; break;
+		case TokenType::DEFAULT: os << "default"; break;
+		case TokenType::DEFER: os << "defer"; break;
+		case TokenType::ELSE: os << "else"; break;
+		case TokenType::FALLTHROUGH: os << "fallthrough"; break;
+		case TokenType::FOR: os << "for"; break;
+		case TokenType::FUNC: os << "func"; break;
+		case TokenType::PROC: os << "proc"; break;
+		case TokenType::IF: os << "if"; break;
+		case TokenType::IMPORT: os << "import"; break;
+		case TokenType::RETURN: os << "return"; break;
+		case TokenType::SELECT: os << "select"; break;
+		case TokenType::STRUCT: os << "struct"; break;
+		case TokenType::SWITCH: os << "switch"; break;
+		case TokenType::TYPE: os << "type"; break;
+		case TokenType::VAR: os << "var"; break;
+
+		case TokenType::SEMI: os << ";"; break;
+		case TokenType::COLON: os << ":"; break;
+		case TokenType::DEFINE: os << ":="; break;
+		case TokenType::DOUBLE_COLON: os << "::"; break;
+		case TokenType::ELLIPSE: os << "..."; break;
+		case TokenType::PERIOD: os << "."; break;
+		case TokenType::COMMA: os << ","; break;
+		case TokenType::LPAREN: os << "("; break;
+		case TokenType::RPAREN: os << ")"; break;
+		case TokenType::LBRACK: os << "["; break;
+		case TokenType::RBRACK: os << "]"; break;
+		case TokenType::LBRACE: os << "{"; break;
+		case TokenType::RBRACE: os << "}"; break;
+		case TokenType::ADD: os << "+"; break;
+		case TokenType::ADD_ASSIGN: os << "+="; break;
+		case TokenType::INC: os << "++"; break;
+		case TokenType::ARROW: os << "->"; break;
+		case TokenType::SUB: os << "-"; break;
+		case TokenType::SUB_ASSIGN: os << "-="; break;
+		case TokenType::DEC: os << "--"; break;
+		case TokenType::MUL: os << "*"; break;
+		case TokenType::MUL_ASSIGN: os << "*="; break;
+		case TokenType::QUO: os << "/"; break;
+		case TokenType::QUO_ASSIGN: os << "/="; break;
+		case TokenType::REM: os << "%"; break;
+		case TokenType::REM_ASSIGN: os << "%="; break;
+		case TokenType::XOR: os << "^"; break;
+		case TokenType::XOR_ASSIGN: os << "^="; break;
+		case TokenType::LSS: os << "<"; break;
+		case TokenType::LEQ: os << "<="; break;
+		case TokenType::SHL: os << "<<"; break;
+		case TokenType::SHL_ASSIGN: os << "<<="; break;
+		case TokenType::GTR: os << ">"; break;
+		case TokenType::GEQ: os << ">="; break;
+		case TokenType::SHR: os << ">>"; break;
+		case TokenType::SHR_ASSIGN: os << ">>="; break;
+		case TokenType::ASSIGN: os << "="; break;
+		case TokenType::EQL: os << "=="; break;
+		case TokenType::NOT: os << "!"; break;
+		case TokenType::NEQ: os << "!="; break;
+		case TokenType::AND_NOT: os << "&^"; break;
+		case TokenType::AND_NOT_ASSIGN: os << "&^="; break;
+		case TokenType::AND: os << "&"; break;
+		case TokenType::AND_ASSIGN: os << "&="; break;
+		case TokenType::LAND: os << "&&"; break;
+		case TokenType::OR: os << "|"; break;
+		case TokenType::OR_ASSIGN: os << "|="; break;
+		case TokenType::LOR: os << "||"; break;
+
+		case TokenType::END: os << "[END]"; break;
+	}
+	return os;
+}
 
 struct Token {
     TokenType type;
