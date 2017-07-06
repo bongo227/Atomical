@@ -1,22 +1,24 @@
-TEST(LexerTest, WhitespaceIsIgnored) {
+TEST_SUITE_BEGIN("Lexer");
+
+TEST_CASE("whitespace is ignored") {
     Lexer *lexer = new Lexer("   \t\n\r\n  ");
     std::deque<Token> tokens = lexer->lex();
-    ASSERT_EQ(0, tokens.size());
+    REQUIRE_EQ(0, tokens.size());
 }
 
-TEST(LexerTest, Ident) {
+TEST_CASE("identifiers") {
     auto cases = {"foo", "a", "bar100"};
 
     for (auto c : cases) {
         Lexer *lexer = new Lexer(c);
         std::deque<Token> tokens = lexer->lex();
-        ASSERT_EQ(1, tokens.size());
-        ASSERT_EQ(TokenType::IDENT, tokens[0].type);
-        ASSERT_EQ(c, tokens[0].value);
+        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(TokenType::IDENT, tokens[0].type);
+        REQUIRE_EQ(c, tokens[0].value);
     }
 }
 
-TEST(LexerTest, Numbers) {
+TEST_CASE("numbers") {
     auto cases = {
         std::make_tuple("1", TokenType::INT, "1"),
         std::make_tuple("1204", TokenType::INT, "1204"),
@@ -29,13 +31,13 @@ TEST(LexerTest, Numbers) {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         std::deque<Token> tokens = lexer->lex();
-        ASSERT_EQ(1, tokens.size());
-        ASSERT_EQ(std::get<1>(c), tokens[0].type);
-        ASSERT_EQ(std::get<2>(c), tokens[0].value);    
+        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(std::get<1>(c), tokens[0].type);
+        REQUIRE_EQ(std::get<2>(c), tokens[0].value);    
     }
 }
 
-TEST(LexerTest, Strings) {
+TEST_CASE("strings") {
     auto cases = {
         std::make_tuple("\"test\"", TokenType::STRING, "test"),
         std::make_tuple("\"\"", TokenType::STRING, ""),
@@ -49,13 +51,13 @@ TEST(LexerTest, Strings) {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         auto tokens = lexer->lex();
-        ASSERT_EQ(1, tokens.size());
-        ASSERT_EQ(std::get<1>(c), tokens[0].type);
-        ASSERT_EQ(std::get<2>(c), tokens[0].value);
+        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(std::get<1>(c), tokens[0].type);
+        REQUIRE_EQ(std::get<2>(c), tokens[0].value);
     }
 }
 
-TEST(LexerTest, Symbols) {
+TEST_CASE("symbols") {
     auto cases = {
         std::make_tuple(":", TokenType::COLON, "" ),
         std::make_tuple(":=", TokenType::DEFINE, "" ),
@@ -124,40 +126,40 @@ TEST(LexerTest, Symbols) {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         std::deque<Token> tokens = lexer->lex();
-        ASSERT_EQ(1, tokens.size());
-        ASSERT_EQ(std::get<1>(c), tokens[0].type);
-        ASSERT_EQ(std::get<2>(c), tokens[0].value);
+        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(std::get<1>(c), tokens[0].type);
+        REQUIRE_EQ(std::get<2>(c), tokens[0].value);
     }
 }
 
-TEST(LexerTest, LineNumbers) {
+TEST_CASE("line numbers") {
     Lexer *lexer = new Lexer("1\n2\n3");
     std::deque<Token> tokens = lexer->lex();
-    ASSERT_EQ(5, tokens.size());
+    REQUIRE_EQ(5, tokens.size());
     for (int i = 0; i < 0; i++) {
-        ASSERT_EQ(i+1, tokens[i].line);
+        REQUIRE_EQ(i+1, tokens[i].line);
     }
 }
 
-TEST(LexerTest, ColumnNumbers) {
+TEST_CASE("column numbers") {
     Lexer *lexer = new Lexer("foo bar baz");
     std::deque<Token> tokens = lexer->lex();
  
-    ASSERT_EQ(3, tokens.size());
-    ASSERT_EQ(1, tokens[0].column);
-    ASSERT_EQ(5, tokens[1].column);
-    ASSERT_EQ(9, tokens[2].column);
+    REQUIRE_EQ(3, tokens.size());
+    REQUIRE_EQ(1, tokens[0].column);
+    REQUIRE_EQ(5, tokens[1].column);
+    REQUIRE_EQ(9, tokens[2].column);
 }
 
-TEST(LexerTest, SemiColonInsertion) {
+TEST_CASE("semicolon insertion") {
     Lexer *lexer = new Lexer("foo\nbar");
     std::deque<Token> tokens = lexer->lex();
 
-    ASSERT_EQ(3, tokens.size());
-    ASSERT_EQ(TokenType::SEMI, tokens[1].type);
+    REQUIRE_EQ(3, tokens.size());
+    REQUIRE_EQ(TokenType::SEMI, tokens[1].type);
 }
 
-TEST(LexerTest, Keywords) {
+TEST_CASE("keywords") {
     auto cases = {
         std::make_tuple("break", TokenType::BREAK),
         std::make_tuple("case", TokenType::CASE),
@@ -183,7 +185,9 @@ TEST(LexerTest, Keywords) {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         std::deque<Token> tokens = lexer->lex();
-        ASSERT_EQ(1, tokens.size());
-        ASSERT_EQ(std::get<1>(c), tokens[0].type);
+        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(std::get<1>(c), tokens[0].type);
     }
 }
+
+TEST_SUITE_END();

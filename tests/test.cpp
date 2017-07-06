@@ -1,11 +1,8 @@
-#include <gtest/gtest.h>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 #include <string>
 #include <vector>
+
 #include "../src/lib.cpp"
 #include "lexer_test.cpp"
-#include "parser_test.cpp"
-
-int main(int argc, char **argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+// #include "parser_test.cpp"

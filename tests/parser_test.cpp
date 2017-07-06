@@ -1,19 +1,21 @@
+TEST_SUITE_BEGIN("Parser");
+
 #define TEST_EXPRESSION(source, expected) {                                 \
     auto exp = Parser((source)).parse_expression(0);                        \
-    ASSERT_EQ((expected), *exp);                                            \
+    CHECK_EQ((expected), *exp);                                             \
 }                                                                           \
 
 #define TEST_STATEMENT(source, expected) {                                  \
     auto exp = Parser((source)).parse_statement();                          \
-    ASSERT_EQ((expected), *exp);                                            \
+    CHECK_EQ((expected), *exp);                                             \
 }                                                                           \
 
 #define TEST_FUNCTION(source, expected) {                                   \
     auto func = Parser((source)).parse_function();                          \
-    ASSERT_EQ((expected), *func);                                           \
+    CHECK_EQ((expected), *func);                                            \
 }                                                                           \
 
-TEST(ParserTest, EmptyFunction) {
+TEST_CASE("functions") {
     TEST_FUNCTION("proc foo :: -> {}", Function(
         "foo",
         {},
@@ -64,23 +66,23 @@ TEST(ParserTest, EmptyFunction) {
     ))
 }
 
-TEST(ParserTest, ParseReturnStatement) {
+TEST_CASE("return statement") {
     TEST_STATEMENT("return a;", ReturnStatement(new IdentExpression("a")))
 }
 
-TEST(ParserTest, ParseLiteral) {
+TEST_CASE("literal expression") {
     TEST_EXPRESSION("100", LiteralExpression(TokenType::INT, "100"))
     TEST_EXPRESSION("10.01", LiteralExpression(TokenType::FLOAT, "10.01"))
     TEST_EXPRESSION("0240", LiteralExpression(TokenType::OCTAL, "240"))
     TEST_EXPRESSION("0x1000", LiteralExpression(TokenType::HEX, "1000"))
 }
 
-TEST(ParserTest, ParseUnaryExpression) {
+TEST_CASE("unary expression") {
     TEST_EXPRESSION("!foo", UnaryExpression(TokenType::NOT, new IdentExpression("foo")))
     TEST_EXPRESSION("-foo", UnaryExpression(TokenType::SUB, new IdentExpression("foo")))
 }
 
-TEST(ParserTest, ParseBinaryExpression) {
+TEST_CASE("binary expression") {
     TEST_EXPRESSION("foo + bar", BinaryExpression(
         TokenType::ADD, 
         new IdentExpression("foo"), 
@@ -148,7 +150,7 @@ TEST(ParserTest, ParseBinaryExpression) {
     ))
 }
 
-TEST(ParserTest, ParseCallExpression) {
+TEST_CASE("call expression") {
     TEST_EXPRESSION("a()", 
         CallExpression(
             new IdentExpression("a"), {})
@@ -186,7 +188,7 @@ TEST(ParserTest, ParseCallExpression) {
     )
 }
 
-TEST(ParserTest, ParseBlockStatements) {
+TEST_CASE("block statement") {
         TEST_STATEMENT("{}", BlockStatement({}))
 
         TEST_STATEMENT("{ return a; }", BlockStatement({
@@ -211,7 +213,7 @@ TEST(ParserTest, ParseBlockStatements) {
         }))
 }
 
-TEST(ParserTest, ParseIfStatement) {
+TEST_CASE("if statement") {
     TEST_STATEMENT("if foo {}", IfStatement(
         new IdentExpression("foo"),
         NULL,
@@ -243,7 +245,7 @@ TEST(ParserTest, ParseIfStatement) {
     ))
 }
 
-TEST(ParserTest, ParseForStatement) {
+TEST_CASE("for statement") {
     TEST_STATEMENT("for return a; a < 20; return a {}", ForStatement(
         new ReturnStatement(
             new IdentExpression("a")
@@ -260,7 +262,7 @@ TEST(ParserTest, ParseForStatement) {
     ))
 }
 
-TEST(ParserTest, ParseAssignStatements) {
+TEST_CASE("assign statement") {
     TEST_STATEMENT("foo := 100", AssignStatement(
         new IdentExpression("foo"),
         TokenType::DEFINE,
@@ -283,3 +285,5 @@ TEST(ParserTest, ParseAssignStatements) {
         )
     ))
 }
+
+TEST_SUITE_END();
