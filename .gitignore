@@ -1,7 +1,7 @@
 ### Main ###
 
-atomical
-atomical-test
+build/*
+!build/CMakeLists.txt
 
 ### GDB ###
 

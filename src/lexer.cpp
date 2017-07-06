@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <deque>
 
 class Lexer {
     private:
@@ -11,17 +12,17 @@ class Lexer {
         bool semi;
 
     public:
-        Lexer(std::string source);
-        std::vector<Token> lex();
+        explicit Lexer(std::string source);
+        std::deque<Token> lex();
 
     private:
         void clear_whitespace();
         bool is_digit();
         bool is_letter();
         int as_digit(char c);
-        std::string next_ident();
         std::string next_mantissa(int base);
         std::tuple<TokenType, std::string> next_number();
+        std::tuple<TokenType, std::string> next_ident();
         std::string next_escape(char quote);
         std::string next_string();
 
@@ -30,13 +31,7 @@ class Lexer {
         TokenType switch4(TokenType t0, TokenType t1, char c, TokenType t2, TokenType t3);
 };
 
-Lexer::Lexer(std::string src) {
-    source = src;
-    index = 0;
-    line = 1;
-    column = 1;
-    semi = false;
-}
+Lexer::Lexer(std::string source) : source(source), index(0), line(1), column(1), semi(false) {}
 
 void Lexer::clear_whitespace() {
     while(source[index] == ' ' || 
@@ -70,19 +65,6 @@ int Lexer::as_digit(char c) {
     }
 }
 
-std::string Lexer::next_ident() {
-    if(!is_letter()) {
-        return "";
-    }
-
-    std::string ident = "";
-    do {
-        ident += source[index++];
-    } while(is_letter() || is_digit());
-
-    return ident;
-}
-
 std::string Lexer::next_mantissa(int base) {
     std::string number = "";
     while(is_digit() && this->as_digit(source[index]) < base) {
@@ -94,13 +76,13 @@ std::string Lexer::next_mantissa(int base) {
 
 std::tuple<TokenType, std::string> Lexer::next_number() {
     std::string number = "";
-    TokenType type = INT;
+    TokenType type = TokenType::INT;
     int base = 10;    
 
     if (source[index] == '0') {
         index++;
         if(source[index] == 'x' || source[index] == 'X') {
-            type = HEX;
+            type = TokenType::HEX;
             base = 16;
             index++;
             number += next_mantissa(base);
@@ -115,11 +97,11 @@ std::tuple<TokenType, std::string> Lexer::next_number() {
                 base = 10;
                 number += next_mantissa(base);
             } else {
-                type = OCTAL;
+                type = TokenType::OCTAL;
             }
 
             if (source[index] == '.') goto fraction;
-            if (!octal) return std::make_tuple(ILLEGAL, ""); // Illegal number
+            if (!octal) return std::make_tuple(TokenType::ILLEGAL, ""); // Illegal number
         }
         goto exit;
     }
@@ -130,7 +112,7 @@ std::tuple<TokenType, std::string> Lexer::next_number() {
 fraction:
     if (source[index] == '.') {
         number += source[index++];
-        type = FLOAT;
+        type = TokenType::FLOAT;
         base = 10;
         number += next_mantissa(base);
     }
@@ -226,6 +208,40 @@ std::string Lexer::next_escape(char quote) {
     return escape;
 }
 
+std::tuple<TokenType, std::string> Lexer::next_ident() {
+    if(!is_letter()) {
+        return std::make_tuple(TokenType::ILLEGAL, "");
+    }
+
+    std::string ident = "";
+    do {
+        ident += source[index++];
+    } while(is_letter() || is_digit());
+
+    TokenType type = TokenType::IDENT;
+    if(ident == "break") type = TokenType::BREAK;
+    else if(ident == "case") type = TokenType::CASE;
+    else if(ident == "const") type = TokenType::CONST;
+    else if(ident == "continue") type = TokenType::CONTINUE;
+    else if(ident == "default") type = TokenType::DEFAULT;
+    else if(ident == "defer") type = TokenType::DEFER;
+    else if(ident == "else") type = TokenType::ELSE;
+    else if(ident == "fallthrough") type = TokenType::FALLTHROUGH;
+    else if(ident == "for") type = TokenType::FOR;
+    else if(ident == "func") type = TokenType::FUNC;
+    else if(ident == "proc") type = TokenType::PROC;
+    else if(ident == "if") type = TokenType::IF;
+    else if(ident == "import") type = TokenType::IMPORT;
+    else if(ident == "return") type = TokenType::RETURN;
+    else if(ident == "select") type = TokenType::SELECT;
+    else if(ident == "struct") type = TokenType::STRUCT;
+    else if(ident == "switch") type = TokenType::SWITCH;
+    else if(ident == "type") type = TokenType::TYPE;
+    else if(ident == "var") type = TokenType::VAR;
+
+    return std::make_tuple(type, ident);
+}
+
 std::string Lexer::next_string() {
     std::string string = "";
     
@@ -239,8 +255,7 @@ std::string Lexer::next_string() {
 }
 
 TokenType Lexer::switch2(TokenType t0, TokenType t1) {
-    index++;
-    if (source[index] == '=') {
+    if (source[index+1] == '=') {
         index++;
         return t1;
     } else {
@@ -249,11 +264,10 @@ TokenType Lexer::switch2(TokenType t0, TokenType t1) {
 }
 
 TokenType Lexer::switch3(TokenType t0, TokenType t1, char c, TokenType t2) {
-    index++;
-    if(source[index] == '=') {
+    if(source[index+1] == '=') {
         index++;
         return t1;
-    } else if (source[index] == c) {
+    } else if (source[index+1] == c) {
         index++;
         return t2;
     } else {
@@ -278,16 +292,17 @@ TokenType Lexer::switch4(TokenType t0, TokenType t1, char c, TokenType t2, Token
     }
 }
 
-std::vector<Token> Lexer::lex() {
-    std::vector<Token> tokens(0);
+std::deque<Token> Lexer::lex() {
+    std::deque<Token> tokens;
 
     clear_whitespace();
     while (source.length() > index) {
-        Token token = {ILLEGAL, line, column, ""};
+        Token token = {TokenType::ILLEGAL, line, column, ""};
 
         if (is_letter()) {
-            token.type = TokenType::IDENT;
-            token.value = next_ident();
+            auto ident = next_ident();
+            token.type = std::get<0>(ident);
+            token.value = std::get<1>(ident); 
             column += token.value.length();
             semi = true;
         } else if (is_digit()) {
@@ -299,126 +314,126 @@ std::vector<Token> Lexer::lex() {
         } else {
             switch(source[index]) {
                 case '\n':
-                    token.type = SEMI;
+                    token.type = TokenType::SEMI;
                     column = 1;
                     line++;
                     semi = true;
                     break;
                 case '"':
-                    token.type = STRING;
+                    token.type = TokenType::STRING;
                     token.value = next_string();
                     semi = true;
                     break;
                 
                 case ':':
-					token.type = switch3(COLON, DEFINE, ':', DOUBLE_COLON);
+					token.type = switch3(TokenType::COLON, TokenType::DEFINE, ':', TokenType::DOUBLE_COLON);
 					break;
 
 				case '.':
-					token.type = PERIOD;
+					token.type = TokenType::PERIOD;
 					index++;
 					if (source[index] == '.') {
 						index++;
 						if (source[index] == '.') {
-							token.type = ELLIPSE;
+							token.type = TokenType::ELLIPSE;
 						}
 					}
 					break;
 
 				case ',':
-					token.type = COMMA;
+					token.type = TokenType::COMMA;
 					break;
 
 				case ';':
-					token.type = SEMI;
+					token.type = TokenType::SEMI;
 					break;
 
 				case '(':
-					token.type = LPAREN;
+					token.type = TokenType::LPAREN;
 					break;
 
 				case ')':
 					semi = true;
-					token.type = RPAREN;
+					token.type = TokenType::RPAREN;
 					break;
 
 				case '[':
-					token.type = LBRACK;
+					token.type = TokenType::LBRACK;
 					break;
 
 				case ']':
 					semi = true;
-					token.type = RBRACK;
+					token.type = TokenType::RBRACK;
 					break;
 
 				case '{':
 					semi = false;
-					token.type = LBRACE;
+					token.type = TokenType::LBRACE;
 					break;
 
 				case '}':
 					semi = true;
-					token.type = RBRACE;
+					token.type = TokenType::RBRACE;
 					break;
 
 				case '+':
-					token.type = switch3(ADD, ADD_ASSIGN, '+', INC);
-					if (token.type == INC) semi = true;
+					token.type = switch3(TokenType::ADD, TokenType::ADD_ASSIGN, '+', TokenType::INC);
+					if (token.type == TokenType::INC) semi = true;
 					break;
 
 				case '-':
 					if (source[index+1] == '>') {
-						token.type = ARROW;
+						token.type = TokenType::ARROW;
 						index++;
 					} else {
-						token.type = switch3(SUB, SUB_ASSIGN, '-', DEC);
-						if (token.type == DEC) semi = true;
+						token.type = switch3(TokenType::SUB, TokenType::SUB_ASSIGN, '-', TokenType::DEC);
+						if (token.type == TokenType::DEC) semi = true;
 					}
 					break;
 
 				case '*':
-					token.type = switch2(MUL, MUL_ASSIGN);
+					token.type = switch2(TokenType::MUL, TokenType::MUL_ASSIGN);
 					break;
 
 				case '/':
-					token.type = switch2(QUO, QUO_ASSIGN);
+					token.type = switch2(TokenType::QUO, TokenType::QUO_ASSIGN);
 					break;
 
 				case '%':
-					token.type = switch2(REM, REM_ASSIGN);
+					token.type = switch2(TokenType::REM, TokenType::REM_ASSIGN);
 					break;
 
 				case '^':
-					token.type = switch2(XOR, XOR_ASSIGN);
+					token.type = switch2(TokenType::XOR, TokenType::XOR_ASSIGN);
 					break;
 
 				case '<':
-					token.type = switch4(LSS, LEQ, '<', SHL, SHL_ASSIGN);
+					token.type = switch4(TokenType::LSS, TokenType::LEQ, '<', TokenType::SHL, TokenType::SHL_ASSIGN);
 					break;
 
 				case '>':
-					token.type = switch4(GTR, GEQ, '>', SHR, SHR_ASSIGN);
+					token.type = switch4(TokenType::GTR, TokenType::GEQ, '>', TokenType::SHR, TokenType::SHR_ASSIGN);
 					break;
 
 				case '=':
-					token.type = switch2(ASSIGN, EQL);
+					token.type = switch2(TokenType::ASSIGN, TokenType::EQL);
 					break;
 
 				case '!':
-					token.type = switch2(NOT, NEQ);
+					token.type = switch2(TokenType::NOT, TokenType::NEQ);
 					break;
 
 				case '&':
 					if (source[index+1] == '^') {
 						index++;
-						token.type = switch2(AND_NOT, AND_NOT_ASSIGN);
+						token.type = switch2(TokenType::AND_NOT, TokenType::AND_NOT_ASSIGN);
 					} else {
-						token.type = switch3(AND, AND_ASSIGN, '&', LAND);
+						token.type = switch3(TokenType::AND, TokenType::AND_ASSIGN, '&', TokenType::LAND);
 					}
 					break;
 
 				case '|':
-					token.type = switch3(OR, OR_ASSIGN, '|', LOR);
+					token.type = switch3(TokenType::OR, TokenType::OR_ASSIGN, '|', TokenType::LOR);
 					break;
             }
 

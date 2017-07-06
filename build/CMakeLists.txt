@@ -5,7 +5,6 @@ set(CMAKE_C_COMPILER /usr/bin/clang-3.9)
 # set(CMAKE_C_COMPILER /usr/bin/clang++-3.9)
 add_definitions("-fPIC")
 
-
 project(Atomical)
 
 # Locate GTest
@@ -143,11 +142,8 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Compiler library
 add_library(atomical ../src/lib.cpp)
-# target_link_libraries(atomical ${LLVM_LIBS})
-target_compile_options(atomical PRIVATE "-fpermissive")
-target_compile_options(atomical PRIVATE "-w")
-# target_compile_options(atomical PRIVATE "-std=c11")
-# target_compile_options(atomical PRIVATE "-Werror")
+target_compile_options(atomical PRIVATE "-std=c++14")
+target_compile_options(atomical PRIVATE "-Werror")
 
 # Compiler executable
 # add_executable(atomical-bin ../src/main.cpp)
@@ -158,7 +154,6 @@ target_compile_options(atomical PRIVATE "-w")
 
 # Test executable 
 add_executable(atomical-test ../tests/test.cpp)
-# ${LLVM_LIBS}
 target_link_libraries(atomical-test ${GTEST_LIBRARIES} pthread atomical)
 target_compile_options(atomical-test PRIVATE "-fpermissive") # required by GTEST
 target_compile_options(atomical-test PRIVATE "-Werror")

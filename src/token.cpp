@@ -1,7 +1,7 @@
 #include <string>
 #include <assert.h>
 
-enum TokenType {
+enum class TokenType {
     ILLEGAL,
 	IDENT,
 	
@@ -99,57 +99,53 @@ struct Token {
 
 int Token::get_binding_power() {
     switch(type) {
-        case SEMI:
-            return 0;
-
         // Assign / define
-        case ASSIGN:
-        case ADD_ASSIGN:
-        case SUB_ASSIGN:
-        case MUL_ASSIGN:
-        case REM_ASSIGN:
-        case OR_ASSIGN:
-        case SHR_ASSIGN:
-        case DEFINE:
-            return 10;
+        case TokenType::ASSIGN:
+        case TokenType::ADD_ASSIGN:
+        case TokenType::SUB_ASSIGN:
+        case TokenType::MUL_ASSIGN:
+        case TokenType::REM_ASSIGN:
+        case TokenType::OR_ASSIGN:
+        case TokenType::SHR_ASSIGN:
+        case TokenType::DEFINE:
+            return 0; // if things break change to '10'
 
         // Logical operators
-        case LAND:
-        case LOR:
+        case TokenType::LAND:
+        case TokenType::LOR:
             return 20;
             
         // Equality operators
-        case EQL:
-        case NEQ:
-        case LSS:
-        case GTR:
-        case LEQ:
-        case GEQ:
+        case TokenType::EQL:
+        case TokenType::NEQ:
+        case TokenType::LSS:
+        case TokenType::GTR:
+        case TokenType::LEQ:
+        case TokenType::GEQ:
             return 30;
 
         // Math operators
-        case ADD:
-        case SUB:
+        case TokenType::ADD:
+        case TokenType::SUB:
             return 40;
 
-        case MUL:
-        case QUO:
-        case REM:
+        case TokenType::MUL:
+        case TokenType::QUO:
+        case TokenType::REM:
             return 50;
 
         // Special unary
-        case NOT:
+        case TokenType::NOT:
             return 60;
 
         // Strongly bound
-        case PERIOD:
-        case LBRACK:
-        case LPAREN:
+        case TokenType::PERIOD:
+        case TokenType::LBRACK:
+        case TokenType::LPAREN:
             return 70;
 
         // Unknown token
         default:
-            assert(false);
             return 0;
     }
 }

@@ -3,6 +3,7 @@
 #include <vector>
 #include "../src/lib.cpp"
 #include "lexer_test.cpp"
+#include "parser_test.cpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
