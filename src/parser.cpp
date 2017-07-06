@@ -191,7 +191,7 @@ Expression *Parser::led(Token token, Expression *expression) {
             }
             expect(TokenType::RPAREN);
 
-            return new CallExpression(new IdentExpression(token.value), args);
+            return new CallExpression(static_cast<IdentExpression *>(expression), args);
         }
 
         default:
