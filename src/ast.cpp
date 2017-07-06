@@ -215,8 +215,6 @@ struct IfStatement : Statement {
         condition(condition), elses(elses), body(body) {}
 
     private:
-        // TODO: check pointers are not equal first (as done here) before dereference
-        // in all other nodes.
         virtual bool is_equal(const Statement& smt) const override {
             auto e = static_cast<const IfStatement&>(smt);
             return (this->condition == e.condition || *this->condition == *e.condition) &&
