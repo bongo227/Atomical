@@ -15,13 +15,7 @@ friend bool operator==(const type& lhs, const type& rhs) {                      
     return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);                       \
 }                                                                                   \
 
-struct Node {
-    public:
-        Node *left;
-        Node *right;
-};
-
-struct Expression : Node {
+struct Expression {
     private:
         virtual bool is_equal(const Expression& exp) const {
             return true;
@@ -47,7 +41,7 @@ struct IdentExpression : Expression {
             return this->ident == e.ident;
         }
 
-        virtual void print_node(std::ostream& os) const {
+        virtual void print_node(std::ostream& os) const override {
             os << ident;
         }
 
@@ -67,7 +61,7 @@ struct LiteralExpression : Expression {
                 this->value == e.value;
         }
 
-        virtual void print_node(std::ostream &os) const {
+        virtual void print_node(std::ostream &os) const override {
             os << value;
         }
     
@@ -146,7 +140,7 @@ struct CallExpression : Expression {
         virtual bool is_equal(const Expression& exp) const override {
             auto e = static_cast<const CallExpression&>(exp);
             if (this->args.size() != e.args.size()) return false;
-            for (int i = 0; i < e.args.size(); i++) {
+            for (size_t i = 0; i < e.args.size(); i++) {
                 if(!(*this->args[i] == *e.args[i])) return false;
             }
             return true;
@@ -166,7 +160,7 @@ struct CallExpression : Expression {
     PRINT_OP(CallExpression)
 };
 
-struct Statement : Node {
+struct Statement {
     private:
         virtual bool is_equal(const Statement& exp) const {
         return true;
@@ -192,7 +186,7 @@ struct ReturnStatement : Statement {
             return *this->expression == *e.expression;
         }
 
-        virtual void print_node(std::ostream& os) const {
+        virtual void print_node(std::ostream& os) const override {
             os << "return " << *expression;
         }
 
@@ -208,13 +202,13 @@ struct BlockStatement : Statement {
         virtual bool is_equal(const Statement& smt) const override {
             auto e = static_cast<const BlockStatement&>(smt);
             if (this->statements.size() != e.statements.size()) return false;
-            for (int i = 0; i < e.statements.size(); i++) {
+            for (size_t i = 0; i < e.statements.size(); i++) {
                 if(!(*this->statements[i] == *e.statements[i])) return false;
             }
             return true;
         }
 
-        virtual void print_node(std::ostream& os) const {
+        virtual void print_node(std::ostream& os) const override {
             os << "{" << std::endl;
             for (auto s : statements) {
                 os << "  " << *s << std::endl;
@@ -243,7 +237,7 @@ struct IfStatement : Statement {
                 (this->body == e.body || *this->body == *e.body);
         }
 
-        virtual void print_node(std::ostream& os) const {
+        virtual void print_node(std::ostream& os) const override {
             os << "if " << *condition << " " << *body;
             if (this->elses != NULL) os << "else " << *elses; 
         }
@@ -270,7 +264,7 @@ struct ForStatement : Statement {
                 *this->body == *e.body;
         }
 
-        virtual void print_node(std::ostream& os) const {
+        virtual void print_node(std::ostream& os) const override {
             os << "for " << *declaration << "; " << *condition << "; " << *increment << *body;
         }
 
@@ -293,8 +287,9 @@ struct AssignStatement : Statement {
                 *this->value == *e.value;
         }
 
-        virtual void print_node(std::ostream &os) const {
+        virtual void print_node(std::ostream &os) const override {
             os << *variable << " ";
+            // TODO: add << operator to TokenType
             switch (assign_type) {
                 case TokenType::DEFINE: os << ":="; break;
                 case TokenType::ASSIGN: os << "="; break;
@@ -309,6 +304,7 @@ struct AssignStatement : Statement {
                 case TokenType::AND_NOT_ASSIGN: os << "&^="; break;
                 case TokenType::AND_ASSIGN: os << "&="; break;
                 case TokenType::OR_ASSIGN: os << "|="; break;
+                default: assert(false); // expected assignment operator
             }
             os << *value;
         }
@@ -316,7 +312,7 @@ struct AssignStatement : Statement {
     PRINT_OP(AssignStatement)
 };
 
-struct Type : Node {};
+struct Type {};
 
 enum class Primitive {
     I8,
@@ -335,7 +331,7 @@ struct PrimitiveType : Type {
     explicit PrimitiveType(Primitive type) : type(type) {}
 };
 
-struct Function : Node {
+struct Function {
     std::string name;
     std::vector<std::tuple<Type *, std::string>> arguments;
     std::vector<std::tuple<Type *, std::string>> returns;
@@ -349,14 +345,14 @@ struct Function : Node {
 
     friend std::ostream& operator<<(std::ostream& os, const Function& func) {
         os << func.name << " :: ";
-        for (int i = 0; i < func.arguments.size(); i++) {
+        for (size_t i = 0; i < func.arguments.size(); i++) {
             auto arg = func.arguments[i];
             // TODO: add type printing
             if(i > 0) os << ", ";
             os << "[TYPE] " << std::get<1>(arg);
         }
         os << " -> ";
-        for (int i = 0; i < func.returns.size(); i++) {
+        for (size_t i = 0; i < func.returns.size(); i++) {
             auto ret = func.returns[i];
             // TODO: add type printing
             if(i > 0) os << ", ";

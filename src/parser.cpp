@@ -121,9 +121,9 @@ Statement *Parser::parse_statement() {
         case TokenType::IF: return parse_if_statement();
         case TokenType::FOR: return parse_for_statement();
         case TokenType::IDENT: return parse_assign_statement();
+        default: assert(false); // expected statement
     }
-
-    assert(false); // expected statement
+    return NULL;
 }
 
 Expression *Parser::parse_expression(int rbp) {
@@ -163,6 +163,7 @@ Expression *Parser::nud(Token token) {
         default:
             assert(false); // Expected a prefix token
     }
+    return NULL;
 }
 
 Expression *Parser::led(Token token, Expression *expression) {
@@ -196,6 +197,7 @@ Expression *Parser::led(Token token, Expression *expression) {
         default:
             assert(false); // Expected infix expression
     }
+    return NULL;
 }
 
 Type *Parser::parse_type() {

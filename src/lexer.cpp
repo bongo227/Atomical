@@ -6,7 +6,7 @@
 class Lexer {
     private:
         std::string source;
-        int index;
+        size_t index;
         int line;
         int column;
         bool semi;
