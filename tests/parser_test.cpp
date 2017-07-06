@@ -57,7 +57,7 @@ TEST(ParserTest, EmptyFunction) {
                 new BinaryExpression(
                     TokenType::ADD,
                     new IdentExpression("a"),
-                    new LiteralExpression(TokenType::INT, "1")
+                    new LiteralExpression(TokenType::INT, "u")
                 )
             )
         })
