@@ -1,5 +1,6 @@
 TEST_SUITE_BEGIN("Parser");
 
+// TODO: make thes SUBCASE for better error messages
 #define TEST_EXPRESSION(source, expected) {                                 \
     auto exp = Parser((source)).parse_expression(0);                        \
     CHECK_EQ((expected), *exp);                                             \

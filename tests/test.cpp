@@ -5,4 +5,5 @@
 
 #include "../src/lib.cpp"
 #include "lexer_test.cpp"
+#include "ast_test.cpp"
 #include "parser_test.cpp"

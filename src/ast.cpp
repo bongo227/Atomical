@@ -15,6 +15,11 @@ friend bool operator==(const type& lhs, const type& rhs) {                      
     return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);                       \
 }                                                                                   \
 
+#define NOT_EQUAL_OP(type)                                                          \
+friend bool operator!=(const type& lhs, const type& rhs) {                          \
+    return (typeid(lhs) != typeid(rhs)) || !lhs.is_equal(rhs);                      \
+}                                                                                   \
+
 struct Expression {
     private:
         virtual bool is_equal(const Expression& exp) const {
@@ -26,6 +31,7 @@ struct Expression {
         }
 
     EQUAL_OP(Expression);
+    NOT_EQUAL_OP(Expression);
     PRINT_OP(Expression);
 };
 
@@ -103,12 +109,12 @@ struct BinaryExpression : Expression {
         virtual bool is_equal(const Expression& exp) const override {
             auto e = static_cast<const BinaryExpression&>(exp);
             return this->type == e.type &&
-                this->left && e.left &&
-                this->right && e.right;
+                *this->left == *e.left &&
+                *this->right == *e.right;
         }
 
         virtual void print_node(std::ostream &os) const override {
-            os << *left;
+            os << *left << " ";
             switch (type) {
                 case TokenType::ADD: os << "+"; break;
                 case TokenType::SUB: os << "-"; break;
@@ -123,7 +129,7 @@ struct BinaryExpression : Expression {
                 case TokenType::LEQ: os << "<="; break;
                 default: assert(false);
             }
-            os << *right;
+            os << " " << *right;
         }
 
     PRINT_OP(BinaryExpression)
@@ -139,9 +145,10 @@ struct CallExpression : Expression {
     private:
         virtual bool is_equal(const Expression& exp) const override {
             auto e = static_cast<const CallExpression&>(exp);
+            if(*this->function_name != *e.function_name) return false;
             if (this->args.size() != e.args.size()) return false;
             for (size_t i = 0; i < e.args.size(); i++) {
-                if(!(*this->args[i] == *e.args[i])) return false;
+                if(*this->args[i] != *e.args[i]) return false;
             }
             return true;
         }
@@ -171,6 +178,7 @@ struct Statement {
         } 
 
     EQUAL_OP(Statement);
+    NOT_EQUAL_OP(Statement);
     PRINT_OP(Statement);
 };
 
@@ -238,15 +246,16 @@ struct IfStatement : Statement {
         }
 
         virtual void print_node(std::ostream& os) const override {
-            os << "if " << *condition << " " << *body;
-            if (this->elses != NULL) os << "else " << *elses; 
+            if (condition) os << "if " << *condition << " ";
+            os << *body;
+            if (elses) os << "else " << *elses; 
         }
 
     PRINT_OP(IfStatement)
 };
 
 struct ForStatement : Statement {
-    Statement *declaration;
+    Statement *declaration; // Change to assigment/define statement
     Expression *condition;
     Statement *increment;
     BlockStatement *body;
@@ -265,7 +274,8 @@ struct ForStatement : Statement {
         }
 
         virtual void print_node(std::ostream& os) const override {
-            os << "for " << *declaration << "; " << *condition << "; " << *increment << *body;
+            os << "for " << *declaration << "; " << *condition << "; " 
+                << *increment << " " << *body;
         }
 
     PRINT_OP(ForStatement)
@@ -306,13 +316,26 @@ struct AssignStatement : Statement {
                 case TokenType::OR_ASSIGN: os << "|="; break;
                 default: assert(false); // expected assignment operator
             }
-            os << *value;
+            os << " " << *value;
         }
 
     PRINT_OP(AssignStatement)
 };
 
-struct Type {};
+struct Type {
+    private:
+        virtual bool is_equal(const Type &type) const {
+            return true;
+        }
+
+        virtual void print_node(std::ostream& os) const {
+            os << "[BASE TYPE]";
+        }
+
+    EQUAL_OP(Type);
+    NOT_EQUAL_OP(Type);
+    PRINT_OP(Type);
+};
 
 enum class Primitive {
     I8,
@@ -326,9 +349,28 @@ enum class Primitive {
 };
 
 struct PrimitiveType : Type {
-    Primitive type;
+    Primitive prim;
 
-    explicit PrimitiveType(Primitive type) : type(type) {}
+    explicit PrimitiveType(Primitive prim) : prim(prim) {}
+
+    private:
+        virtual bool is_equal(const Type& type) const override {
+            auto t = static_cast<const PrimitiveType&>(type);
+            return prim == t.prim;
+        }
+
+        virtual void print_node(std::ostream& os) const override {
+            switch(prim) {
+                case Primitive::I8: os << "i8"; break;
+                case Primitive::I16: os << "i16"; break;
+                case Primitive::I32: os << "i32"; break;
+                case Primitive::I64: os << "i64"; break;
+                case Primitive::INT: os << "int"; break;
+                case Primitive::F32: os << "f32"; break;
+                case Primitive::F64: os << "f64"; break;
+                case Primitive::FLOAT: os << "float"; break;
+            }
+        }
 };
 
 struct Function {
@@ -342,6 +384,41 @@ struct Function {
         std::vector<std::tuple<Type *, std::string>> returns,
         BlockStatement *body)
         : name(name), arguments(arguments), returns(returns), body(body) {}
+
+    private:
+        bool is_equal(const Function &func) const {
+            if(this->name != func.name) return false;
+            
+            // Check arguments are equal
+            if(this->arguments.size() != func.arguments.size()) return false;
+            for (size_t i = 0; i < this->arguments.size(); i++) {
+                auto type = std::get<0>(this->arguments[i]);
+                auto func_type = std::get<0>(func.arguments[i]);
+                if(*type != *func_type) return false;
+
+                auto name = std::get<1>(this->arguments[i]);
+                auto func_name = std::get<1>(func.arguments[i]);
+                if(name != func_name) return false;
+            }
+            
+            // Check returns are equal
+            if(this->returns.size() != func.returns.size()) return false;
+            for (size_t i = 0; i < this->returns.size(); i++) {
+                auto type = std::get<0>(this->returns[i]);
+                auto func_type = std::get<0>(func.returns[i]);
+                if(*type != *func_type) return false;
+
+                auto name = std::get<1>(this->returns[i]);
+                auto func_name = std::get<1>(func.returns[i]);
+                if(name != func_name) return false;
+            }
+
+            // Check bodys are equal
+            if(static_cast<Statement>(*this->body) != static_cast<Statement>(*func.body)) 
+                return false;
+            
+            return true;
+        }
 
     friend std::ostream& operator<<(std::ostream& os, const Function& func) {
         os << func.name << " :: ";
@@ -364,13 +441,7 @@ struct Function {
         return os;
     }
 
-    friend bool operator==(const Function& lhs, const Function& rhs) {
-        if(lhs.name != rhs.name) return false;
-        if(lhs.arguments.size() != rhs.arguments.size()) return false;
-        if(lhs.returns.size() != rhs.returns.size()) return false;
-        // TODO: Check arguments and returns are actually the same, not just the same length
-        if(!(static_cast<Statement>(*lhs.body) == static_cast<Statement>(*rhs.body))) return false;
-        return true;
-    }
+    EQUAL_OP(Function);
+    NOT_EQUAL_OP(Function);
 };
 
