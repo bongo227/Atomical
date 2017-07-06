@@ -424,17 +424,15 @@ struct Function {
         os << "proc " << func.name << " :: ";
         for (size_t i = 0; i < func.arguments.size(); i++) {
             auto arg = func.arguments[i];
-            // TODO: add type printing
             if(i > 0) os << ", ";
-            os << "[TYPE] " << std::get<1>(arg);
+            os << *std::get<0>(arg) << " " << std::get<1>(arg);
         }
         if(func.arguments.size() != 0) os << " ";
         os << "-> ";
         for (size_t i = 0; i < func.returns.size(); i++) {
             auto ret = func.returns[i];
-            // TODO: add type printing
             if(i > 0) os << ", ";
-            os << "[TYPE] " << std::get<1>(ret);
+            os << *std::get<0>(ret) << " " << std::get<1>(ret);
         }
          if(func.returns.size() != 0) os << " ";
         os << *func.body;
