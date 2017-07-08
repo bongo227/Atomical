@@ -1,6 +1,5 @@
 class Parser {
-    private:
-        std::deque<Token> tokens;
+    std::deque<Token> tokens;
     
     public:
         explicit Parser(std::deque<Token>);

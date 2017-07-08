@@ -10,3 +10,5 @@
 #include "ast.cpp"
 #include "lexer.cpp"
 #include "parser.cpp"
+#include "ir.cpp"
+#include "irgen.cpp"
