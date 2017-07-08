@@ -19,10 +19,31 @@ struct Variable {
     Variable(int id, Type *type) : id(id), type(type) {}
 };
 
-struct RetInstruction : Instruction {
-    Variable *variable;
+struct Value {
+    TokenType type;
+    std::string *value;
 
-    RetInstruction(Variable *variable) : variable(variable) {}
+    Value(TokenType type, std::string value) : type(type), value(&value) {}
+};
+
+struct Parameter{
+    union {
+        Variable var;
+        Value val;
+    };
+
+    enum { VARIABLE, VALUE } type;
+
+    Parameter(Variable var) : var(var), type(VARIABLE) {}
+    Parameter(Value val) : val(val), type(VALUE) {}
+    Parameter(int id, Type *type) : var(Variable(id, type)), type(VARIABLE) {}
+    Parameter(TokenType type, std::string value) : val(Value(type, value)), type(VALUE) {}
+};
+
+struct RetInstruction : Instruction {
+    Parameter *value;
+
+    RetInstruction(Parameter *value) : value(value) {}
 };
 
 struct BrInstruction : Instruction {
@@ -32,75 +53,75 @@ struct BrInstruction : Instruction {
 };
 
 struct AddInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    AddInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    AddInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct SubInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    SubInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    SubInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct MulInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    MulInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    MulInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct DivInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
     bool iunsigned;
 
-    DivInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    DivInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct ShiftLeftInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    ShiftLeftInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    ShiftLeftInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct ShiftRightInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
     bool iunsigned;
 
-    ShiftRightInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    ShiftRightInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct AndInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    AndInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    AndInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct OrInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    OrInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    OrInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct XorInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
 
-    XorInstruction(Variable *lhs, Variable *rhs) : lhs(lhs), rhs(rhs) {}
+    XorInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
 };
 
 struct CastInstruction : Instruction {
-    Variable *var;
+    Parameter *var;
     Type *cast_type;
 
-    CastInstruction(Variable *var, Type *cast_type) : var(var), cast_type(cast_type) {}
+    CastInstruction(Parameter *var, Type *cast_type) : var(var), cast_type(cast_type) {}
 };
 
 enum class CompareType {
@@ -113,28 +134,28 @@ enum class CompareType {
 };
 
 struct CompareInstruction : Instruction {
-    Variable *lhs;
-    Variable *rhs;
+    Parameter *lhs;
+    Parameter *rhs;
     CompareType type;
     bool iordered;
     bool iunsigned;
 
-    CompareInstruction(Variable *lhs, Variable *rhs, CompareType type, bool iordered, 
+    CompareInstruction(Parameter *lhs, Parameter *rhs, CompareType type, bool iordered, 
         bool iunsigned) : lhs(lhs), rhs(rhs), type(type), iordered(iordered), iunsigned(iunsigned) 
         {}
 };
 
 struct PhiInstruction : Instruction {
-    std::vector<std::tuple<BasicBlock *, Variable *>> incoming;
+    std::vector<std::tuple<BasicBlock *, Parameter>> incoming;
 
-    PhiInstruction(std::vector<std::tuple<BasicBlock *, Variable *>> incoming) : incoming(incoming)
+    PhiInstruction(std::vector<std::tuple<BasicBlock *, Parameter>> incoming) : incoming(incoming)
         {}
 };
 
 struct CallInstruction : Instruction {
     Function *function;
-    std::vector<Variable *> arguments;
+    std::vector<Parameter> arguments;
 
-    CallInstruction(Function *function, std::vector<Variable *> arguments) : function(function),
+    CallInstruction(Function *function, std::vector<Parameter> arguments) : function(function),
         arguments(arguments) {}
 };
