@@ -26,7 +26,7 @@ TEST_CASE("functions") {
         "foo",
         {},
         {},
-        new BlockStatement({})
+        Statement::Block({})
     ))
 
     TEST_FUNCTION("proc foo :: int a, int b -> {}", Function(
@@ -36,7 +36,7 @@ TEST_CASE("functions") {
             std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
         },
         {},
-        new BlockStatement({})
+        Statement::Block({})
     ))
 
     TEST_FUNCTION("proc foo :: int a, int b -> float c, float d {}", Function(
@@ -49,7 +49,7 @@ TEST_CASE("functions") {
             std::make_tuple(new PrimitiveType(Primitive::FLOAT), "c"),
             std::make_tuple(new PrimitiveType(Primitive::FLOAT), "d"),
         },
-        new BlockStatement({})
+        Statement::Block({})
     ))
 
     TEST_FUNCTION("proc foo :: int a -> int b { return a + 1; }", Function(
@@ -60,8 +60,8 @@ TEST_CASE("functions") {
         {
             std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
         },
-        new BlockStatement({
-            new ReturnStatement(
+        Statement::Block({
+            Statement::Return(
                 Expression::Binary(
                     TokenType::ADD,
                     Expression::Ident("a"),
@@ -73,7 +73,7 @@ TEST_CASE("functions") {
 }
 
 TEST_CASE("return statement") {
-    TEST_STATEMENT("return a;", ReturnStatement(Expression::Ident("a")))
+    TEST_STATEMENT("return a;", *Statement::Return(Expression::Ident("a")))
 }
 
 TEST_CASE("literal expression") {
@@ -195,65 +195,65 @@ TEST_CASE("call expression") {
 }
 
 TEST_CASE("block statement") {
-        TEST_STATEMENT("{}", BlockStatement({}))
+        TEST_STATEMENT("{}", *Statement::Block({}))
 
-        TEST_STATEMENT("{ return a; }", BlockStatement({
-            new ReturnStatement(
+        TEST_STATEMENT("{ return a; }", *Statement::Block({
+            Statement::Return(
                 Expression::Ident("a")
             ),
         }))
         
-        TEST_STATEMENT("{ return a; return b; }", BlockStatement({
-            new ReturnStatement(
+        TEST_STATEMENT("{ return a; return b; }", *Statement::Block({
+            Statement::Return(
                 Expression::Ident("a")
             ),
-            new ReturnStatement(
+            Statement::Return(
                 Expression::Ident("b")
             ),
         }))
 
-        TEST_STATEMENT("{{{}}}", BlockStatement({
-            new BlockStatement({
-                new BlockStatement({}),
+        TEST_STATEMENT("{{{}}}", *Statement::Block({
+            Statement::Block({
+                Statement::Block({}),
             }),
         }))
 }
 
 TEST_CASE("if statement") {
-    TEST_STATEMENT("if foo {}", IfStatement(
+    TEST_STATEMENT("if foo {}", *Statement::If(
         Expression::Ident("foo"),
         NULL,
-        new BlockStatement({})
+        Statement::Block({})
     ))
 
-    TEST_STATEMENT("if foo {} else {}", IfStatement(
+    TEST_STATEMENT("if foo {} else {}", *Statement::If(
         Expression::Ident("foo"),
-        new IfStatement(
+        Statement::If(
             NULL,
             NULL,
-            new BlockStatement({})
+            Statement::Block({})
         ),
-        new BlockStatement({})
+        Statement::Block({})
     ))
 
-    TEST_STATEMENT("if foo {} else if bar {} else {}", IfStatement(
+    TEST_STATEMENT("if foo {} else if bar {} else {}", *Statement::If(
         Expression::Ident("foo"),
-        new IfStatement(
+        Statement::If(
             Expression::Ident("bar"),
-            new IfStatement(
+            Statement::If(
                 NULL,
                 NULL,
-                new BlockStatement({})
+                Statement::Block({})
             ),
-            new BlockStatement({})
+            Statement::Block({})
         ),
-        new BlockStatement({})
+        Statement::Block({})
     ))
 }
 
 TEST_CASE("for statement") {
-    TEST_STATEMENT("for a := 0; a < 20; a += 1 {}", ForStatement(
-        new AssignStatement(
+    TEST_STATEMENT("for a := 0; a < 20; a += 1 {}", *Statement::For(
+        Statement::Assign(
             Expression::Ident("a"),
             TokenType::DEFINE,
             Expression::Literal(TokenType::INT, "0")
@@ -263,29 +263,29 @@ TEST_CASE("for statement") {
             Expression::Ident("a"),
             Expression::Literal(TokenType::INT, "20")
         ),
-        new AssignStatement(
+        Statement::Assign(
             Expression::Ident("a"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "1")
         ),
-        new BlockStatement({})
+        Statement::Block({})
     ))
 }
 
 TEST_CASE("assign statement") {
-    TEST_STATEMENT("foo := 100", AssignStatement(
+    TEST_STATEMENT("foo := 100", *Statement::Assign(
         Expression::Ident("foo"),
         TokenType::DEFINE,
         Expression::Literal(TokenType::INT, "100")
     ))
 
-    TEST_STATEMENT("foo = bar", AssignStatement(
+    TEST_STATEMENT("foo = bar", *Statement::Assign(
         Expression::Ident("foo"),
         TokenType::ASSIGN,
         Expression::Ident("bar")
     ))
 
-    TEST_STATEMENT("baz += 100 + 20", AssignStatement(
+    TEST_STATEMENT("baz += 100 + 20", *Statement::Assign(
         Expression::Ident("baz"),
         TokenType::ADD_ASSIGN,
         Expression::Binary(

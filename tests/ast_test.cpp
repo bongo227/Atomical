@@ -73,13 +73,17 @@ TEST_CASE("binary expressions equal") {
     );
 
     CHECK_NE(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, Expression::Literal(TokenType::INT, "100"), Expression::Ident("b"))
+        *Expression::Binary(TokenType::ADD, 
+            Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, 
+            Expression::Literal(TokenType::INT, "100"), Expression::Ident("b"))
     );
 
     CHECK_NE(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Literal(TokenType::INT, "100"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), 
+            Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), 
+            Expression::Literal(TokenType::INT, "100"))
     );
 }
 
@@ -117,79 +121,83 @@ TEST_CASE("call expressions equal") {
 
 TEST_CASE("return statements equal") {
     CHECK_EQ(
-        ReturnStatement(Expression::Ident("a")),
-        ReturnStatement(Expression::Ident("a"))
+        *Statement::Return(Expression::Ident("a")),
+        *Statement::Return(Expression::Ident("a"))
     );
 
     CHECK_NE(
-        ReturnStatement(Expression::Ident("a")),
-        ReturnStatement(Expression::Ident("b"))
+        *Statement::Return(Expression::Ident("a")),
+        *Statement::Return(Expression::Ident("b"))
     );
 
     CHECK_NE(
-        ReturnStatement(Expression::Ident("a")),
-        ReturnStatement(Expression::Literal(TokenType::INT, "100"))
+        *Statement::Return(Expression::Ident("a")),
+        *Statement::Return(Expression::Literal(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("block statements equal") {
     CHECK_EQ(
-        BlockStatement({}),
-        BlockStatement({})
+        *Statement::Block({}),
+        *Statement::Block({})
     );
 
     CHECK_NE(
-        BlockStatement({new ReturnStatement(Expression::Ident("a"))}),
-        BlockStatement({})
+        *Statement::Block({Statement::Return(Expression::Ident("a"))}),
+        *Statement::Block({})
     );
 
     CHECK_NE(
-        BlockStatement({new ReturnStatement(Expression::Ident("a"))}),
-        BlockStatement({new ReturnStatement(Expression::Ident("b"))})
+        *Statement::Block({Statement::Return(Expression::Ident("a"))}),
+        *Statement::Block({Statement::Return(Expression::Ident("b"))})
     );
 
     CHECK_NE(
-        BlockStatement({new ReturnStatement(Expression::Ident("a"))}),
-        BlockStatement({new BlockStatement({})})
+        *Statement::Block({Statement::Return(Expression::Ident("a"))}),
+        *Statement::Block({Statement::Block({})})
     );
 }
 
 TEST_CASE("if statements equal") {
     CHECK_EQ(
-        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
-        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({}))
+        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
+        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({}))
     );
 
     CHECK_NE(
-        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
-        IfStatement(Expression::Ident("bar"), NULL, new BlockStatement({}))
+        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
+        *Statement::If(Expression::Ident("bar"), NULL, Statement::Block({}))
     );
 
     CHECK_NE(
-        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
-        IfStatement(Expression::Literal(TokenType::INT, "100"), NULL, new BlockStatement({}))
+        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
+        *Statement::If(Expression::Literal(TokenType::INT, "100"), NULL, Statement::Block({}))
     );
 
     CHECK_NE(
-        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
-        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({new BlockStatement({})}))
+        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
+        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({Statement::Block({})}))
     );
 
     CHECK_EQ(
-        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({})),
-        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({}))
+        *Statement::If(Expression::Ident("foo"), 
+            Statement::If(NULL, NULL, Statement::Block({})), Statement::Block({})),
+        *Statement::If(Expression::Ident("foo"), 
+            Statement::If(NULL, NULL, Statement::Block({})), Statement::Block({}))
     );
 
     CHECK_NE(
-        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({})),
-        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({new BlockStatement({})})), new BlockStatement({}))
+        *Statement::If(Expression::Ident("foo"), 
+            Statement::If(NULL, NULL, Statement::Block({})), Statement::Block({})),
+        *Statement::If(Expression::Ident("foo"), 
+            Statement::If(NULL, NULL, Statement::Block({Statement::Block({})})), Statement::Block({}))
     );
 }
 
 TEST_CASE("for statements equal") {
     CHECK_EQ(
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -199,17 +207,17 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         ),
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -219,20 +227,20 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         )
     );
 
     CHECK_NE(
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -242,17 +250,17 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         ),
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("b"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -262,20 +270,20 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         )
     );
 
     CHECK_NE(
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -285,17 +293,17 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         ),
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -305,20 +313,20 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("b"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         )
     );
 
     CHECK_NE(
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -328,17 +336,17 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         ),
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -348,20 +356,20 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::SUB_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         )
     );
 
     CHECK_NE(
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -371,17 +379,17 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         ),
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -391,18 +399,18 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
     CHECK_NE(
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
@@ -412,29 +420,29 @@ TEST_CASE("for statements equal") {
                 Expression::Ident("a"),
                 Expression::Literal(TokenType::INT, "10")
             ),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         ),
-        ForStatement(
-            new AssignStatement(
+        *Statement::For(
+            Statement::Assign(
                 Expression::Ident("a"), 
                 TokenType::DEFINE, 
                 Expression::Literal(TokenType::INT, "0")
             ),
             Expression::Ident("foo"),
-            new AssignStatement(
+            Statement::Assign(
                 Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
                 Expression::Literal(TokenType::INT, "1")
             ),
-            new BlockStatement({
-                new ReturnStatement(Expression::Ident("a")),
+            Statement::Block({
+                Statement::Return(Expression::Ident("a")),
             })
         )
     );
@@ -442,12 +450,12 @@ TEST_CASE("for statements equal") {
 
 TEST_CASE("assignment statements equal") {
     CHECK_EQ(
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
         ),
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
@@ -455,12 +463,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     CHECK_NE(
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
         ),
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("bar"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
@@ -468,12 +476,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     CHECK_NE(
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
         ),
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::SUB_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
@@ -481,12 +489,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     CHECK_NE(
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
         ),
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "200")
@@ -494,12 +502,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     CHECK_NE(
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Literal(TokenType::INT, "100")
         ),
-        AssignStatement(
+        *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
             Expression::Ident("bar")
@@ -513,13 +521,13 @@ TEST_CASE("functions equal") {
             "foo",
             {},
             {},
-            new BlockStatement({})
+            Statement::Block({})
         ),
         Function(
             "foo",
             {},
             {},
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
@@ -528,13 +536,13 @@ TEST_CASE("functions equal") {
             "foo",
             {},
             {},
-            new BlockStatement({})
+            Statement::Block({})
         ),
         Function(
             "bar",
             {},
             {},
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
@@ -549,7 +557,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         ),
         Function(
             "foo",
@@ -561,7 +569,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
@@ -576,7 +584,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         ),
         Function(
             "foo",
@@ -588,7 +596,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
@@ -603,7 +611,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         ),
         Function(
             "foo",
@@ -615,7 +623,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::INT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
@@ -627,7 +635,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         ),
         Function(
             "foo",
@@ -639,7 +647,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            new BlockStatement({})
+            Statement::Block({})
         )
     );
 
@@ -652,8 +660,8 @@ TEST_CASE("functions equal") {
             {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
             },
-            new BlockStatement({
-                new ReturnStatement(
+            Statement::Block({
+                Statement::Return(
                     Expression::Binary(
                         TokenType::ADD,
                         Expression::Ident("a"),
@@ -670,8 +678,8 @@ TEST_CASE("functions equal") {
             {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
             },
-            new BlockStatement({
-                new ReturnStatement(
+            Statement::Block({
+                Statement::Return(
                     Expression::Binary(
                         TokenType::ADD,
                         Expression::Ident("a"),

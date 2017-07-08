@@ -87,18 +87,22 @@ struct Expression {
             case IDENT:
                 os << exp.ident;
                 break;
+
             case LITERAL:
                 os << exp.literal.value;
                 break;
+
             case UNARY:
                 os << exp.unary.type;
                 if (exp.unary.value->type == BINARY) os << "(";
                 os << *exp.unary.value;
                 if (exp.unary.value->type == BINARY) os << ")";
                 break;
+
             case BINARY:
                 os << *exp.binary.lhs << " " << exp.binary.type << " " << *exp.binary.rhs;
                 break;
+
             case CALL:
                 os << exp.call.function_name;
                 os << "(";
@@ -115,138 +119,116 @@ struct Expression {
 };
 
 struct Statement {
-    private:
-        virtual bool is_equal(const Statement& exp) const {
-            return true;
-        }
+    union {
+        Expression *ret;
+        std::vector<Statement *> block;
+        struct { Expression *condition; Statement *body; Statement *elses; } ifs;
+        struct { Expression *variable; TokenType type; Expression *value; } assign;
+        struct { Statement *declaration; Expression *condition; Statement *increment; 
+            Statement *body; } fors;
+    };
 
-        virtual void print_node(std::ostream& os) const {
-            os << "[BASE STATEMENT]";
-        } 
-
-    EQUAL_OP(Statement);
-    NOT_EQUAL_OP(Statement);
-    PRINT_OP(Statement);
-};
-
-
-struct ReturnStatement : Statement {
-    Expression *expression;
-
-    explicit ReturnStatement(Expression *expression) : expression(expression) {}
+    enum { RETURN, BLOCK, IF, ASSIGN, FOR } type;
 
     private:
-        virtual bool is_equal(const Statement& smt) const override {
-            auto e = static_cast<const ReturnStatement&>(smt);
-            return *this->expression == *e.expression;
-        }
+        Statement(Expression *value) : ret(value), type(RETURN) {}
+        Statement(std::vector<Statement *> statements) : block(statements), type(BLOCK) {}
+        Statement(Expression *condition, Statement *body, Statement *elses) 
+            : ifs{condition, body, elses}, type(IF) {}
+        Statement(Expression *variable, TokenType type, Expression *value)
+            : assign{variable, type, value}, type(ASSIGN) {}
+        Statement(Statement *declaration, Expression *condition, Statement *increment, 
+            Statement *body) : fors{declaration, condition, increment, body}, type(FOR) {}
 
-        virtual void print_node(std::ostream& os) const override {
-            os << "return " << *expression;
-        }
+        bool is_equal(const Statement &smt) const {
+            if (type != smt.type) return false;
 
-    PRINT_OP(ReturnStatement)
-};
+            switch(type) {
+                case RETURN:
+                    return *ret == *smt.ret;
+                
+                case BLOCK:
+                    if (block.size() != smt.block.size()) return false;
+                    for (size_t i = 0; i < smt.block.size(); i++) {
+                        if(!(*block[i] == *smt.block[i])) return false;
+                    }
+                    return true;
+                
+                case IF:
+                    return (ifs.condition == smt.ifs.condition || 
+                        *ifs.condition == *smt.ifs.condition) &&
+                        (ifs.elses == smt.ifs.elses || *ifs.elses == *smt.ifs.elses) &&
+                        (ifs.body == smt.ifs.body || *ifs.body == *smt.ifs.body);
 
-struct BlockStatement : Statement {
-    std::vector<Statement *> statements;
+                case ASSIGN:
+                    return *assign.variable == *smt.assign.variable &&
+                        assign.type == smt.assign.type &&
+                        *assign.value == *smt.assign.value;
 
-    explicit BlockStatement(std::vector<Statement *> statements) : statements(statements) {}
-
-    private:
-        virtual bool is_equal(const Statement& smt) const override {
-            auto e = static_cast<const BlockStatement&>(smt);
-            if (this->statements.size() != e.statements.size()) return false;
-            for (size_t i = 0; i < e.statements.size(); i++) {
-                if(!(*this->statements[i] == *e.statements[i])) return false;
+                case FOR:
+                    return *fors.declaration == *smt.fors.declaration &&
+                        *fors.condition == *smt.fors.condition &&
+                        *fors.increment == *smt.fors.increment &&
+                        *fors.body == *smt.fors.body;
             }
-            return true;
+            
+            assert(false);
         }
 
-        virtual void print_node(std::ostream& os) const override {
-            os << "{" << std::endl;
-            for (auto s : statements) {
-                os << "  " << *s << std::endl;
-            }
-            os << "}" << std::endl;
+    public:
+        static Statement *Return(Expression *value)
+            { return new Statement(value); }
+        static Statement *Block(std::vector<Statement *> statements)
+            { return new Statement(statements); }
+        static Statement *If(Expression *condition, Statement *body, Statement *elses)
+            { return new Statement(condition, body, elses); }
+        static Statement *Assign(Expression *variable, TokenType type, Expression *value)
+            { return new Statement(variable, type, value); }
+        static Statement *For(Statement *declaration, Expression *condition, 
+            Statement *increment, Statement *body) 
+            { return new Statement(declaration, condition, increment, body); }
+
+    friend bool operator==(const Statement& lhs, const Statement& rhs) {
+        return lhs.is_equal(rhs);
+    }
+
+    friend bool operator!=(const Statement& lhs, const Statement& rhs) {
+        return !lhs.is_equal(rhs);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Statement& smt) {
+        switch(smt.type) {
+            case RETURN:
+                os << "return " << *smt.ret;
+                break;
+
+            case BLOCK:
+                os << "{" << std::endl;
+                for (auto s : smt.block) {
+                    os << "  " << *s << std::endl;
+                }
+                os << "}" << std::endl;       
+                break;
+
+            case IF:
+                if (smt.ifs.condition) os << "if " << *smt.ifs.condition << " ";
+                os << *smt.ifs.body;
+                if (smt.ifs.elses) os << "else " << *smt.ifs.elses;
+                break;
+
+            case ASSIGN:
+                os << *smt.assign.variable << " " << smt.assign.type << " " 
+                    << *smt.assign.value;
+                break;
+
+            case FOR:
+                os << "for " << *smt.fors.declaration << "; " << *smt.fors.condition << "; " 
+                    << *smt.fors.increment << " " << *smt.fors.body;
+                break;
         }
-
-    PRINT_OP(BlockStatement)
-};
-
-struct IfStatement : Statement {
-    Expression *condition;
-    IfStatement *elses;
-    BlockStatement *body;
-
-    IfStatement(Expression *condition, IfStatement *elses, BlockStatement *body) : 
-        condition(condition), elses(elses), body(body) {}
-
-    private:
-        virtual bool is_equal(const Statement& smt) const override {
-            auto e = static_cast<const IfStatement&>(smt);
-            return (this->condition == e.condition || *this->condition == *e.condition) &&
-                (this->elses == e.elses || *this->elses == *e.elses) &&
-                (this->body == e.body || *this->body == *e.body);
-        }
-
-        virtual void print_node(std::ostream& os) const override {
-            if (condition) os << "if " << *condition << " ";
-            os << *body;
-            if (elses) os << "else " << *elses; 
-        }
-
-    PRINT_OP(IfStatement)
-};
-
-struct AssignStatement : Statement {
-    Expression *variable;
-    TokenType assign_type;
-    Expression *value;
-
-    AssignStatement(Expression *variable, TokenType assign_type, Expression *value) 
-        : variable(variable), assign_type(assign_type), value(value) {}
-
-    private:
-        virtual bool is_equal(const Statement &smt) const override {
-            auto e = static_cast<const AssignStatement &>(smt);
-            return *this->variable == *e.variable &&
-                this->assign_type == e.assign_type &&
-                *this->value == *e.value;
-        }
-
-        virtual void print_node(std::ostream &os) const override {
-            os << *variable << " " << assign_type << " " << *value;
-        }
-
-    PRINT_OP(AssignStatement)
-};
-
-struct ForStatement : Statement {
-    AssignStatement *declaration;
-    Expression *condition;
-    Statement *increment;
-    BlockStatement *body;
-
-    ForStatement(AssignStatement *declaration, Expression *condition, Statement *increment, 
-        BlockStatement *body) : declaration(declaration), condition(condition), 
-        increment(increment), body(body) {}
-
-    private:
-        virtual bool is_equal(const Statement& smt) const override {
-            auto e = static_cast<const ForStatement&>(smt);
-            return *this->declaration == *e.declaration &&
-                *this->condition == *e.condition &&
-                *this->increment == *e.increment &&
-                *this->body == *e.body;
-        }
-
-        virtual void print_node(std::ostream& os) const override {
-            os << "for " << *declaration << "; " << *condition << "; " 
-                << *increment << " " << *body;
-        }
-
-    PRINT_OP(ForStatement)
+        
+        return os;
+    }
 };
 
 struct Type {
@@ -309,12 +291,12 @@ struct Function {
     std::string name;
     std::vector<std::tuple<Type *, std::string>> arguments;
     std::vector<std::tuple<Type *, std::string>> returns;
-    BlockStatement *body;
+    Statement *body;
 
     Function(std::string name,
         std::vector<std::tuple<Type *, std::string>> arguments,
         std::vector<std::tuple<Type *, std::string>> returns,
-        BlockStatement *body)
+        Statement *body)
         : name(name), arguments(arguments), returns(returns), body(body) {}
 
     private:

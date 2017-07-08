@@ -16,11 +16,11 @@ class Parser {
         Token expect(TokenType type);
         void accept(TokenType type);
           
-        ReturnStatement *parse_return_statement();
-        BlockStatement *parse_block_statement();
-        IfStatement *parse_if_statement();
-        ForStatement *parse_for_statement();
-        AssignStatement *parse_assign_statement();
+        Statement *parse_return_statement();
+        Statement *parse_block_statement();
+        Statement *parse_if_statement();
+        Statement *parse_for_statement();
+        Statement *parse_assign_statement();
 
         Expression *nud(Token token);
         Expression *led(Token token, Expression *expression);
@@ -52,14 +52,14 @@ void Parser::accept(TokenType type) {
     if (tokens.front().type == type) tokens.pop_front();
 }
 
-ReturnStatement *Parser::parse_return_statement() {
+Statement *Parser::parse_return_statement() {
     expect(TokenType::RETURN);
-    ReturnStatement *smt = new ReturnStatement(parse_expression(0));;
+    Statement *smt = Statement::Return(parse_expression(0));;
     accept(TokenType::SEMI);
     return smt;
 }
 
-BlockStatement *Parser::parse_block_statement() {
+Statement *Parser::parse_block_statement() {
     expect(TokenType::LBRACE);
 
     std::vector<Statement *> smts(0);
@@ -69,15 +69,15 @@ BlockStatement *Parser::parse_block_statement() {
 
     expect(TokenType::RBRACE);
     
-    return new BlockStatement(smts);
+    return Statement::Block(smts);
 }
 
-IfStatement *Parser::parse_if_statement() {
+Statement *Parser::parse_if_statement() {
     expect(TokenType::IF);
 
     Expression *condition = parse_expression(0);
-    BlockStatement *body = parse_block_statement();
-    IfStatement *elses = NULL;
+    Statement *body = parse_block_statement();
+    Statement *elses = NULL;
 
     if (tokens.front().type == TokenType::ELSE) {
         expect(TokenType::ELSE);
@@ -86,32 +86,31 @@ IfStatement *Parser::parse_if_statement() {
             elses = parse_if_statement();
         } else {
             // final else statement
-            elses = new IfStatement(NULL, NULL, parse_block_statement());
+            elses = Statement::If(NULL, NULL, parse_block_statement());
         }
     }
-
-    return new IfStatement(condition, elses, body);
+    return Statement::If(condition, elses, body);
 }
 
-ForStatement *Parser::parse_for_statement() {
+Statement *Parser::parse_for_statement() {
     expect(TokenType::FOR);
 
-    AssignStatement *declaration = parse_assign_statement();
+    Statement *declaration = parse_assign_statement();
     expect(TokenType::SEMI);
     Expression *condition = parse_expression(0);
     expect(TokenType::SEMI);
     Statement *increment = parse_statement();
-    BlockStatement *body = parse_block_statement();
+    Statement *body = parse_block_statement();
 
-    return new ForStatement(declaration, condition, increment, body);
+    return Statement::For(declaration, condition, increment, body);
 }
 
-AssignStatement *Parser::parse_assign_statement() {
+Statement *Parser::parse_assign_statement() {
     Expression *ident = Expression::Ident(expect(TokenType::IDENT).value);
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
-    return new AssignStatement(ident, type.type, value); 
+    return Statement::Assign(ident, type.type, value); 
 }
 
 Statement *Parser::parse_statement() {
@@ -242,7 +241,7 @@ Function *Parser::parse_function() {
         returns.push_back(std::make_tuple(type, name));
     }
 
-    BlockStatement *body = parse_block_statement();
+    Statement *body = parse_block_statement();
 
     return new Function(ident.value, arguments, returns, body);
 }
