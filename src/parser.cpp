@@ -5,7 +5,7 @@ class Parser {
         explicit Parser(std::deque<Token>);
         explicit Parser(std::string source);
       
-        std::vector<Function *> parse();
+        std::vector<Function *> parse(); // TODO: consider removing pointer
       
         Function *parse_function();
         Statement *parse_statement();
@@ -107,7 +107,7 @@ ForStatement *Parser::parse_for_statement() {
 }
 
 AssignStatement *Parser::parse_assign_statement() {
-    IdentExpression *ident = new IdentExpression(expect(TokenType::IDENT).value);
+    Expression *ident = Expression::Ident(expect(TokenType::IDENT).value);
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
@@ -144,7 +144,7 @@ Expression *Parser::parse_expression(int rbp) {
 Expression *Parser::nud(Token token) {
     switch(token.type) {
         case TokenType::IDENT: {
-            return new IdentExpression(token.value);
+            return Expression::Ident(token.value);
         }
 
         case TokenType::INT:
@@ -152,12 +152,12 @@ Expression *Parser::nud(Token token) {
         case TokenType::HEX:
         case TokenType::OCTAL:
         case TokenType::STRING: {
-            return new LiteralExpression(token.type, token.value);
+            return Expression::Literal(token.type, token.value);
         }
 
         case TokenType::NOT: 
         case TokenType::SUB: {
-            return new UnaryExpression(token.type, parse_expression(60));
+            return Expression::Unary(token.type, parse_expression(60));
         }
 
         default:
@@ -180,7 +180,7 @@ Expression *Parser::led(Token token, Expression *expression) {
         case TokenType::LSS:
         case TokenType::GEQ:
         case TokenType::LEQ: {
-            return new BinaryExpression(token.type, expression, parse_expression(bp));
+            return Expression::Binary(token.type, expression, parse_expression(bp));
         }
         
         case TokenType::LPAREN: {
@@ -191,7 +191,7 @@ Expression *Parser::led(Token token, Expression *expression) {
             }
             expect(TokenType::RPAREN);
 
-            return new CallExpression(static_cast<IdentExpression *>(expression), args);
+            return Expression::Call(expression->ident, args);
         }
 
         default:

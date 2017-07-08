@@ -15,141 +15,109 @@ friend bool operator!=(const type& lhs, const type& rhs) {                      
 }                                                                                   \
 
 struct Expression {
-    private:
-        virtual bool is_equal(const Expression& exp) const {
-            return true;
-        }
+    union {
+        std::string ident;
+        struct { TokenType type; std::string value; } literal;
+        struct { TokenType type; Expression *value; } unary;
+        struct { TokenType type; Expression *lhs; Expression *rhs; } binary;
+        struct { std::string function_name; std::vector<Expression *> args; } call;
+    };
 
-        virtual void print_node(std::ostream& os) const {
-            os << "[BASE EXPRESSION]";
-        }
-
-    EQUAL_OP(Expression);
-    NOT_EQUAL_OP(Expression);
-    PRINT_OP(Expression);
-};
-
-
-struct IdentExpression : Expression {
-    std::string ident;
-
-    explicit IdentExpression(std::string ident) : ident(ident) {}
-    
-    private:
-        virtual bool is_equal(const Expression& exp) const override {
-            auto e = static_cast<const IdentExpression&>(exp);
-            return this->ident == e.ident;
-        }
-
-        virtual void print_node(std::ostream& os) const override {
-            os << ident;
-        }
-
-    PRINT_OP(IdentExpression)
-};
-
-struct LiteralExpression : Expression {
-    TokenType type;
-    std::string value;
-
-    LiteralExpression(TokenType type, std::string value) : type(type), value(value) {}
+    enum { IDENT, LITERAL, UNARY, BINARY, CALL } type;
 
     private:
-        virtual bool is_equal(const Expression& exp) const override {
-            auto e = static_cast<const LiteralExpression&>(exp);
-            return this->type == e.type &&
-                this->value == e.value;
-        }
+        Expression(std::string ident) : ident(ident), type(IDENT) {}
+        Expression(TokenType type, std::string value) : literal{type, value}, type(LITERAL) {}
+        Expression(TokenType type, Expression *value) : unary{type, value}, type(UNARY) {}
+        Expression(TokenType type, Expression *lhs, Expression *rhs)
+            : binary{type, lhs, rhs}, type(BINARY) {}
+        Expression(std::string function_name, std::vector<Expression *> args)
+            : call{function_name, args}, type(CALL) {}
+        
+        bool is_equal(const Expression &exp) const {
+            if (type != exp.type) return false;
 
-        virtual void print_node(std::ostream &os) const override {
-            os << value;
-        }
-    
-    PRINT_OP(LiteralExpression);
-};
-
-struct UnaryExpression : Expression {
-    TokenType type;
-    Expression *value;
-
-    UnaryExpression(TokenType type, Expression *value) : type(type), value(value) {}
-
-    private:
-        virtual bool is_equal(const Expression& exp) const override {
-            auto e = static_cast<const UnaryExpression&>(exp);
-            return this->type == e.type &&
-                *this->value == *e.value;
-        }
-
-        virtual void print_node(std::ostream& os) const override {
-            if(type == TokenType::SUB) os << "-";
-            else if(type == TokenType::NOT) os << "!";
-            else assert(false);
-            os << *value;
-        }
-
-    PRINT_OP(UnaryExpression)
-};
-
-struct BinaryExpression : Expression {
-    TokenType type;
-    Expression *left;
-    Expression *right;
-
-    BinaryExpression(TokenType type, Expression *left, Expression *right)
-     : type(type), left(left), right(right) {}
-
-    private:
-        virtual bool is_equal(const Expression& exp) const override {
-            auto e = static_cast<const BinaryExpression&>(exp);
-            return this->type == e.type &&
-                *this->left == *e.left &&
-                *this->right == *e.right;
-        }
-
-        virtual void print_node(std::ostream &os) const override {
-            os << *left << " " << type << " " << *right;
-        }
-
-    PRINT_OP(BinaryExpression)
-};
-
-struct CallExpression : Expression {
-    IdentExpression *function_name;
-    std::vector<Expression *> args;
-
-    CallExpression(IdentExpression *function_name, std::vector<Expression *> args) :
-        function_name(function_name), args(args) {}
-
-    private:
-        virtual bool is_equal(const Expression& exp) const override {
-            auto e = static_cast<const CallExpression&>(exp);
-            if(*this->function_name != *e.function_name) return false;
-            if (this->args.size() != e.args.size()) return false;
-            for (size_t i = 0; i < e.args.size(); i++) {
-                if(*this->args[i] != *e.args[i]) return false;
+            switch(type) {
+                case IDENT:
+                    return ident == exp.ident;
+                case LITERAL:
+                    return literal.type == exp.literal.type &&
+                        literal.value == exp.literal.value;
+                case UNARY:
+                    return unary.type == exp.unary.type &&
+                        *unary.value == *exp.unary.value;
+                case BINARY:
+                    return binary.type == exp.binary.type &&
+                        *binary.lhs == *exp.binary.lhs &&
+                        *binary.rhs == *exp.binary.rhs;
+                case CALL:
+                    if (call.function_name != exp.call.function_name) return false;
+                    if (call.args.size() != exp.call.args.size()) return false;
+                    for (int i = 0; i < call.args.size(); i++) {
+                        if (*call.args[i] != *exp.call.args[i]) return false;
+                    }
+                    return true;
             }
-            return true;
+            
+            assert(false);
         }
 
-        virtual void print_node(std::ostream& os) const override {
-            os << *function_name;
-            os << "(";
-            int i = 0;
-            for (auto a : args) {
-                if(i++ > 0) os << ", ";
-                os << *a;
-            }
-            os << ")";
-        }
+    public:
+        static Expression *Ident(std::string ident) 
+            { return new Expression(ident); }
+        static Expression *Literal(TokenType type, std::string value) 
+            { return new Expression(type, value); }
+        static Expression *Unary(TokenType type, Expression *value) 
+            { return new Expression(type, value); }
+        static Expression *Binary(TokenType type, Expression *lhs, Expression *rhs) 
+            { return new Expression(type, lhs, rhs); }
+        static Expression *Call(std::string function_name, std::vector<Expression *> args) 
+            { return new Expression(function_name, args); }
 
-    PRINT_OP(CallExpression)
+    friend bool operator==(const Expression& lhs, const Expression& rhs) {
+        return lhs.is_equal(rhs);
+    }
+
+    friend bool operator!=(const Expression& lhs, const Expression& rhs) {
+        return !lhs.is_equal(rhs);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Expression& exp) {
+        switch(exp.type) {
+            case IDENT:
+                os << exp.ident;
+                break;
+            case LITERAL:
+                os << exp.literal.value;
+                break;
+            case UNARY:
+                os << exp.unary.type;
+                if (exp.unary.value->type == BINARY) os << "(";
+                os << *exp.unary.value;
+                if (exp.unary.value->type == BINARY) os << ")";
+                break;
+            case BINARY:
+                os << *exp.binary.lhs << " " << exp.binary.type << " " << *exp.binary.rhs;
+                break;
+            case CALL:
+                os << exp.call.function_name;
+                os << "(";
+                int i = 0;
+                for (auto a : exp.call.args) {
+                    if(i++ > 0) os << ", ";
+                    os << *a;
+                }
+                os << ")";
+                break;
+        }
+        return os;                                                         
+    }
 };
 
 struct Statement {
     private:
         virtual bool is_equal(const Statement& exp) const {
-        return true;
+            return true;
         }
 
         virtual void print_node(std::ostream& os) const {
@@ -232,11 +200,11 @@ struct IfStatement : Statement {
 };
 
 struct AssignStatement : Statement {
-    IdentExpression *variable;
+    Expression *variable;
     TokenType assign_type;
     Expression *value;
 
-    AssignStatement(IdentExpression *variable, TokenType assign_type, Expression *value) 
+    AssignStatement(Expression *variable, TokenType assign_type, Expression *value) 
         : variable(variable), assign_type(assign_type), value(value) {}
 
     private:

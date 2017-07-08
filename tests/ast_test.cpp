@@ -1,116 +1,134 @@
 TEST_SUITE_BEGIN("Ast");
 
 TEST_CASE("identifier expressions equal") {
-    CHECK_EQ(IdentExpression("foo"), IdentExpression("foo"));
-    CHECK_NE(IdentExpression("foo"), IdentExpression("bar"));
+    CHECK_EQ(
+        *Expression::Ident("foo"), 
+        *Expression::Ident("foo")
+    );
+    
+    CHECK_NE(
+        *Expression::Ident("foo"), 
+        *Expression::Ident("bar")
+    );
 }
 
 TEST_CASE("literal expressions equal") {
-    CHECK_EQ(LiteralExpression(TokenType::INT, "100"), LiteralExpression(TokenType::INT, "100"));
-    CHECK_NE(LiteralExpression(TokenType::INT, "100"), LiteralExpression(TokenType::FLOAT, "100"));
-    CHECK_NE(LiteralExpression(TokenType::INT, "100"), LiteralExpression(TokenType::INT, "200"));
+    CHECK_EQ(
+        *Expression::Literal(TokenType::INT, "100"), 
+        *Expression::Literal(TokenType::INT, "100")
+    );
+    
+    CHECK_NE(
+        *Expression::Literal(TokenType::INT, "100"), 
+        *Expression::Literal(TokenType::FLOAT, "100")
+    );
+
+    CHECK_NE(
+        *Expression::Literal(TokenType::INT, "100"), 
+        *Expression::Literal(TokenType::INT, "200")
+    );
 }
 
 TEST_CASE("unary expressions equal") {
     CHECK_EQ(
-        UnaryExpression(TokenType::NOT, new IdentExpression("a")), 
-        UnaryExpression(TokenType::NOT, new IdentExpression("a"))
+        *Expression::Unary(TokenType::NOT, Expression::Ident("a")), 
+        *Expression::Unary(TokenType::NOT, Expression::Ident("a"))
     );
     
     CHECK_NE(
-        UnaryExpression(TokenType::NOT, new IdentExpression("a")),
-        UnaryExpression(TokenType::NOT, new IdentExpression("b"))
+        *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
+        *Expression::Unary(TokenType::NOT, Expression::Ident("b"))
     );
 
     CHECK_NE(
-        UnaryExpression(TokenType::NOT, new IdentExpression("a")),
-        UnaryExpression(TokenType::SUB, new IdentExpression("a"))
+        *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
+        *Expression::Unary(TokenType::SUB, Expression::Ident("a"))
     );
 
     CHECK_NE(
-        UnaryExpression(TokenType::NOT, new IdentExpression("a")),
-        UnaryExpression(TokenType::NOT, new LiteralExpression(TokenType::INT, "100"))
+        *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
+        *Expression::Unary(TokenType::NOT, Expression::Literal(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("binary expressions equal") {
     CHECK_EQ(
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b"))
     );
 
     CHECK_NE(
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        BinaryExpression(TokenType::SUB, new IdentExpression("a"), new IdentExpression("b"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::SUB, Expression::Ident("a"), Expression::Ident("b"))
     );
 
     CHECK_NE(
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        BinaryExpression(TokenType::ADD, new IdentExpression("b"), new IdentExpression("b"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, Expression::Ident("b"), Expression::Ident("b"))
     );
 
     CHECK_NE(
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("a"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("a"))
     );
 
     CHECK_NE(
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        BinaryExpression(TokenType::ADD, new LiteralExpression(TokenType::INT, "100"), new IdentExpression("b"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, Expression::Literal(TokenType::INT, "100"), Expression::Ident("b"))
     );
 
     CHECK_NE(
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        BinaryExpression(TokenType::ADD, new IdentExpression("a"), new LiteralExpression(TokenType::INT, "100"))
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
+        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Literal(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("call expressions equal") {
     CHECK_EQ(
-        CallExpression(new IdentExpression("foo"), {}),
-        CallExpression(new IdentExpression("foo"), {})
+        *Expression::Call("foo", {}),
+        *Expression::Call("foo", {})
     );
 
     CHECK_NE(
-        CallExpression(new IdentExpression("foo"), {}),
-        CallExpression(new IdentExpression("bar"), {})
+        *Expression::Call("foo", {}),
+        *Expression::Call("bar", {})
     );
 
     CHECK_EQ(
-        CallExpression(new IdentExpression("foo"), {new IdentExpression("a")}),
-        CallExpression(new IdentExpression("foo"), {new IdentExpression("a")})
+        *Expression::Call("foo", {Expression::Ident("a")}),
+        *Expression::Call("foo", {Expression::Ident("a")})
     );
 
     CHECK_NE(
-        CallExpression(new IdentExpression("foo"), {new IdentExpression("a")}),
-        CallExpression(new IdentExpression("foo"), {})
+        *Expression::Call("foo", {Expression::Ident("a")}),
+        *Expression::Call("foo", {})
     );
 
     CHECK_NE(
-        CallExpression(new IdentExpression("foo"), {new IdentExpression("a")}),
-        CallExpression(new IdentExpression("foo"), {new IdentExpression("b")})
+        *Expression::Call("foo", {Expression::Ident("a")}),
+        *Expression::Call("foo", {Expression::Ident("b")})
     );
 
     CHECK_NE(
-        CallExpression(new IdentExpression("foo"), {new IdentExpression("a")}),
-        CallExpression(new IdentExpression("foo"), {new LiteralExpression(TokenType::INT, "100")})
+        *Expression::Call("foo", {Expression::Ident("a")}),
+        *Expression::Call("foo", {Expression::Literal(TokenType::INT, "100")})
     );
 }
 
 TEST_CASE("return statements equal") {
     CHECK_EQ(
-        ReturnStatement(new IdentExpression("a")),
-        ReturnStatement(new IdentExpression("a"))
+        ReturnStatement(Expression::Ident("a")),
+        ReturnStatement(Expression::Ident("a"))
     );
 
     CHECK_NE(
-        ReturnStatement(new IdentExpression("a")),
-        ReturnStatement(new IdentExpression("b"))
+        ReturnStatement(Expression::Ident("a")),
+        ReturnStatement(Expression::Ident("b"))
     );
 
     CHECK_NE(
-        ReturnStatement(new IdentExpression("a")),
-        ReturnStatement(new LiteralExpression(TokenType::INT, "100"))
+        ReturnStatement(Expression::Ident("a")),
+        ReturnStatement(Expression::Literal(TokenType::INT, "100"))
     );
 }
 
@@ -121,50 +139,50 @@ TEST_CASE("block statements equal") {
     );
 
     CHECK_NE(
-        BlockStatement({new ReturnStatement(new IdentExpression("a"))}),
+        BlockStatement({new ReturnStatement(Expression::Ident("a"))}),
         BlockStatement({})
     );
 
     CHECK_NE(
-        BlockStatement({new ReturnStatement(new IdentExpression("a"))}),
-        BlockStatement({new ReturnStatement(new IdentExpression("b"))})
+        BlockStatement({new ReturnStatement(Expression::Ident("a"))}),
+        BlockStatement({new ReturnStatement(Expression::Ident("b"))})
     );
 
     CHECK_NE(
-        BlockStatement({new ReturnStatement(new IdentExpression("a"))}),
+        BlockStatement({new ReturnStatement(Expression::Ident("a"))}),
         BlockStatement({new BlockStatement({})})
     );
 }
 
 TEST_CASE("if statements equal") {
     CHECK_EQ(
-        IfStatement(new IdentExpression("foo"), NULL, new BlockStatement({})),
-        IfStatement(new IdentExpression("foo"), NULL, new BlockStatement({}))
+        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
+        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({}))
     );
 
     CHECK_NE(
-        IfStatement(new IdentExpression("foo"), NULL, new BlockStatement({})),
-        IfStatement(new IdentExpression("bar"), NULL, new BlockStatement({}))
+        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
+        IfStatement(Expression::Ident("bar"), NULL, new BlockStatement({}))
     );
 
     CHECK_NE(
-        IfStatement(new IdentExpression("foo"), NULL, new BlockStatement({})),
-        IfStatement(new LiteralExpression(TokenType::INT, "100"), NULL, new BlockStatement({}))
+        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
+        IfStatement(Expression::Literal(TokenType::INT, "100"), NULL, new BlockStatement({}))
     );
 
     CHECK_NE(
-        IfStatement(new IdentExpression("foo"), NULL, new BlockStatement({})),
-        IfStatement(new IdentExpression("foo"), NULL, new BlockStatement({new BlockStatement({})}))
+        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({})),
+        IfStatement(Expression::Ident("foo"), NULL, new BlockStatement({new BlockStatement({})}))
     );
 
     CHECK_EQ(
-        IfStatement(new IdentExpression("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({})),
-        IfStatement(new IdentExpression("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({}))
+        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({})),
+        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({}))
     );
 
     CHECK_NE(
-        IfStatement(new IdentExpression("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({})),
-        IfStatement(new IdentExpression("foo"), new IfStatement(NULL, NULL, new BlockStatement({new BlockStatement({})})), new BlockStatement({}))
+        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({})), new BlockStatement({})),
+        IfStatement(Expression::Ident("foo"), new IfStatement(NULL, NULL, new BlockStatement({new BlockStatement({})})), new BlockStatement({}))
     );
 }
 
@@ -172,42 +190,42 @@ TEST_CASE("for statements equal") {
     CHECK_EQ(
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         ),
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         )
     );
@@ -215,42 +233,42 @@ TEST_CASE("for statements equal") {
     CHECK_NE(
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         ),
         ForStatement(
             new AssignStatement(
-                new IdentExpression("b"), 
+                Expression::Ident("b"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         )
     );
@@ -258,42 +276,42 @@ TEST_CASE("for statements equal") {
     CHECK_NE(
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         ),
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("b"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("b"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         )
     );
@@ -301,42 +319,42 @@ TEST_CASE("for statements equal") {
     CHECK_NE(
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         ),
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::SUB_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         )
     );
@@ -344,39 +362,39 @@ TEST_CASE("for statements equal") {
     CHECK_NE(
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         ),
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({})
         )
@@ -385,38 +403,38 @@ TEST_CASE("for statements equal") {
     CHECK_NE(
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new BinaryExpression(
+            Expression::Binary(
                 TokenType::LSS,
-                new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                Expression::Ident("a"),
+                Expression::Literal(TokenType::INT, "10")
             ),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         ),
         ForStatement(
             new AssignStatement(
-                new IdentExpression("a"), 
+                Expression::Ident("a"), 
                 TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                Expression::Literal(TokenType::INT, "0")
             ),
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             new AssignStatement(
-                new IdentExpression("a"),
+                Expression::Ident("a"),
                 TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                Expression::Literal(TokenType::INT, "1")
             ),
             new BlockStatement({
-                new ReturnStatement(new IdentExpression("a")),
+                new ReturnStatement(Expression::Ident("a")),
             })
         )
     );
@@ -425,66 +443,66 @@ TEST_CASE("for statements equal") {
 TEST_CASE("assignment statements equal") {
     CHECK_EQ(
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         ),
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         )
     );
 
     CHECK_NE(
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         ),
         AssignStatement(
-            new IdentExpression("bar"),
+            Expression::Ident("bar"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         )
     );
 
     CHECK_NE(
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         ),
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::SUB_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         )
     );
 
     CHECK_NE(
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         ),
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "200")
+            Expression::Literal(TokenType::INT, "200")
         )
     );
 
     CHECK_NE(
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            Expression::Literal(TokenType::INT, "100")
         ),
         AssignStatement(
-            new IdentExpression("foo"),
+            Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
-            new IdentExpression("bar")
+            Expression::Ident("bar")
         )
     );
 }
@@ -636,10 +654,10 @@ TEST_CASE("functions equal") {
             },
             new BlockStatement({
                 new ReturnStatement(
-                    new BinaryExpression(
+                    Expression::Binary(
                         TokenType::ADD,
-                        new IdentExpression("a"),
-                        new LiteralExpression(TokenType::FLOAT, "u")
+                        Expression::Ident("a"),
+                        Expression::Literal(TokenType::FLOAT, "u")
                     )
                 )
             })
@@ -654,10 +672,10 @@ TEST_CASE("functions equal") {
             },
             new BlockStatement({
                 new ReturnStatement(
-                    new BinaryExpression(
+                    Expression::Binary(
                         TokenType::ADD,
-                        new IdentExpression("a"),
-                        new LiteralExpression(TokenType::FLOAT, "1")
+                        Expression::Ident("a"),
+                        Expression::Literal(TokenType::FLOAT, "1")
                     )
                 )
             })

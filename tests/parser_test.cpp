@@ -62,10 +62,10 @@ TEST_CASE("functions") {
         },
         new BlockStatement({
             new ReturnStatement(
-                new BinaryExpression(
+                Expression::Binary(
                     TokenType::ADD,
-                    new IdentExpression("a"),
-                    new LiteralExpression(TokenType::INT, "1")
+                    Expression::Ident("a"),
+                    Expression::Literal(TokenType::INT, "1")
                 )
             )
         })
@@ -73,122 +73,122 @@ TEST_CASE("functions") {
 }
 
 TEST_CASE("return statement") {
-    TEST_STATEMENT("return a;", ReturnStatement(new IdentExpression("a")))
+    TEST_STATEMENT("return a;", ReturnStatement(Expression::Ident("a")))
 }
 
 TEST_CASE("literal expression") {
-    TEST_EXPRESSION("100", LiteralExpression(TokenType::INT, "100"))
-    TEST_EXPRESSION("10.01", LiteralExpression(TokenType::FLOAT, "10.01"))
-    TEST_EXPRESSION("0240", LiteralExpression(TokenType::OCTAL, "240"))
-    TEST_EXPRESSION("0x1000", LiteralExpression(TokenType::HEX, "1000"))
+    TEST_EXPRESSION("100", *Expression::Literal(TokenType::INT, "100"))
+    TEST_EXPRESSION("10.01", *Expression::Literal(TokenType::FLOAT, "10.01"))
+    TEST_EXPRESSION("0240", *Expression::Literal(TokenType::OCTAL, "240"))
+    TEST_EXPRESSION("0x1000", *Expression::Literal(TokenType::HEX, "1000"))
 }
 
 TEST_CASE("unary expression") {
-    TEST_EXPRESSION("!foo", UnaryExpression(TokenType::NOT, new IdentExpression("foo")))
-    TEST_EXPRESSION("-foo", UnaryExpression(TokenType::SUB, new IdentExpression("foo")))
+    TEST_EXPRESSION("!foo", *Expression::Unary(TokenType::NOT, Expression::Ident("foo")))
+    TEST_EXPRESSION("-foo", *Expression::Unary(TokenType::SUB, Expression::Ident("foo")))
 }
 
 TEST_CASE("binary expression") {
-    TEST_EXPRESSION("foo + bar", BinaryExpression(
+    TEST_EXPRESSION("foo + bar", *Expression::Binary(
         TokenType::ADD, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
     
-    TEST_EXPRESSION("foo - bar", BinaryExpression(
+    TEST_EXPRESSION("foo - bar", *Expression::Binary(
         TokenType::SUB, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo * bar", BinaryExpression(
+    TEST_EXPRESSION("foo * bar", *Expression::Binary(
         TokenType::MUL, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo / bar", BinaryExpression(
+    TEST_EXPRESSION("foo / bar", *Expression::Binary(
         TokenType::QUO, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo % bar", BinaryExpression(
+    TEST_EXPRESSION("foo % bar", *Expression::Binary(
         TokenType::REM, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo == bar", BinaryExpression(
+    TEST_EXPRESSION("foo == bar", *Expression::Binary(
         TokenType::EQL, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo != bar", BinaryExpression(
+    TEST_EXPRESSION("foo != bar", *Expression::Binary(
         TokenType::NEQ, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo > bar", BinaryExpression(
+    TEST_EXPRESSION("foo > bar", *Expression::Binary(
         TokenType::GTR, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo < bar", BinaryExpression(
+    TEST_EXPRESSION("foo < bar", *Expression::Binary(
         TokenType::LSS, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo >= bar", BinaryExpression(
+    TEST_EXPRESSION("foo >= bar", *Expression::Binary(
         TokenType::GEQ, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 
-    TEST_EXPRESSION("foo <= bar", BinaryExpression(
+    TEST_EXPRESSION("foo <= bar", *Expression::Binary(
         TokenType::LEQ, 
-        new IdentExpression("foo"), 
-        new IdentExpression("bar")
+        Expression::Ident("foo"), 
+        Expression::Ident("bar")
     ))
 }
 
 TEST_CASE("call expression") {
     TEST_EXPRESSION("a()", 
-        CallExpression(
-            new IdentExpression("a"), {})
+        *Expression::Call(
+            "a", {})
     )
 
     TEST_EXPRESSION("a(b)", 
-        CallExpression(
-            new IdentExpression("a"), {
-                new IdentExpression("b")
+        *Expression::Call(
+            "a", {
+                Expression::Ident("b")
             })
     )
 
     TEST_EXPRESSION("a(b, c)", 
-        CallExpression(
-            new IdentExpression("a"), {
-                new IdentExpression("b"),
-                new IdentExpression("c"),
+        *Expression::Call(
+            "a", {
+                Expression::Ident("b"),
+                Expression::Ident("c"),
             })
     )
     
     TEST_EXPRESSION("a(1 + 2, a - b)", 
-        CallExpression(
-            new IdentExpression("a"), {
-                new BinaryExpression(
+        *Expression::Call(
+            "a", {
+                Expression::Binary(
                     TokenType::ADD,
-                    new LiteralExpression(TokenType::INT, "1"),
-                    new LiteralExpression(TokenType::INT, "2")
+                    Expression::Literal(TokenType::INT, "1"),
+                    Expression::Literal(TokenType::INT, "2")
                 ),
-                new BinaryExpression(
+                Expression::Binary(
                     TokenType::SUB,
-                    new IdentExpression("a"),
-                    new IdentExpression("b")
+                    Expression::Ident("a"),
+                    Expression::Ident("b")
                 )
             })
     )
@@ -199,16 +199,16 @@ TEST_CASE("block statement") {
 
         TEST_STATEMENT("{ return a; }", BlockStatement({
             new ReturnStatement(
-                new IdentExpression("a")
+                Expression::Ident("a")
             ),
         }))
         
         TEST_STATEMENT("{ return a; return b; }", BlockStatement({
             new ReturnStatement(
-                new IdentExpression("a")
+                Expression::Ident("a")
             ),
             new ReturnStatement(
-                new IdentExpression("b")
+                Expression::Ident("b")
             ),
         }))
 
@@ -221,13 +221,13 @@ TEST_CASE("block statement") {
 
 TEST_CASE("if statement") {
     TEST_STATEMENT("if foo {}", IfStatement(
-        new IdentExpression("foo"),
+        Expression::Ident("foo"),
         NULL,
         new BlockStatement({})
     ))
 
     TEST_STATEMENT("if foo {} else {}", IfStatement(
-        new IdentExpression("foo"),
+        Expression::Ident("foo"),
         new IfStatement(
             NULL,
             NULL,
@@ -237,9 +237,9 @@ TEST_CASE("if statement") {
     ))
 
     TEST_STATEMENT("if foo {} else if bar {} else {}", IfStatement(
-        new IdentExpression("foo"),
+        Expression::Ident("foo"),
         new IfStatement(
-            new IdentExpression("bar"),
+            Expression::Ident("bar"),
             new IfStatement(
                 NULL,
                 NULL,
@@ -254,19 +254,19 @@ TEST_CASE("if statement") {
 TEST_CASE("for statement") {
     TEST_STATEMENT("for a := 0; a < 20; a += 1 {}", ForStatement(
         new AssignStatement(
-            new IdentExpression("a"),
+            Expression::Ident("a"),
             TokenType::DEFINE,
-            new LiteralExpression(TokenType::INT, "0")
+            Expression::Literal(TokenType::INT, "0")
         ),
-        new BinaryExpression(
+        Expression::Binary(
             TokenType::LSS,
-            new IdentExpression("a"),
-            new LiteralExpression(TokenType::INT, "20")
+            Expression::Ident("a"),
+            Expression::Literal(TokenType::INT, "20")
         ),
         new AssignStatement(
-            new IdentExpression("a"),
+            Expression::Ident("a"),
             TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "1")
+            Expression::Literal(TokenType::INT, "1")
         ),
         new BlockStatement({})
     ))
@@ -274,24 +274,24 @@ TEST_CASE("for statement") {
 
 TEST_CASE("assign statement") {
     TEST_STATEMENT("foo := 100", AssignStatement(
-        new IdentExpression("foo"),
+        Expression::Ident("foo"),
         TokenType::DEFINE,
-        new LiteralExpression(TokenType::INT, "100")
+        Expression::Literal(TokenType::INT, "100")
     ))
 
     TEST_STATEMENT("foo = bar", AssignStatement(
-        new IdentExpression("foo"),
+        Expression::Ident("foo"),
         TokenType::ASSIGN,
-        new IdentExpression("bar")
+        Expression::Ident("bar")
     ))
 
     TEST_STATEMENT("baz += 100 + 20", AssignStatement(
-        new IdentExpression("baz"),
+        Expression::Ident("baz"),
         TokenType::ADD_ASSIGN,
-        new BinaryExpression(
+        Expression::Binary(
             TokenType::ADD,
-            new LiteralExpression(TokenType::INT, "100"),
-            new LiteralExpression(TokenType::INT, "20")
+            Expression::Literal(TokenType::INT, "100"),
+            Expression::Literal(TokenType::INT, "20")
         )
     ))
 }
