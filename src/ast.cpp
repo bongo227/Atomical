@@ -275,6 +275,22 @@ struct PrimitiveType : Type {
     Primitive prim;
 
     explicit PrimitiveType(Primitive prim) : prim(prim) {}
+    explicit PrimitiveType(TokenType type) {
+        switch(type) {
+            case TokenType::INT:
+            case TokenType::HEX:
+            case TokenType::OCTAL: 
+                PrimitiveType(Primitive::INT); 
+                break;
+            
+            case TokenType::FLOAT: 
+                PrimitiveType(Primitive::FLOAT); 
+                break;
+            
+            default:
+                assert(false); // not a primitive type
+        }
+    }
 
     private:
         virtual bool is_equal(const Type& type) const override {
