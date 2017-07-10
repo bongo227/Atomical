@@ -1,6 +1,7 @@
-struct Instruction {};
+struct Instruction;
 
 struct BasicBlock {
+    int id;
     std::vector<Instruction> instructions;
 
     BasicBlock(std::vector<Instruction> instructions) : instructions(instructions) {}
@@ -12,116 +13,41 @@ struct IrFunction {
     IrFunction(std::vector<BasicBlock> basic_blocks) : basic_blocks(basic_blocks) {}
 };
 
-struct Variable {
-    int id;
-    Type *type;
-
-    Variable(int id, Type *type) : id(id), type(type) {}
-};
-
-struct Value {
-    TokenType type;
-    std::string *value;
-
-    Value(TokenType type, std::string value) : type(type), value(&value) {}
-};
-
 struct Parameter{
     union {
-        Variable var;
-        Value val;
+        int variable;
+        std::string value;
     };
+    Type *type;
 
-    enum { VARIABLE, VALUE } type;
+    enum { VARIABLE, VALUE, NONE } parameter_type;
 
-    Parameter(Variable var) : var(var), type(VARIABLE) {}
-    Parameter(Value val) : val(val), type(VALUE) {}
-    Parameter(int id, Type *type) : var(Variable(id, type)), type(VARIABLE) {}
-    Parameter(TokenType type, std::string value) : val(Value(type, value)), type(VALUE) {}
-};
+    Parameter(int id, Type *type) : variable(id), type(type), parameter_type(VARIABLE) {}
+    Parameter(std::string value, Type *type) : value(value), type(type), parameter_type(VALUE) {}
+    Parameter() : parameter_type(NONE) {}
 
-struct RetInstruction : Instruction {
-    Parameter *value;
+    Parameter(const Parameter &param) {
+        switch(param.parameter_type) {
+            case VARIABLE: Parameter(param.variable, param.type); break;
+            case VALUE: Parameter(param.value, param.type); break;
+            case NONE: assert(false);
+        }
+    }
 
-    RetInstruction(Parameter *value) : value(value) {}
-};
+    Parameter &operator=(const Parameter &param) {
+        switch(param.parameter_type) {
+            case VARIABLE: variable = param.variable;
+            case VALUE: value = param.value;
+            case NONE: assert(false);
+        }
+        type = param.type;
+        parameter_type = param.parameter_type;
+    }
 
-struct BrInstruction : Instruction {
-    BasicBlock *destination;
-
-    BrInstruction(BasicBlock *destination) : destination(destination) {}
-};
-
-struct AddInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    AddInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct SubInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    SubInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct MulInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    MulInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct DivInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-    bool iunsigned;
-
-    DivInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct ShiftLeftInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    ShiftLeftInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct ShiftRightInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-    bool iunsigned;
-
-    ShiftRightInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct AndInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    AndInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct OrInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    OrInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct XorInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-
-    XorInstruction(Parameter *lhs, Parameter *rhs) : lhs(lhs), rhs(rhs) {}
-};
-
-struct CastInstruction : Instruction {
-    Parameter *var;
-    Type *cast_type;
-
-    CastInstruction(Parameter *var, Type *cast_type) : var(var), cast_type(cast_type) {}
+    ~Parameter() {
+        if(parameter_type == NONE) assert(false);
+        if(parameter_type == VALUE) value.std::string::~string();
+    }
 };
 
 enum class CompareType {
@@ -133,29 +59,112 @@ enum class CompareType {
     MoreThanOrEqualTo
 };
 
-struct CompareInstruction : Instruction {
-    Parameter *lhs;
-    Parameter *rhs;
-    CompareType type;
-    bool iordered;
-    bool iunsigned;
+struct Instruction {
+    typedef enum {
+        RETURN, 
+        BRANCH, 
+        ADD, 
+        SUB, 
+        MUL, 
+        DIV, 
+        SHIFT_LEFT, 
+        SHIFT_RIGHT, 
+        AND, 
+        OR, 
+        XOR, 
+        CAST, 
+        COMPARE, 
+        PHI 
+    } InstructionType;
 
-    CompareInstruction(Parameter *lhs, Parameter *rhs, CompareType type, bool iordered, 
-        bool iunsigned) : lhs(lhs), rhs(rhs), type(type), iordered(iordered), iunsigned(iunsigned) 
-        {}
-};
+    Parameter param;
+    InstructionType instruction_type;
+    
+    union {
+        Parameter ret;
+        BasicBlock *br;
+        struct { Parameter lhs; Parameter rhs; } binary;
+        struct { Type *type; Parameter value; } cast;
+        std::vector<std::tuple<BasicBlock *, Parameter>> phi;
+    };
 
-struct PhiInstruction : Instruction {
-    std::vector<std::tuple<BasicBlock *, Parameter>> incoming;
 
-    PhiInstruction(std::vector<std::tuple<BasicBlock *, Parameter>> incoming) : incoming(incoming)
-        {}
-};
+    // TODO: collapse into flags
+    // CompareType compare_type;
+    // bool instruction_ordered;
+    // bool instruction_unsigned;
 
-struct CallInstruction : Instruction {
-    Function *function;
-    std::vector<Parameter> arguments;
+    private:
+        Instruction(Parameter param, Parameter value) : 
+            param(param), ret(value), instruction_type(InstructionType::RETURN) {}
+        Instruction(Parameter param, BasicBlock *destination) : 
+            param(param), br(destination), instruction_type(InstructionType::BRANCH) {}
+        Instruction(Parameter param, Parameter lhs, Parameter rhs, InstructionType type) : 
+            param(param), binary{lhs, rhs}, instruction_type(type) {}
+        Instruction(Parameter param, Type *type, Parameter value) : 
+            param(param), cast{type, value}, instruction_type(InstructionType::CAST) {}
+        Instruction(Parameter param, std::vector<std::tuple<BasicBlock *, Parameter>> incoming) : 
+            param(param), phi(incoming) {}
 
-    CallInstruction(Function *function, std::vector<Parameter> arguments) : function(function),
-        arguments(arguments) {}
+    public:
+        static Instruction Return(Parameter param, Parameter value) 
+            { return Instruction(param, value); }
+        static Instruction Branch(Parameter param, BasicBlock *destination) 
+            { return Instruction(param, destination); }
+        static Instruction Add(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::ADD); }
+        static Instruction Sub(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::SUB); }
+        static Instruction Mul(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::MUL); }
+        static Instruction Div(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::DIV); }
+        static Instruction ShiftLeft(Parameter param, Parameter lhs, Parameter rhs) 
+            { return Instruction(param, lhs, rhs, InstructionType::SHIFT_LEFT); }
+        static Instruction ShiftRight(Parameter param, Parameter lhs, Parameter rhs) 
+            { return Instruction(param, lhs, rhs, InstructionType::SHIFT_RIGHT); }
+        static Instruction And(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::AND); }
+        static Instruction Or(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::OR); }
+        static Instruction Xor(Parameter param, Parameter lhs, Parameter rhs)
+            { return Instruction(param, lhs, rhs, InstructionType::XOR); }
+        static Instruction Cast(Parameter param, Type *type, Parameter value) 
+            { return Instruction(param, type, value); }
+        static Instruction Phi(Parameter param, std::vector<std::tuple<BasicBlock *, Parameter>> incoming)
+            { return Instruction(param, incoming); }
+
+    Instruction(const Instruction &inst) {
+        switch(inst.instruction_type) {
+            case InstructionType::RETURN: Instruction(inst.param, inst.ret); break; 
+            case InstructionType::BRANCH: Instruction(inst.param, inst.br); break; 
+            case InstructionType::ADD: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::ADD); break; 
+            case InstructionType::SUB: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::SUB); break; 
+            case InstructionType::MUL: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::MUL); break; 
+            case InstructionType::DIV: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::DIV); break; 
+            case InstructionType::SHIFT_LEFT: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::SHIFT_LEFT); break; 
+            case InstructionType::SHIFT_RIGHT: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::SHIFT_RIGHT); break; 
+            case InstructionType::AND: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::AND); break; 
+            case InstructionType::OR: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::OR); break; 
+            case InstructionType::XOR: Instruction(inst.param, inst.binary.lhs, inst.binary.rhs, 
+                InstructionType::XOR); break; 
+            case InstructionType::CAST: Instruction(inst.param, inst.cast.type, inst.cast.value); break; 
+            // case COMPARE: Instruction(inst.param, ); break; 
+            case InstructionType::PHI: Instruction(inst.param, inst.phi); break;
+        }
+    }
+
+    ~Instruction() {
+        if(instruction_type == InstructionType::PHI) {
+            assert(false); // destruct vector;
+        }
+    }
 };
