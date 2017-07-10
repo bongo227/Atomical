@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    
+    "version": "0.1.0",
+    "isShellCommand": true,
+    "options": {
+        "cwd": "${workspaceRoot}/build"
+    },
+    "showOutput": "always",
+    "tasks": [
+        {
+            "isBuildCommand": true,
+            "taskName": "Build",
+            "command": "bash",
+            "args": ["build.sh"],
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        {
+            "isTestCommand": true,
+            "taskName": "Test",
+            "command": "./atomical-test",
+            "args": []
+        }
+    ]
+}
