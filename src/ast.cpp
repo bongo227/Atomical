@@ -134,7 +134,7 @@ struct Statement {
         Statement(Expression *value) : ret(value), type(RETURN) {}
         Statement(std::vector<Statement *> statements) : block(statements), type(BLOCK) {}
         Statement(Expression *condition, Statement *body, Statement *elses) 
-            : ifs{condition, body, elses}, type(IF) {}
+            : ifs{condition, body, elses}, type(IF) { assert(body); }
         Statement(Expression *variable, TokenType type, Expression *value)
             : assign{variable, type, value}, type(ASSIGN) {}
         Statement(Statement *declaration, Expression *condition, Statement *increment, 

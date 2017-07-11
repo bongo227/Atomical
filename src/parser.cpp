@@ -42,7 +42,11 @@ std::vector<Function *> Parser::parse() {
 }
 
 Token Parser::expect(TokenType type) {
-    assert(tokens.front().type == type);
+    if (tokens.front().type != type) {
+        std::cout << "Expected: \"" << type << "\"" << std::endl;
+        std::cout << "Got: \"" << tokens.front().type << "\"" << std::endl;
+        assert(false);
+    }
     Token token = tokens.front();
     tokens.pop_front();
     return token;
@@ -86,17 +90,16 @@ Statement *Parser::parse_if_statement() {
             elses = parse_if_statement();
         } else {
             // final else statement
-            elses = Statement::If(NULL, NULL, parse_block_statement());
+            elses = Statement::If(NULL, parse_block_statement(), NULL);
         }
     }
-    return Statement::If(condition, elses, body);
+    return Statement::If(condition, body, elses);
 }
 
 Statement *Parser::parse_for_statement() {
     expect(TokenType::FOR);
 
     Statement *declaration = parse_assign_statement();
-    expect(TokenType::SEMI);
     Expression *condition = parse_expression(0);
     expect(TokenType::SEMI);
     Statement *increment = parse_statement();
@@ -110,6 +113,7 @@ Statement *Parser::parse_assign_statement() {
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
+    accept(TokenType::SEMI);
     return Statement::Assign(ident, type.type, value); 
 }
 

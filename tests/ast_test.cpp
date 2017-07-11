@@ -160,37 +160,51 @@ TEST_CASE("block statements equal") {
 
 TEST_CASE("if statements equal") {
     CHECK_EQ(
-        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
-        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({}))
+        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
+        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL)
     );
 
     CHECK_NE(
-        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
-        *Statement::If(Expression::Ident("bar"), NULL, Statement::Block({}))
+        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
+        *Statement::If(Expression::Ident("bar"), Statement::Block({}), NULL)
     );
 
     CHECK_NE(
-        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
-        *Statement::If(Expression::Literal(TokenType::INT, "100"), NULL, Statement::Block({}))
+        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
+        *Statement::If(Expression::Literal(TokenType::INT, "100"), Statement::Block({}), NULL)
     );
 
     CHECK_NE(
-        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({})),
-        *Statement::If(Expression::Ident("foo"), NULL, Statement::Block({Statement::Block({})}))
+        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
+        *Statement::If(Expression::Ident("foo"), Statement::Block({Statement::Block({})}), NULL)
     );
 
     CHECK_EQ(
-        *Statement::If(Expression::Ident("foo"), 
-            Statement::If(NULL, NULL, Statement::Block({})), Statement::Block({})),
-        *Statement::If(Expression::Ident("foo"), 
-            Statement::If(NULL, NULL, Statement::Block({})), Statement::Block({}))
+        *Statement::If(
+            Expression::Ident("foo"),
+            Statement::Block({}),
+            Statement::If(NULL, Statement::Block({}), NULL)
+        ),
+        *Statement::If(
+            Expression::Ident("foo"),
+            Statement::Block({}),
+            Statement::If(NULL, Statement::Block({}), NULL)
+        )
     );
 
     CHECK_NE(
-        *Statement::If(Expression::Ident("foo"), 
-            Statement::If(NULL, NULL, Statement::Block({})), Statement::Block({})),
-        *Statement::If(Expression::Ident("foo"), 
-            Statement::If(NULL, NULL, Statement::Block({Statement::Block({})})), Statement::Block({}))
+        *Statement::If(
+            Expression::Ident("foo"),
+            Statement::Block({}),
+            Statement::If(NULL, Statement::Block({}), NULL)
+        ),
+        *Statement::If(
+            Expression::Ident("foo"),
+            Statement::Block({}),
+            Statement::If(NULL, Statement::Block({
+                Statement::Block({})
+            }), NULL)
+        )
     );
 }
 

@@ -212,6 +212,22 @@ TEST_CASE("block statement") {
             ),
         }))
 
+        TEST_STATEMENT("{ a := 10; b := -a; }", *Statement::Block({
+            Statement::Assign(
+                Expression::Ident("a"),
+                TokenType::DEFINE,
+                Expression::Literal(TokenType::INT, "10")
+            ),
+            Statement::Assign(
+                Expression::Ident("b"),
+                TokenType::DEFINE,
+                Expression::Unary(
+                    TokenType::SUB,
+                    Expression::Ident("a")
+                )
+            )
+        }))
+
         TEST_STATEMENT("{{{}}}", *Statement::Block({
             Statement::Block({
                 Statement::Block({}),
@@ -222,32 +238,32 @@ TEST_CASE("block statement") {
 TEST_CASE("if statement") {
     TEST_STATEMENT("if foo {}", *Statement::If(
         Expression::Ident("foo"),
-        NULL,
-        Statement::Block({})
+        Statement::Block({}),
+        NULL
     ))
 
     TEST_STATEMENT("if foo {} else {}", *Statement::If(
         Expression::Ident("foo"),
+        Statement::Block({}),
         Statement::If(
             NULL,
-            NULL,
-            Statement::Block({})
-        ),
-        Statement::Block({})
+            Statement::Block({}),
+            NULL
+        )
     ))
 
     TEST_STATEMENT("if foo {} else if bar {} else {}", *Statement::If(
         Expression::Ident("foo"),
+        Statement::Block({}),
         Statement::If(
             Expression::Ident("bar"),
+            Statement::Block({}),
             Statement::If(
                 NULL,
-                NULL,
-                Statement::Block({})
-            ),
-            Statement::Block({})
-        ),
-        Statement::Block({})
+                Statement::Block({}),
+                NULL
+            )
+        )
     ))
 }
 
