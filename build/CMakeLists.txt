@@ -7,10 +7,6 @@ add_definitions("-fPIC")
 
 project(Atomical)
 
-# Locate GTest
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
-
 # Locate LLVM
 message(STATUS "LLVM LIB PATH: ${LLVM_LIBRARIES_PATH}")
 find_package(LLVM REQUIRED CONFIG)
@@ -154,6 +150,5 @@ target_compile_options(atomical PRIVATE "-Werror")
 
 # Test executable 
 add_executable(atomical-test ../tests/test.cpp)
-target_link_libraries(atomical-test ${GTEST_LIBRARIES} pthread atomical)
-target_compile_options(atomical-test PRIVATE "-fpermissive") # required by GTEST
+target_link_libraries(atomical-test atomical)
 target_compile_options(atomical-test PRIVATE "-Werror")
