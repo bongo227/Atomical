@@ -5,6 +5,7 @@
 #include <vector>
 #include <tuple>
 #include <deque>
+#include <sstream>
 
 #include "token.cpp"
 #include "ast.cpp"
