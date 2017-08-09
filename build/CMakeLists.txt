@@ -150,5 +150,5 @@ target_compile_options(atomical PRIVATE "-Werror")
 
 # Test executable 
 add_executable(atomical-test ../tests/test.cpp)
-target_link_libraries(atomical-test atomical)
+target_link_libraries(atomical-test atomical stdc++fs)
 target_compile_options(atomical-test PRIVATE "-Werror")

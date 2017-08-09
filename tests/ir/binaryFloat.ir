@@ -1,0 +1,5 @@
+proc main :: -> int a:
+b1:
+	v1 = 130.75 - 7.75
+	ret v1
+

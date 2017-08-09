@@ -6,6 +6,9 @@
 #include <tuple>
 #include <deque>
 #include <sstream>
+#include <experimental/filesystem>
+#include <fstream>
+#include <streambuf>
 
 #include "token.cpp"
 #include "ast.cpp"

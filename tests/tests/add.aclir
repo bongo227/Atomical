@@ -1,9 +1,0 @@
-proc add :: int a, int b -> int c:
-b1:
-    v1 = a + b
-    ret v1
-
-proc main :: -> int:
-b1:
-    v1 = add(120, 3)
-    ret v1
