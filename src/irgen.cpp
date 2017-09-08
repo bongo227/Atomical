@@ -38,6 +38,9 @@ class Irgen {
                     current_block->append_instruction(op);
                     return static_cast<Value *>(op);
                 }
+                default: {
+                    assert(false);
+                }
             }
         }
 
@@ -48,6 +51,9 @@ class Irgen {
                     Instruction *ins = new Ret(val);
                     current_block->append_instruction(ins);
                     return ins;
+                }
+                default: {
+                    assert(false);
                 }
             }
         }

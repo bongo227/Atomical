@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 # Use Clang
-set(CMAKE_CXX_COMPILER /usr/bin/clang++-3.9)
-set(CMAKE_C_COMPILER /usr/bin/clang-3.9)
+set(CMAKE_CXX_COMPILER /usr/bin/clang++-4.0)
+set(CMAKE_C_COMPILER /usr/bin/clang-4.0)
 add_definitions("-fPIC")
 
 project(Atomical)
@@ -145,10 +145,11 @@ target_compile_options(atomical PRIVATE "-Werror")
 # add_executable(atomical-bin ../src/main.cpp)
 # target_link_libraries(atomical-bin ${LLVM_LIBS} atomical)
 # # target_compile_options(atomical-bin PRIVATE "-Werror")
-# # target_compile_options(atomical-bin PRIVATE "-std=c11")
+# # target_compile_options(atomical-bin PRIVATE "-std=c++14")
 # set_target_properties(atomical-bin PROPERTIES OUTPUT_NAME atomical)
 
 # Test executable 
 add_executable(atomical-test ../tests/test.cpp)
 target_link_libraries(atomical-test atomical stdc++fs)
+target_compile_options(atomical-test PRIVATE "-std=c++14")
 target_compile_options(atomical-test PRIVATE "-Werror")

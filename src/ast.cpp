@@ -14,6 +14,17 @@ friend bool operator!=(const type& lhs, const type& rhs) {                      
     return (typeid(lhs) != typeid(rhs)) || !lhs.is_equal(rhs);                      \
 }                                                                                   \
 
+enum class Primitive {
+    I8,
+    I16,
+    I32,
+    I64,
+    INT,
+    F32,
+    F64,
+    FLOAT,
+};
+
 struct Expression {
     union {
         std::string ident;
@@ -246,17 +257,6 @@ struct Type {
     PRINT_OP(Type);
 };
 
-enum class Primitive {
-    I8,
-    I16,
-    I32,
-    I64,
-    INT,
-    F32,
-    F64,
-    FLOAT,
-};
-
 std::ostream &operator<<(std::ostream &os, const Primitive &prim) {
     switch(prim) {
         case Primitive::I8: os << "i8"; break;
@@ -275,16 +275,18 @@ struct PrimitiveType : Type {
     Primitive prim;
 
     explicit PrimitiveType(Primitive prim) : prim(prim) {}
+
     explicit PrimitiveType(TokenType type) {
         switch(type) {
             case TokenType::INT:
             case TokenType::HEX:
-            case TokenType::OCTAL: 
-                PrimitiveType(Primitive::INT); 
+            case TokenType::OCTAL: {
+                prim = Primitive::INT;
                 break;
+            }
             
             case TokenType::FLOAT: 
-                PrimitiveType(Primitive::FLOAT); 
+                prim = Primitive::FLOAT; 
                 break;
             
             default:
