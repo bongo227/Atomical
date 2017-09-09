@@ -1,0 +1,13 @@
+proc test :: int n -> int :
+b1:
+	v1 = argument n
+	v2 = 123
+	v3 = -v2
+	ret v3
+
+proc main :: -> int :
+b2:
+	v4 = 321
+	v5 = test(v4)
+	ret v5
+

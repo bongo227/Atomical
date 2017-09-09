@@ -1,5 +1,5 @@
 proc test :: int n -> int {
-    n = 123
+    n = -123
     return n
 }
 

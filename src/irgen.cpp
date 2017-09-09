@@ -47,9 +47,11 @@ class Irgen {
                     return read_var(exp->ident);
                 }
                 case Expression::LITERAL: {
-                    return new Const(
+                    Const *con = new Const(next_var_id(), 
                         new PrimitiveType(exp->literal.type), 
                         exp->literal.value);
+                    current_block->append_instruction(con);
+                    return static_cast<Value *>(con);
                 }
                 case Expression::BINARY: {
                     Value *lhs = gen(exp->binary.lhs);
@@ -83,6 +85,14 @@ class Irgen {
                     Instruction *ins = new Ret(val);
                     current_block->append_instruction(ins);
                     return ins;
+                }
+                case Statement::ASSIGN: {
+                    std::string var_name = smt->assign.variable->ident;
+                    
+                    Value *value = gen(smt->assign.value);
+                    write_var(var_name, value);
+                    
+                    return NULL;
                 }
                 default: {
                     assert(false);

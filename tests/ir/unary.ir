@@ -6,7 +6,8 @@ b1:
 
 proc main :: -> int :
 b2:
-	v3 = -123
-	v4 = neg(v3)
-	ret v4
+	v3 = 123
+	v4 = -v3
+	v5 = neg(v4)
+	ret v5
 

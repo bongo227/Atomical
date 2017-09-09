@@ -110,17 +110,18 @@ struct Value {
     }
 };
 
-struct Const : public Value {
+struct Const : public Instruction, public Value {
     std::string value;
 
-    Const(Type *type, std::string value) : Value(-1, type), value(value) {}
+    Const(int id, Type *type, std::string value) 
+        : Instruction(), Value(id, type), value(value) {}
 
-    void printValue(std::ostream &os) const {
-        os << value;
+    void print_instruction(std::ostream &os) const {
+        os << static_cast<Value>(*this) << " = " << value;
     }
 
     friend std::ostream &operator<<(std::ostream& os, const Const& con) {
-        con.printValue(os);
+        con.print_instruction(os);
         return os;                                                         
     }
 };
@@ -128,7 +129,7 @@ struct Const : public Value {
 struct Arg : public Instruction, public Value {
     std::string name;
 
-    Arg(int id, Type *type, std::string name) : Value(id, type), name(name) {}
+    Arg(int id, Type *type, std::string name) : Instruction(), Value(id, type), name(name) {}
 
     void print_instruction(std::ostream& os) const {
         os << static_cast<Value>(*this) << " = " << "argument " << name;

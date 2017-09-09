@@ -1,0 +1,14 @@
+proc add :: int a, int b -> int c:
+b1:
+	v1 = argument a
+	v2 = argument b
+	v3 = v1 + v2
+	ret v3
+
+proc main :: -> int a:
+b2:
+	v4 = 120
+	v5 = 3
+	v6 = add(v4, v5)
+	ret v6
+

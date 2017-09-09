@@ -1,5 +1,7 @@
 proc main :: -> int a:
 b1:
-	v1 = 130.75 - 7.75
-	ret v1
+	v1 = 130.75
+	v2 = 7.75
+	v3 = v1 - v2
+	ret v3
 
