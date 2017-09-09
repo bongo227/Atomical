@@ -3,21 +3,21 @@ TEST_SUITE_BEGIN("Parser");
 #define TEST_EXPRESSION(source, expected) {                                 \
     SUBCASE(#source) {                                                      \
         auto exp = Parser((source)).parse_expression(0);                    \
-        CHECK_EQ((expected), *exp);                                         \
+        REQUIRE_EQ((expected), *exp);                                         \
     }                                                                       \
 }                                                                           \
 
 #define TEST_STATEMENT(source, expected) {                                  \
     SUBCASE(#source) {                                                      \
         auto smt = Parser((source)).parse_statement();                      \
-        CHECK_EQ((expected), *smt);                                         \
+        REQUIRE_EQ((expected), *smt);                                         \
     }                                                                       \
 }                                                                           \
 
 #define TEST_FUNCTION(source, expected) {                                   \
     SUBCASE(#source) {                                                      \
         auto func = Parser((source)).parse_function();                      \
-        CHECK_EQ((expected), *func);                                        \
+        REQUIRE_EQ((expected), *func);                                        \
     }                                                                       \
 }                                                                           \
 
@@ -315,10 +315,10 @@ TEST_CASE("assign statement") {
 TEST_CASE("multiple proc statements") {
     auto funcs = Parser("proc main :: -> {}\n\n"
                         "proc bar :: -> {}").parse();
-    CHECK_EQ(funcs.size(), 2);
+    REQUIRE_EQ(funcs.size(), 2);
 
-    CHECK_EQ(*funcs[0], Function("main", {}, {}, Statement::Block({})));
-    CHECK_EQ(*funcs[1], Function("bar", {}, {}, Statement::Block({})));
+    REQUIRE_EQ(*funcs[0], Function("main", {}, {}, Statement::Block({})));
+    REQUIRE_EQ(*funcs[1], Function("bar", {}, {}, Statement::Block({})));
 }
 
 TEST_CASE("acl test files") {
@@ -333,7 +333,7 @@ TEST_CASE("acl test files") {
 			std::istreambuf_iterator<char>());
         
         // check it parses
-        CHECK_EQ(acl_string_path, acl_string_path);
+        MESSAGE("Parsing: " << acl_string_path);
         auto funcs = Parser(acl).parse();
 	}
 }    

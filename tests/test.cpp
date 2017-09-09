@@ -7,4 +7,4 @@
 #include "lexer_test.cpp"
 #include "ast_test.cpp"
 #include "parser_test.cpp"
-// #include "irgen_test.cpp"
+#include "irgen_test.cpp"

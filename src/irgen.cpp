@@ -21,6 +21,9 @@ class Irgen {
 
         Value *gen(Expression *exp) {
             switch(exp->type) {
+                case Expression::IDENT: {
+                    assert(false);
+                }
                 case Expression::LITERAL: {
                     return new Const(
                         new PrimitiveType(exp->literal.type), 
@@ -46,9 +49,6 @@ class Irgen {
                     // std::vector<Value> values();
                     // for(Expression e : exp->call.)
                     // Value *value = gen()
-                }
-                default: {
-                    assert(false);
                 }
             }
         }
