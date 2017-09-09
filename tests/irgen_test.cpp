@@ -15,9 +15,6 @@ TEST_CASE("Gen Test") {
 		std::string ir_string_path = acl_string_path;
 		MESSAGE("Gen: " << acl_string_path);
 
-		int ii =  199;
-		CAPTURE(ii);
-
 		auto i = ir_string_path.find("/acl/");
 		if (i != std::string::npos)
 			ir_string_path.replace(i, 5, "/ir/");

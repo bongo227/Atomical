@@ -1,0 +1,11 @@
+proc neg :: int n -> int :
+b1:
+	v1 = -n
+	ret v1
+
+proc main :: -> int :
+b2:
+	v2 = -123
+	v3 = neg(v2)
+	ret v3
+

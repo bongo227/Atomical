@@ -2,7 +2,8 @@ class Irgen {
     private:
         std::vector<Function *> functions;
         BasicBlock *current_block;
-        
+        Function *current_function;
+
         int var_id;
         int next_var_id() {
             return ++var_id;
@@ -22,6 +23,16 @@ class Irgen {
         Value *gen(Expression *exp) {
             switch(exp->type) {
                 case Expression::IDENT: {
+                    // TODO: replace with local identifier list
+                    for (auto arg : current_function->arguments) {
+                        Type *type = std::get<0>(arg);
+                        std::string name = std::get<1>(arg);
+
+                        if (name == exp->ident) {
+                            return new Arg(type, name);
+                        }
+                    }
+
                     assert(false);
                 }
                 case Expression::LITERAL: {
@@ -43,12 +54,13 @@ class Irgen {
                     return static_cast<Value *>(op);
                 }
                 case Expression::CALL: {
-                    std::cout << "Function name: " << exp->call.function_name 
-                        << std::endl;
-                    assert(false);
-                    // std::vector<Value> values();
-                    // for(Expression e : exp->call.)
-                    // Value *value = gen()
+                    // Generate argument expressions
+                    std::vector<Value *> arg_values;
+                    for (Expression *arg : exp->call.args) arg_values.push_back(gen(arg));
+                    
+                    Call *call_exp = new Call(next_var_id(), exp->call.function_name, arg_values);
+                    current_block->append_instruction(call_exp);
+                    return static_cast<Value *>(call_exp);
                 }
             }
         }
@@ -82,6 +94,7 @@ class Irgen {
         std::vector<IrFunction> gen(std::vector<Function *> funcs) {
             std::vector<IrFunction> ir_funcs = {};
             for (Function *func : funcs) {
+                current_function = func;
                 ir_funcs.push_back(gen(func));
             }
             return ir_funcs;
