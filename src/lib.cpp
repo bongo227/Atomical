@@ -9,6 +9,7 @@
 #include <experimental/filesystem>
 #include <fstream>
 #include <streambuf>
+#include <map>
 
 #include "token.cpp"
 #include "ast.cpp"

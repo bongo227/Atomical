@@ -4,6 +4,7 @@ class Irgen {
         BasicBlock *current_block;
         Function *current_function;
 
+
         int var_id;
         int next_var_id() {
             return ++var_id;
@@ -29,7 +30,9 @@ class Irgen {
                         std::string name = std::get<1>(arg);
 
                         if (name == exp->ident) {
-                            return new Arg(type, name);
+                            Arg *arg = new Arg(next_var_id(), type, name);
+                            current_block->append_instruction(arg);
+                            return static_cast<Value *>(arg);
                         }
                     }
 

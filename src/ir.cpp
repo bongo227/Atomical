@@ -125,13 +125,13 @@ struct Const : public Value {
     }
 };
 
-struct Arg : public Value {
+struct Arg : public Instruction, public Value {
     std::string name;
 
-    Arg(Type *type, std::string name) : Value(-1, type), name(name) {}
+    Arg(int id, Type *type, std::string name) : Value(id, type), name(name) {}
 
-    void printValue(std::ostream &os) const {
-        os << name;
+    void print_instruction(std::ostream& os) const {
+        os << static_cast<Value>(*this) << " = " << "argument " << name;
     }
 
     friend std::ostream &operator<<(std::ostream& os, const Arg& arg) {

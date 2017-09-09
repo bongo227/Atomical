@@ -1,11 +1,12 @@
 proc neg :: int n -> int :
 b1:
-	v1 = -n
-	ret v1
+	v1 = argument n
+	v2 = -v1
+	ret v2
 
 proc main :: -> int :
 b2:
-	v2 = -123
-	v3 = neg(v2)
-	ret v3
+	v3 = -123
+	v4 = neg(v3)
+	ret v4
 
