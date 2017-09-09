@@ -231,3 +231,94 @@ int Token::get_binding_power() {
             return 0;
     }
 }
+
+std::ostream &operator<<(std::ostream &os, const Token &token) {
+	switch(token.type) {
+		case TokenType::ILLEGAL: 
+			assert(false);
+
+		case TokenType::IDENT:
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::HEX:
+		case TokenType::OCTAL:
+		case TokenType::STRING:
+			os << token.value;
+			break;
+		
+		case TokenType::BREAK:
+		case TokenType::CASE:
+		case TokenType::CONST:
+		case TokenType::CONTINUE:
+		case TokenType::DEFAULT:
+		case TokenType::DEFER:
+		case TokenType::ELSE:
+		case TokenType::FALLTHROUGH:
+		case TokenType::FOR:
+		case TokenType::FUNC:
+		case TokenType::PROC:
+		case TokenType::IF:
+		case TokenType::IMPORT:
+		case TokenType::RETURN:
+		case TokenType::SELECT:
+		case TokenType::STRUCT:
+		case TokenType::SWITCH:
+		case TokenType::TYPE:
+		case TokenType::VAR:
+		case TokenType::SEMI:
+		case TokenType::COLON:
+		case TokenType::DEFINE:
+		case TokenType::DOUBLE_COLON:
+		case TokenType::ELLIPSE:
+		case TokenType::PERIOD:
+		case TokenType::COMMA:
+		case TokenType::LPAREN:
+		case TokenType::RPAREN:
+		case TokenType::LBRACK:
+		case TokenType::RBRACK:
+		case TokenType::LBRACE:
+		case TokenType::RBRACE:
+		case TokenType::ADD:
+		case TokenType::ADD_ASSIGN:
+		case TokenType::INC:
+		case TokenType::ARROW:
+		case TokenType::SUB:
+		case TokenType::SUB_ASSIGN:
+		case TokenType::DEC:
+		case TokenType::MUL:
+		case TokenType::MUL_ASSIGN:
+		case TokenType::QUO:
+		case TokenType::QUO_ASSIGN:
+		case TokenType::REM:
+		case TokenType::REM_ASSIGN:
+		case TokenType::XOR:
+		case TokenType::XOR_ASSIGN:
+		case TokenType::LSS:
+		case TokenType::LEQ:
+		case TokenType::SHL:
+		case TokenType::SHL_ASSIGN:
+		case TokenType::GTR:
+		case TokenType::GEQ:
+		case TokenType::SHR:
+		case TokenType::SHR_ASSIGN:
+		case TokenType::ASSIGN:
+		case TokenType::EQL:
+		case TokenType::NOT:
+		case TokenType::NEQ:
+		case TokenType::AND_NOT:
+		case TokenType::AND_NOT_ASSIGN:
+		case TokenType::AND:
+		case TokenType::AND_ASSIGN:
+		case TokenType::LAND:
+		case TokenType::OR:
+		case TokenType::OR_ASSIGN:
+		case TokenType::LOR:
+			os << token.type;
+			break;
+
+		case TokenType::END: 
+			os << ""; 
+			break;
+	}
+	return os;
+}

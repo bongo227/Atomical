@@ -12,7 +12,7 @@ TEST_CASE("identifiers") {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(c);
         std::deque<Token> tokens = lexer->lex();
-        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(2, tokens.size());
         REQUIRE_EQ(TokenType::IDENT, tokens[0].type);
         REQUIRE_EQ(c, tokens[0].value);
     }
@@ -32,7 +32,7 @@ TEST_CASE("numbers") {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         std::deque<Token> tokens = lexer->lex();
-        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(2, tokens.size());
         REQUIRE_EQ(std::get<1>(c), tokens[0].type);
         REQUIRE_EQ(std::get<2>(c), tokens[0].value);    
     }
@@ -52,7 +52,7 @@ TEST_CASE("strings") {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         auto tokens = lexer->lex();
-        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(2, tokens.size());
         REQUIRE_EQ(std::get<1>(c), tokens[0].type);
         REQUIRE_EQ(std::get<2>(c), tokens[0].value);
     }
@@ -127,16 +127,16 @@ TEST_CASE("symbols") {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         std::deque<Token> tokens = lexer->lex();
-        REQUIRE_EQ(1, tokens.size());
-        REQUIRE_EQ(std::get<1>(c), tokens[0].type);
-        REQUIRE_EQ(std::get<2>(c), tokens[0].value);
+        // REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(std::get<1>(c), tokens.front().type);
+        REQUIRE_EQ(std::get<2>(c), tokens.front().value);
     }
 }
 
 TEST_CASE("line numbers") {
     Lexer *lexer = new Lexer("1\n2\n3");
     std::deque<Token> tokens = lexer->lex();
-    REQUIRE_EQ(5, tokens.size());
+    REQUIRE_EQ(6, tokens.size());
     for (int i = 0; i < 0; i++) {
         REQUIRE_EQ(i+1, tokens[i].line);
     }
@@ -146,18 +146,10 @@ TEST_CASE("column numbers") {
     Lexer *lexer = new Lexer("foo bar baz");
     std::deque<Token> tokens = lexer->lex();
  
-    REQUIRE_EQ(3, tokens.size());
+    REQUIRE_EQ(4, tokens.size());
     REQUIRE_EQ(1, tokens[0].column);
     REQUIRE_EQ(5, tokens[1].column);
     REQUIRE_EQ(9, tokens[2].column);
-}
-
-TEST_CASE("semicolon insertion") {
-    Lexer *lexer = new Lexer("foo\nbar");
-    std::deque<Token> tokens = lexer->lex();
-
-    REQUIRE_EQ(3, tokens.size());
-    REQUIRE_EQ(TokenType::SEMI, tokens[1].type);
 }
 
 TEST_CASE("keywords") {
@@ -186,8 +178,39 @@ TEST_CASE("keywords") {
     for (auto c : cases) {
         Lexer *lexer = new Lexer(std::get<0>(c));
         std::deque<Token> tokens = lexer->lex();
-        REQUIRE_EQ(1, tokens.size());
+        REQUIRE_EQ(2, tokens.size());
         REQUIRE_EQ(std::get<1>(c), tokens[0].type);
+    }
+}
+
+TEST_CASE("semicolon insertion") {
+    auto cases = {
+        std::make_tuple("{ }", "{ };"),
+        std::make_tuple("{ }\n", "{ };"),
+        std::make_tuple("{ a := 0 }", "{ a := 0; };"),
+        std::make_tuple("{ a := 0; b := 0 }", "{ a := 0; b := 0; };"),
+        std::make_tuple("{ a := 0\n b := 0 }", "{ a := 0; b := 0; };"),
+        std::make_tuple("{ for i := 0; i < 123; i++ { } }", "{ for i := 0; i < 123; i++ { }; };"),
+        std::make_tuple("if foo { }", "if foo { };"),
+        std::make_tuple("if foo { } else { }", "if foo { } else { };"),
+        std::make_tuple("for a := 0; a < 20; a += 1 { }", "for a := 0; a < 20; a += 1 { };"),
+        std::make_tuple("a\n\n", "a;"),
+    };
+
+    for (auto c : cases) {
+        std::deque<Token> tokens = Lexer(std::get<0>(c)).lex();
+        std::ostringstream os;
+        for (int i = 0; i < tokens.size(); i++) {
+            os << tokens[i];
+            if (i < tokens.size() - 1 && 
+                tokens[i+1].type != TokenType::SEMI &&
+                tokens[i+1].type != TokenType::INC) os << " ";
+        }
+
+        std::string formatted = os.str(); 
+
+        std::string expected = std::get<1>(c);
+        REQUIRE_EQ(formatted, expected);
     }
 }
 

@@ -1,85 +1,85 @@
 TEST_SUITE_BEGIN("Ast");
 
 TEST_CASE("identifier expressions equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Expression::Ident("foo"), 
         *Expression::Ident("foo")
     );
     
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Ident("foo"), 
         *Expression::Ident("bar")
     );
 }
 
 TEST_CASE("literal expressions equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Expression::Literal(TokenType::INT, "100"), 
         *Expression::Literal(TokenType::INT, "100")
     );
     
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Literal(TokenType::INT, "100"), 
         *Expression::Literal(TokenType::FLOAT, "100")
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Literal(TokenType::INT, "100"), 
         *Expression::Literal(TokenType::INT, "200")
     );
 }
 
 TEST_CASE("unary expressions equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Expression::Unary(TokenType::NOT, Expression::Ident("a")), 
         *Expression::Unary(TokenType::NOT, Expression::Ident("a"))
     );
     
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
         *Expression::Unary(TokenType::NOT, Expression::Ident("b"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
         *Expression::Unary(TokenType::SUB, Expression::Ident("a"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
         *Expression::Unary(TokenType::NOT, Expression::Literal(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("binary expressions equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
         *Expression::Binary(TokenType::SUB, Expression::Ident("a"), Expression::Ident("b"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
         *Expression::Binary(TokenType::ADD, Expression::Ident("b"), Expression::Ident("b"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("a"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Binary(TokenType::ADD, 
             Expression::Ident("a"), Expression::Ident("b")),
         *Expression::Binary(TokenType::ADD, 
             Expression::Literal(TokenType::INT, "100"), Expression::Ident("b"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), 
             Expression::Ident("b")),
         *Expression::Binary(TokenType::ADD, Expression::Ident("a"), 
@@ -88,98 +88,98 @@ TEST_CASE("binary expressions equal") {
 }
 
 TEST_CASE("call expressions equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Expression::Call("foo", {}),
         *Expression::Call("foo", {})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Call("foo", {}),
         *Expression::Call("bar", {})
     );
 
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Expression::Call("foo", {Expression::Ident("a")}),
         *Expression::Call("foo", {Expression::Ident("a")})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Call("foo", {Expression::Ident("a")}),
         *Expression::Call("foo", {})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Call("foo", {Expression::Ident("a")}),
         *Expression::Call("foo", {Expression::Ident("b")})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Expression::Call("foo", {Expression::Ident("a")}),
         *Expression::Call("foo", {Expression::Literal(TokenType::INT, "100")})
     );
 }
 
 TEST_CASE("return statements equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Statement::Return(Expression::Ident("a")),
         *Statement::Return(Expression::Ident("a"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Return(Expression::Ident("a")),
         *Statement::Return(Expression::Ident("b"))
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Return(Expression::Ident("a")),
         *Statement::Return(Expression::Literal(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("block statements equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Statement::Block({}),
         *Statement::Block({})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Block({Statement::Return(Expression::Ident("a"))}),
         *Statement::Block({})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Block({Statement::Return(Expression::Ident("a"))}),
         *Statement::Block({Statement::Return(Expression::Ident("b"))})
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Block({Statement::Return(Expression::Ident("a"))}),
         *Statement::Block({Statement::Block({})})
     );
 }
 
 TEST_CASE("if statements equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
         *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL)
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
         *Statement::If(Expression::Ident("bar"), Statement::Block({}), NULL)
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
         *Statement::If(Expression::Literal(TokenType::INT, "100"), Statement::Block({}), NULL)
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
         *Statement::If(Expression::Ident("foo"), Statement::Block({Statement::Block({})}), NULL)
     );
 
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Statement::If(
             Expression::Ident("foo"),
             Statement::Block({}),
@@ -192,7 +192,7 @@ TEST_CASE("if statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::If(
             Expression::Ident("foo"),
             Statement::Block({}),
@@ -209,7 +209,7 @@ TEST_CASE("if statements equal") {
 }
 
 TEST_CASE("for statements equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Statement::For(
             Statement::Assign(
                 Expression::Ident("a"), 
@@ -252,7 +252,7 @@ TEST_CASE("for statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
                 Expression::Ident("a"), 
@@ -295,7 +295,7 @@ TEST_CASE("for statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
                 Expression::Ident("a"), 
@@ -338,7 +338,7 @@ TEST_CASE("for statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
                 Expression::Ident("a"), 
@@ -381,7 +381,7 @@ TEST_CASE("for statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
                 Expression::Ident("a"), 
@@ -422,7 +422,7 @@ TEST_CASE("for statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
                 Expression::Ident("a"), 
@@ -463,7 +463,7 @@ TEST_CASE("for statements equal") {
 }
 
 TEST_CASE("assignment statements equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
@@ -476,7 +476,7 @@ TEST_CASE("assignment statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
@@ -489,7 +489,7 @@ TEST_CASE("assignment statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
@@ -502,7 +502,7 @@ TEST_CASE("assignment statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
@@ -515,7 +515,7 @@ TEST_CASE("assignment statements equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         *Statement::Assign(
             Expression::Ident("foo"),
             TokenType::ADD_ASSIGN,
@@ -530,7 +530,7 @@ TEST_CASE("assignment statements equal") {
 }
 
 TEST_CASE("functions equal") {
-    CHECK_EQ(
+    REQUIRE_EQ(
         Function(
             "foo",
             {},
@@ -545,7 +545,7 @@ TEST_CASE("functions equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         Function(
             "foo",
             {},
@@ -560,7 +560,7 @@ TEST_CASE("functions equal") {
         )
     );
 
-    CHECK_EQ(
+    REQUIRE_EQ(
         Function(
             "foo",
             {
@@ -587,7 +587,7 @@ TEST_CASE("functions equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         Function(
             "foo",
             {
@@ -614,7 +614,7 @@ TEST_CASE("functions equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         Function(
             "foo",
             {
@@ -641,7 +641,7 @@ TEST_CASE("functions equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         Function(
             "foo",
             {},
@@ -665,7 +665,7 @@ TEST_CASE("functions equal") {
         )
     );
 
-    CHECK_NE(
+    REQUIRE_NE(
         Function(
             "foo",
             {

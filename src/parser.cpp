@@ -59,7 +59,6 @@ void Parser::accept(TokenType type) {
 Statement *Parser::parse_return_statement() {
     expect(TokenType::RETURN);
     Statement *smt = Statement::Return(parse_expression(0));;
-    accept(TokenType::SEMI);
     return smt;
 }
 
@@ -93,6 +92,7 @@ Statement *Parser::parse_if_statement() {
             elses = Statement::If(NULL, parse_block_statement(), NULL);
         }
     }
+
     return Statement::If(condition, body, elses);
 }
 
@@ -100,9 +100,10 @@ Statement *Parser::parse_for_statement() {
     expect(TokenType::FOR);
 
     Statement *declaration = parse_assign_statement();
+    expect(TokenType::SEMI);
     Expression *condition = parse_expression(0);
     expect(TokenType::SEMI);
-    Statement *increment = parse_statement();
+    Statement *increment = parse_assign_statement();
     Statement *body = parse_block_statement();
 
     return Statement::For(declaration, condition, increment, body);
@@ -113,20 +114,43 @@ Statement *Parser::parse_assign_statement() {
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
-    accept(TokenType::SEMI);
     return Statement::Assign(ident, type.type, value); 
 }
 
 Statement *Parser::parse_statement() {
+    Statement *statement = nullptr;
     switch(tokens.front().type) {
-        case TokenType::RETURN: return parse_return_statement();
-        case TokenType::LBRACE: return parse_block_statement();
-        case TokenType::IF: return parse_if_statement();
-        case TokenType::FOR: return parse_for_statement();
-        case TokenType::IDENT: return parse_assign_statement();
-        default: assert(false); // expected statement
+        case TokenType::RETURN: {
+            statement = parse_return_statement();
+            break;
+        } 
+        case TokenType::LBRACE: {
+            statement = parse_block_statement();
+            break;
+        } 
+        case TokenType::IF: {
+            statement = parse_if_statement();
+            break;
+        } 
+        case TokenType::IDENT: {
+            statement = parse_assign_statement();
+            break;
+        } 
+        case TokenType::FOR: {
+            statement = parse_for_statement();
+            break;
+        } 
+        default: {
+            std::cout << "Expected statement, got token: \"" 
+                      << tokens.front().type
+                      << "\""
+                      << std::endl;
+            assert(false);
+            break;
+        }
     }
-    return NULL;
+    expect(TokenType:: SEMI);
+    return statement;
 }
 
 Expression *Parser::parse_expression(int rbp) {
@@ -164,6 +188,10 @@ Expression *Parser::nud(Token token) {
         }
 
         default:
+            std::cout << "Expected prefix token, got token: \"" 
+                << token.type
+                << "\""
+                << std::endl;
             assert(false); // Expected a prefix token
     }
     return NULL;
@@ -238,14 +266,21 @@ Function *Parser::parse_function() {
 
     std::vector<std::tuple<Type *, std::string>> returns;
     while(tokens.front().type != TokenType::LBRACE) {
-        if (returns.size()) expect(TokenType::COMMA);
+        if (returns.size()) 
+            expect(TokenType::COMMA);
+        
         Type *type = parse_type();
-        Token ident = expect(TokenType::IDENT);
-        std::string name = ident.value;
+        
+        std::string name = "";
+        if(tokens.front().type == TokenType::IDENT)
+            name = expect(TokenType::IDENT).value;
+
         returns.push_back(std::make_tuple(type, name));
     }
 
     Statement *body = parse_block_statement();
 
+    expect(TokenType::SEMI);
+    
     return new Function(ident.value, arguments, returns, body);
 }

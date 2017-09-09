@@ -16,10 +16,14 @@ class Irgen {
     public:
         explicit Irgen(std::vector<Function *> functions) : 
             var_id(0), block_id(0), functions(functions) {}
+
         explicit Irgen(std::string source) : Irgen(Parser(source).parse()) {}
 
         Value *gen(Expression *exp) {
             switch(exp->type) {
+                case Expression::IDENT: {
+                    assert(false);
+                }
                 case Expression::LITERAL: {
                     return new Const(
                         new PrimitiveType(exp->literal.type), 
@@ -38,8 +42,13 @@ class Irgen {
                     current_block->append_instruction(op);
                     return static_cast<Value *>(op);
                 }
-                default: {
+                case Expression::CALL: {
+                    std::cout << "Function name: " << exp->call.function_name 
+                        << std::endl;
                     assert(false);
+                    // std::vector<Value> values();
+                    // for(Expression e : exp->call.)
+                    // Value *value = gen()
                 }
             }
         }

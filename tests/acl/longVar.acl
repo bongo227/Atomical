@@ -1,4 +1,0 @@
-proc main :: -> int {
-    var int a = 123
-    return a
-}

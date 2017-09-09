@@ -321,7 +321,7 @@ std::deque<Token> Lexer::lex() {
                     token.type = TokenType::SEMI;
                     column = 1;
                     line++;
-                    semi = true;
+                    semi = false;
                     break;
                 case '"':
                     token.type = TokenType::STRING;
@@ -376,8 +376,21 @@ std::deque<Token> Lexer::lex() {
 					break;
 
 				case '}':
-					semi = true;
-					token.type = TokenType::RBRACE;
+                    semi = true;
+
+                    // Insert semicolon for last statement in a block
+                    if (tokens.size() && 
+                        tokens.back().type != TokenType::SEMI && 
+                        tokens.back().type != TokenType::LBRACE) {
+                        
+                            token.type = TokenType::SEMI;
+                        column = 1;
+                        line++;
+                        tokens.push_back(token);
+                    }
+                    
+                    token = {TokenType::ILLEGAL, line, column, ""};
+                    token.type = TokenType::RBRACE;
 					break;
 
 				case '+':
@@ -447,6 +460,10 @@ std::deque<Token> Lexer::lex() {
         tokens.push_back(token);
         clear_whitespace();
     }
+
+    if (semi && tokens.back().type != TokenType::SEMI)
+        tokens.push_back({TokenType::SEMI, line, column, ""});
+    
 
     return tokens;
 }

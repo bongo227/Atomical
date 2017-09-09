@@ -8,11 +8,16 @@ std::string get_file_string(){
 TEST_CASE("Gen Test") {
 	namespace fs = std::experimental::filesystem;
 	std::string acls_path = "../tests/acl/";
+	MESSAGE("testing");
 	for (auto &p : fs::directory_iterator(acls_path)) {
 		// Build file paths
 		std::string acl_string_path = p.path().string();
 		std::string ir_string_path = acl_string_path;
-		
+		MESSAGE("Gen: " << acl_string_path);
+
+		int ii =  199;
+		CAPTURE(ii);
+
 		auto i = ir_string_path.find("/acl/");
 		if (i != std::string::npos)
 			ir_string_path.replace(i, 5, "/ir/");
@@ -36,7 +41,7 @@ TEST_CASE("Gen Test") {
 			std::istreambuf_iterator<char>());
 
 		// Check ir
-		Irgen irgen(acl);
-		CHECK_EQ(irgen.to_string(), ir);		
+		Irgen irgen = Irgen(acl);
+		REQUIRE_EQ(irgen.to_string(), ir);		
 	}
 }
