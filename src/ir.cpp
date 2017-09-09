@@ -13,6 +13,7 @@ struct Instruction {
 
 struct BasicBlock {
     int id;
+    std::vector<BasicBlock *> preds;
     std::vector<Instruction *> instructions;
     Instruction *terminatator;
 
@@ -44,7 +45,7 @@ struct IrFunction {
     std::string name;
     std::vector<std::tuple<Type *, std::string>> arguments;
     std::vector<std::tuple<Type *, std::string>> returns;
-    std::vector<BasicBlock> blocks;
+    std::vector<BasicBlock *> blocks;
 
     IrFunction(
         std::string name,
@@ -52,7 +53,7 @@ struct IrFunction {
         std::vector<std::tuple<Type *, std::string>> returns) : 
             name(name), arguments(arguments), returns(returns) {}
 
-    void append_block(BasicBlock block) {
+    void append_block(BasicBlock *block) {
         blocks.push_back(block);
     }
 
@@ -80,7 +81,7 @@ struct IrFunction {
         stream << ":" << std::endl;
         
         for(int i = 0; i < blocks.size(); i++) {
-            stream << blocks[i];
+            stream << *blocks[i];
             if (i < blocks.size()-1) stream << std::endl;
         }
 
@@ -215,3 +216,17 @@ struct Ret : public Instruction {
     }
 };
 
+struct Branch : public Instruction {
+    int block_id;
+
+    Branch(int block_id) : Instruction(), block_id(block_id) {}
+
+    void print_instruction(std::ostream &os) const {
+        os << "br b" << block_id; 
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const Branch &branch) {
+        branch.print_instruction(os);
+        return os;
+    }
+};
