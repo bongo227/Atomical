@@ -4,6 +4,26 @@ class Irgen {
         BasicBlock *current_block;
         Function *current_function;
 
+        std::map<std::string, std::map<int, Value *>> current_def;
+        
+        void write_var(std::string var_name, int block_id, Value *value) {
+            current_def[var_name][block_id] = value;
+        }
+
+        void write_var(std::string var_name, Value *value) {
+            current_def[var_name][current_block->id] = value;
+        }
+
+        Value *read_var(std::string var_name, int block_id) {
+            auto m = current_def[var_name];
+            if (m.find(block_id) != m.end())
+                return current_def[var_name][block_id];
+            assert(false); // global value numbering
+        }
+
+        Value *read_var(std::string var_name) {
+            return read_var(var_name, current_block->id);
+        }
 
         int var_id;
         int next_var_id() {
@@ -24,19 +44,7 @@ class Irgen {
         Value *gen(Expression *exp) {
             switch(exp->type) {
                 case Expression::IDENT: {
-                    // TODO: replace with local identifier list
-                    for (auto arg : current_function->arguments) {
-                        Type *type = std::get<0>(arg);
-                        std::string name = std::get<1>(arg);
-
-                        if (name == exp->ident) {
-                            Arg *arg = new Arg(next_var_id(), type, name);
-                            current_block->append_instruction(arg);
-                            return static_cast<Value *>(arg);
-                        }
-                    }
-
-                    assert(false);
+                    return read_var(exp->ident);
                 }
                 case Expression::LITERAL: {
                     return new Const(
@@ -83,21 +91,41 @@ class Irgen {
         }
 
         BasicBlock gen(std::vector<Statement *> block) {
-            current_block = new BasicBlock(next_block_id());
+            BasicBlock *new_block = new BasicBlock(next_block_id());
+            current_block = new_block;
             for (Statement *s : block) { gen(s); }
-            return *current_block;
+            return *new_block;
         }
 
         IrFunction gen(Function *func) {
+            current_function = func;
+            
+            // Create entry block
+            BasicBlock *entry_block = new BasicBlock(next_block_id());
+            current_block = entry_block;
+
+            // Generate argument values
+            for (auto arg : current_function->arguments) {
+                Type *type = std::get<0>(arg);
+                std::string name = std::get<1>(arg);
+                Arg *arg_value = new Arg(next_var_id(), type, name);
+                current_block->append_instruction(arg_value);
+                write_var(name, arg_value);
+            }
+
+            // Generate entry block
+            for (Statement *s : func->body->block) gen(s);
+
+            // Create ir function
             IrFunction ir_func = IrFunction(func->name, func->arguments, func->returns);
-            ir_func.append_block(gen(func->body->block));
+            ir_func.append_block(*entry_block);
+            
             return ir_func;
         }
 
         std::vector<IrFunction> gen(std::vector<Function *> funcs) {
             std::vector<IrFunction> ir_funcs = {};
             for (Function *func : funcs) {
-                current_function = func;
                 ir_funcs.push_back(gen(func));
             }
             return ir_funcs;
