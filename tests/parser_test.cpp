@@ -312,4 +312,30 @@ TEST_CASE("assign statement") {
     ))
 }
 
+TEST_CASE("multiple proc statements") {
+    auto funcs = Parser("proc main :: -> {}\n\n"
+                        "proc bar :: -> {}").parse();
+    CHECK_EQ(funcs.size(), 2);
+
+    CHECK_EQ(*funcs[0], Function("main", {}, {}, Statement::Block({})));
+    CHECK_EQ(*funcs[1], Function("bar", {}, {}, Statement::Block({})));
+}
+
+TEST_CASE("acl test files") {
+    namespace fs = std::experimental::filesystem;
+	std::string acls_path = "../tests/acl/";
+	for (auto &p : fs::directory_iterator(acls_path)) {
+		// read file
+		std::string acl_string_path = p.path().string();
+		fs::path acl_path = fs::path(acl_string_path);
+		std::ifstream acl_file(acl_path.string());
+		std::string acl((std::istreambuf_iterator<char>(acl_file)),
+			std::istreambuf_iterator<char>());
+        
+        // check it parses
+        CHECK_EQ(acl_string_path, acl_string_path);
+        auto funcs = Parser(acl).parse();
+	}
+}    
+
 TEST_SUITE_END();

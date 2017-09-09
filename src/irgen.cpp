@@ -16,6 +16,7 @@ class Irgen {
     public:
         explicit Irgen(std::vector<Function *> functions) : 
             var_id(0), block_id(0), functions(functions) {}
+
         explicit Irgen(std::string source) : Irgen(Parser(source).parse()) {}
 
         Value *gen(Expression *exp) {
@@ -37,6 +38,14 @@ class Irgen {
                     UnaryOp *op = new UnaryOp(next_var_id(), value, exp->unary.type);
                     current_block->append_instruction(op);
                     return static_cast<Value *>(op);
+                }
+                case Expression::CALL: {
+                    std::cout << "Function name: " << exp->call.function_name 
+                        << std::endl;
+                    assert(false);
+                    // std::vector<Value> values();
+                    // for(Expression e : exp->call.)
+                    // Value *value = gen()
                 }
                 default: {
                     assert(false);

@@ -153,11 +153,28 @@ TEST_CASE("column numbers") {
 }
 
 TEST_CASE("semicolon insertion") {
-    Lexer *lexer = new Lexer("foo\nbar");
-    std::deque<Token> tokens = lexer->lex();
+    auto cases = {
+        std::make_tuple("proc foo :: -> {}", "cproc foo :: -> {}")
+    };
 
-    REQUIRE_EQ(3, tokens.size());
-    REQUIRE_EQ(TokenType::SEMI, tokens[1].type);
+    for (auto c : cases) {
+        std::deque<Token> tokens = Lexer(std::get<0>(c)).lex();
+        std::ostringstream os;
+        for (Token t : tokens) {
+            os << t;
+        }
+        std::string formatted = os.str(); 
+
+        REQUIRE_EQ(formatted, std::get<1>(c));
+    }
+
+    // REQUIRE_EQ(Lexer()->lex(), "proc foo :: -> {}");
+    
+    // Lexer *lexer = new Lexer("foo\nbar");
+    // std::deque<Token> tokens = lexer->lex();
+
+    // REQUIRE_EQ(3, tokens.size());
+    // REQUIRE_EQ(TokenType::SEMI, tokens[1].type);
 }
 
 TEST_CASE("keywords") {

@@ -93,6 +93,11 @@ Statement *Parser::parse_if_statement() {
             elses = Statement::If(NULL, parse_block_statement(), NULL);
         }
     }
+
+    // Skip semi's
+    while(tokens.front().type == TokenType::SEMI)
+        accept(TokenType::SEMI);
+
     return Statement::If(condition, body, elses);
 }
 
@@ -122,9 +127,15 @@ Statement *Parser::parse_statement() {
         case TokenType::RETURN: return parse_return_statement();
         case TokenType::LBRACE: return parse_block_statement();
         case TokenType::IF: return parse_if_statement();
-        case TokenType::FOR: return parse_for_statement();
         case TokenType::IDENT: return parse_assign_statement();
-        default: assert(false); // expected statement
+        case TokenType::FOR: return parse_for_statement();
+        default: {
+            std::cout << "Expected statement, got token: \"" 
+                      << tokens.front().type
+                      << "\""
+                      << std::endl;
+            assert(false);
+        }
     }
     return NULL;
 }
@@ -164,6 +175,10 @@ Expression *Parser::nud(Token token) {
         }
 
         default:
+            std::cout << "Expected prefix token, got token: \"" 
+                << token.type
+                << "\""
+                << std::endl;
             assert(false); // Expected a prefix token
     }
     return NULL;
@@ -238,14 +253,22 @@ Function *Parser::parse_function() {
 
     std::vector<std::tuple<Type *, std::string>> returns;
     while(tokens.front().type != TokenType::LBRACE) {
-        if (returns.size()) expect(TokenType::COMMA);
+        if (returns.size()) 
+            expect(TokenType::COMMA);
+        
         Type *type = parse_type();
-        Token ident = expect(TokenType::IDENT);
-        std::string name = ident.value;
+        
+        std::string name = "";
+        if(tokens.front().type == TokenType::IDENT)
+            name = expect(TokenType::IDENT).value;
+
         returns.push_back(std::make_tuple(type, name));
     }
 
     Statement *body = parse_block_statement();
+
+    while(tokens.front().type == TokenType::SEMI)
+        accept(TokenType::SEMI);
 
     return new Function(ident.value, arguments, returns, body);
 }

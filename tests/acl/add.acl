@@ -1,7 +1,7 @@
-proc add :: int a, int b -> int {
+proc add :: int a, int b -> int c {
     return a + b
 }
 
-proc main :: -> int {
+proc main :: -> int a {
     return add(120, 3)
 }

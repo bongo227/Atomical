@@ -1,3 +1,0 @@
-proc :: -> int {
-    return 123
-}
