@@ -1,13 +1,13 @@
 proc main :: -> int :
 b1:
 	v1 = true
-	condbr v1 b3 b2
-
-b2:
-	v3 = 321
-	ret v3
+	condbr v1 b3 b4
 
 b3:
 	v2 = 123
 	ret v2
+
+b4:
+	v3 = 321
+	ret v3
 

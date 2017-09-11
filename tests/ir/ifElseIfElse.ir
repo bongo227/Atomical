@@ -1,0 +1,21 @@
+proc main :: -> int :
+b1:
+	v1 = false
+	condbr v1 b3 b4
+
+b3:
+	v2 = 321
+	ret v2
+
+b4:
+	v3 = true
+	condbr v3 b5 b6
+
+b5:
+	v4 = 123
+	ret v4
+
+b6:
+	v5 = 0
+	ret v5
+

@@ -54,6 +54,16 @@ class Irgen {
             return new_block;
         }
 
+        void destroy_basic_block(int block_id) {
+            int i = 0;
+            for(BasicBlock *block : current_ir_function->blocks) {
+                if (block->id == block_id) break; 
+                i++;
+            }
+
+            current_ir_function->blocks.erase(current_ir_function->blocks.begin() + i);
+        }
+
     public:
         explicit Irgen(std::vector<Function *> functions) 
             : var_id_counter(0), block_id_counter(0), functions(functions) {}
@@ -97,6 +107,61 @@ class Irgen {
             }
         }
 
+        void gen_if_branch(Statement *smt, BasicBlock *parent_block, 
+            BasicBlock *end_block) {
+            
+            assert(smt->type == Statement::IF);
+            
+            if(!smt->ifs.condition) {
+                // Statment is an else block, gen and exit
+                BasicBlock *out_block = gen_block(parent_block, smt->ifs.body->block);
+                
+                // If "else" doesnt terminate, branch to end block
+                if (!out_block->is_terminated()) {
+                    out_block->append_instruction(new Branch(end_block->id));
+                    current_block = end_block;
+                } else {
+                    current_block = out_block;
+                    destroy_basic_block(end_block->id);
+                }
+                
+                return;
+            }
+
+            // Generate conditional
+            Value *condition = gen(smt->ifs.condition);
+            
+            // If we wernt passed a parent block, assume current block
+            if (!parent_block)
+                parent_block = current_block;
+
+            // true block for if the conditional is true
+            BasicBlock *true_block = new_basic_block();
+
+            // false block is either the next else/elseif block if the block to continue from
+            BasicBlock *false_block = end_block;
+            if(smt->ifs.elses)
+                false_block = new_basic_block();
+
+            // generate the true block
+            BasicBlock *out_block = gen_block(true_block, smt->ifs.body->block);
+            if (!out_block->is_terminated())
+                out_block->append_instruction(new Branch(end_block->id));
+
+            // Branch into "if branch" from parent
+            parent_block->append_instruction(
+                new ConditionalBranch(true_block->id, false_block->id, condition));
+                
+            // TODO: do we need this?
+            current_block = false_block;
+
+            // Generate chaining elseif/else statements
+            if (smt->ifs.elses)
+                gen_if_branch(smt->ifs.elses, false_block, end_block);
+                
+            current_block = end_block;
+        }
+
         // TODO: rename these, no point calling them all gen
         Instruction *gen(Statement *smt) {
             switch (smt->type) {
@@ -107,35 +172,22 @@ class Irgen {
                     return ins;
                 }
                 case Statement::BLOCK: {
-                    BasicBlock *new_block = gen(smt->block);
+                    BasicBlock *new_block = new_basic_block();
+                    BasicBlock *out_block = gen_block(new_block, smt->block);
                     BasicBlock *continue_block = new_basic_block();
                     
                     new_block->preds.push_back(current_block);
                     continue_block->preds.push_back(current_block);
                     
                     current_block->append_instruction(new Branch(new_block->id));
-                    new_block->append_instruction(new Branch(continue_block->id));
+                    out_block->append_instruction(new Branch(continue_block->id));
                     current_block = continue_block;
                     return NULL; 
                 }
                 case Statement::IF: {
-                    // TODO: else/elseif statements
-
-                    Value *condition = gen(smt->ifs.condition);
-
-                    BasicBlock *if_block = gen(smt->ifs.body->block);
-                    BasicBlock *continue_block = new_basic_block();
+                    BasicBlock *end_block = new_basic_block();
+                    gen_if_branch(smt, NULL, end_block);
                     
-                    // current block to if block or continue block
-                    current_block->append_instruction(
-                        new ConditionalBranch(if_block->id, continue_block->id, condition));
-                        
-                        // if block to continue block
-                    if(!if_block->is_terminated())
-                        if_block->append_instruction(new Branch(continue_block->id));
-                        
-                    // Continue from continue block
-                    current_block = continue_block;
                     return NULL;
                 }
                 case Statement::ASSIGN: {
@@ -152,13 +204,13 @@ class Irgen {
             }
         }
 
-        BasicBlock *gen(std::vector<Statement *> block) {
+        BasicBlock *gen_block(BasicBlock *target_block, std::vector<Statement *> block) {
             BasicBlock *old_block = current_block;
-            BasicBlock *new_block = new_basic_block();
-            current_block = new_block;
+            current_block = target_block;
             for (Statement *s : block) { gen(s); }
+            BasicBlock *out_block = current_block;
             current_block = old_block;
-            return new_block;
+            return out_block;
         }
 
         IrFunction *gen(Function *func) {
