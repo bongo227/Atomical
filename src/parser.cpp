@@ -174,6 +174,14 @@ Expression *Parser::nud(Token token) {
             return Expression::Ident(token.value);
         }
 
+        case TokenType::BOOL_FALSE: {
+            return Expression::Literal(token.type, "false");
+        }
+
+        case TokenType::BOOL_TRUE: {
+            return Expression::Literal(token.type, "true");
+        }
+
         case TokenType::INT:
         case TokenType::FLOAT:
         case TokenType::HEX:

@@ -242,6 +242,8 @@ std::tuple<TokenType, std::string> Lexer::next_ident() {
     else if(ident == "switch") type = TokenType::SWITCH;
     else if(ident == "type") type = TokenType::TYPE;
     else if(ident == "var") type = TokenType::VAR;
+    else if(ident == "true") type = TokenType::BOOL_TRUE;
+    else if(ident == "false") type = TokenType::BOOL_FALSE;
 
     return std::make_tuple(type, ident);
 }

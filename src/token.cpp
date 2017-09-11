@@ -2,6 +2,10 @@ enum class TokenType {
     ILLEGAL,
 	IDENT,
 	
+	// values
+	BOOL_TRUE,
+	BOOL_FALSE,
+
 	// literals
 	INT,
 	FLOAT,
@@ -88,7 +92,10 @@ std::ostream &operator<<(std::ostream &os, const TokenType &type) {
 	switch(type) {
 		case TokenType::ILLEGAL: os << "[ILLEGAL TOKEN]"; break;
 		case TokenType::IDENT: os << "[IDENT]"; break;
-		
+
+		case TokenType::BOOL_TRUE: os << "true"; break;
+		case TokenType::BOOL_FALSE: os << "false"; break;
+
 		case TokenType::INT: os << "[INT]"; break;
 		case TokenType::FLOAT: os << "[FLOAT]"; break;
 		case TokenType::HEX: os << "[HEX]"; break;
@@ -245,7 +252,9 @@ std::ostream &operator<<(std::ostream &os, const Token &token) {
 		case TokenType::STRING:
 			os << token.value;
 			break;
-		
+			
+		case TokenType::BOOL_TRUE:
+		case TokenType::BOOL_FALSE:
 		case TokenType::BREAK:
 		case TokenType::CASE:
 		case TokenType::CONST:

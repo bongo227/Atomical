@@ -5,6 +5,7 @@ b1:
 
 b2:
 	v2 = 5
+	br b3
 
 b3:
 	ret v1

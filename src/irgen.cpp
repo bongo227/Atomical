@@ -27,6 +27,7 @@ class Irgen {
 
         Value *read_var_recursive(std::string var_name, BasicBlock *block) {
             Value *value;
+            std::cout << "Blocks: " << block->preds.size() << std::endl;
             if (block->preds.size() == 1) {
                 // One predessor, no phi needed
                 value = read_var(var_name, block->preds[0]);
@@ -96,6 +97,7 @@ class Irgen {
             }
         }
 
+        // TODO: rename these, no point calling them all gen
         Instruction *gen(Statement *smt) {
             switch (smt->type) {
                 case Statement::RETURN: {
@@ -105,19 +107,36 @@ class Irgen {
                     return ins;
                 }
                 case Statement::BLOCK: {
-                    BasicBlock new_block = gen(smt->block);
+                    BasicBlock *new_block = gen(smt->block);
                     BasicBlock *continue_block = new_basic_block();
                     
-                    new_block.preds.push_back(current_block);
+                    new_block->preds.push_back(current_block);
                     continue_block->preds.push_back(current_block);
                     
-                    current_block->append_instruction(new Branch(new_block.id));
-                    new_block.append_instruction(new Branch(continue_block->id));
+                    current_block->append_instruction(new Branch(new_block->id));
+                    new_block->append_instruction(new Branch(continue_block->id));
                     current_block = continue_block;
                     return NULL; 
                 }
                 case Statement::IF: {
-                    assert(false);
+                    // TODO: else/elseif statements
+
+                    Value *condition = gen(smt->ifs.condition);
+
+                    BasicBlock *if_block = gen(smt->ifs.body->block);
+                    BasicBlock *continue_block = new_basic_block();
+                    
+                    // current block to if block or continue block
+                    current_block->append_instruction(
+                        new ConditionalBranch(if_block->id, continue_block->id, condition));
+                        
+                        // if block to continue block
+                    if(!if_block->is_terminated())
+                        if_block->append_instruction(new Branch(continue_block->id));
+                        
+                    // Continue from continue block
+                    current_block = continue_block;
+                    return NULL;
                 }
                 case Statement::ASSIGN: {
                     std::string var_name = smt->assign.variable->ident;
@@ -133,13 +152,13 @@ class Irgen {
             }
         }
 
-        BasicBlock gen(std::vector<Statement *> block) {
+        BasicBlock *gen(std::vector<Statement *> block) {
             BasicBlock *old_block = current_block;
             BasicBlock *new_block = new_basic_block();
             current_block = new_block;
             for (Statement *s : block) { gen(s); }
             current_block = old_block;
-            return *new_block;
+            return new_block;
         }
 
         IrFunction *gen(Function *func) {

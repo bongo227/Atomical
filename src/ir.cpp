@@ -1,5 +1,11 @@
 struct Instruction {
-    Instruction () {}
+    bool terminatator;
+
+    Instruction (bool terminatator) : terminatator(terminatator) {}
+
+    bool is_terminator() {
+        return terminatator;
+    }
 
     virtual void print_instruction(std::ostream& os) const {
         os << "[INVALID INSTRUCTION]";
@@ -23,6 +29,11 @@ struct BasicBlock {
         instructions.push_back(i);
         terminatator = i;
         return;
+    }
+
+    bool is_terminated() {
+        if(!terminatator) return false;
+        return terminatator->is_terminator();
     }
 
     std::string to_string() const {
@@ -115,7 +126,7 @@ struct Const : public Instruction, public Value {
     std::string value;
 
     Const(int id, Type *type, std::string value) 
-        : Instruction(), Value(id, type), value(value) {}
+        : Instruction(false), Value(id, type), value(value) {}
 
     void print_instruction(std::ostream &os) const {
         os << static_cast<Value>(*this) << " = " << value;
@@ -130,7 +141,7 @@ struct Const : public Instruction, public Value {
 struct Arg : public Instruction, public Value {
     std::string name;
 
-    Arg(int id, Type *type, std::string name) : Instruction(), Value(id, type), name(name) {}
+    Arg(int id, Type *type, std::string name) : Instruction(false), Value(id, type), name(name) {}
 
     void print_instruction(std::ostream& os) const {
         os << static_cast<Value>(*this) << " = " << "argument " << name;
@@ -147,7 +158,7 @@ struct Call : public Instruction, public Value {
     std::vector<Value *> args;
 
     Call(int id, std::string function_name, std::vector<Value *> args) 
-        : Value(id, NULL), function_name(function_name), args(args) {}
+        : Instruction(false), Value(id, NULL), function_name(function_name), args(args) {}
 
     void print_instruction(std::ostream& os) const {
         os << static_cast<Value>(*this) << " = " << function_name << "(";
@@ -170,7 +181,7 @@ struct BinOp : public Instruction, public Value {
     TokenType op;
 
     BinOp(int id, Value *lhs, Value *rhs, TokenType op)
-        : Instruction(), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
+        : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
         // assert(*lhs.type == *rhs.type);
     }
 
@@ -189,7 +200,7 @@ struct UnaryOp : public Instruction, public Value {
     TokenType op;
 
     UnaryOp(int id, Value *value, TokenType op) 
-        : Instruction(), Value(id, value->type), value(value), op(op) {}
+        : Instruction(false), Value(id, value->type), value(value), op(op) {}
 
     void print_instruction(std::ostream& os) const {
         os << static_cast<Value>(*this) << " = " << op << *value;
@@ -204,7 +215,7 @@ struct UnaryOp : public Instruction, public Value {
 struct Ret : public Instruction {
     Value *val;
     
-    Ret(Value *val) : Instruction(), val(val) {}
+    Ret(Value *val) : Instruction(true), val(val) {}
 
     void print_instruction(std::ostream& os) const {
         os << "ret " << *val;
@@ -219,13 +230,34 @@ struct Ret : public Instruction {
 struct Branch : public Instruction {
     int block_id;
 
-    Branch(int block_id) : Instruction(), block_id(block_id) {}
+    Branch(int block_id) : Instruction(true), block_id(block_id) {}
 
     void print_instruction(std::ostream &os) const {
         os << "br b" << block_id; 
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Branch &branch) {
+        branch.print_instruction(os);
+        return os;
+    }
+};
+
+struct ConditionalBranch : public Instruction {
+    int true_block_id;
+    int false_block_id;
+    Value *condition;
+
+    ConditionalBranch(int true_block_id, int false_block_id, Value *condition) : 
+        Instruction(true), true_block_id(true_block_id), false_block_id(false_block_id), 
+        condition(condition) {}
+
+    void print_instruction(std::ostream &os) const {
+        os << "condbr " << *condition 
+           << " b" << true_block_id 
+           << " b" << false_block_id;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const ConditionalBranch &branch) {
         branch.print_instruction(os);
         return os;
     }

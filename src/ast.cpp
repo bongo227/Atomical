@@ -23,6 +23,7 @@ enum class Primitive {
     F32,
     F64,
     FLOAT,
+    BOOL,
 };
 
 struct Expression {
@@ -267,6 +268,7 @@ std::ostream &operator<<(std::ostream &os, const Primitive &prim) {
         case Primitive::F32: os << "f32"; break;
         case Primitive::F64: os << "f64"; break;
         case Primitive::FLOAT: os << "float"; break;
+        case Primitive::BOOL: os << "bool"; break;
     }
     return os;
 }
@@ -289,8 +291,14 @@ struct PrimitiveType : Type {
                 prim = Primitive::FLOAT; 
                 break;
             
+            case TokenType::BOOL_TRUE:
+            case TokenType::BOOL_FALSE:
+                prim = Primitive::BOOL;
+                break;
+
             default:
-                assert(false); // not a primitive type
+                std::cout << "\"" << type << "\" is not a primitive type"; 
+                assert(false);
         }
     }
 
