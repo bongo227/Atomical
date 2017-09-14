@@ -1,33 +1,3 @@
-class Parser {
-    std::deque<Token> tokens;
-    
-    public:
-        explicit Parser(std::deque<Token>);
-        explicit Parser(std::string source);
-      
-        std::vector<Function *> parse(); // TODO: consider removing pointer
-      
-        Function *parse_function();
-        Statement *parse_statement();
-        Expression *parse_expression(int rbp);
-        
-
-    private:
-        Token expect(TokenType type);
-        void accept(TokenType type);
-          
-        Statement *parse_return_statement();
-        Statement *parse_block_statement();
-        Statement *parse_if_statement();
-        Statement *parse_for_statement();
-        Statement *parse_assign_statement();
-
-        Expression *nud(Token token);
-        Expression *led(Token token, Expression *expression);
-        
-        Type *parse_type();
-};
-
 Parser::Parser(std::deque<Token> tokens) : tokens(tokens) {}
 
 Parser::Parser(std::string source) : Parser(Lexer(source).lex()) {}
@@ -110,7 +80,7 @@ Statement *Parser::parse_for_statement() {
 }
 
 Statement *Parser::parse_assign_statement() {
-    Expression *ident = Expression::Ident(expect(TokenType::IDENT).value);
+    Expression *ident = new IdentExpression(expect(TokenType::IDENT).value);
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
@@ -171,15 +141,15 @@ Expression *Parser::parse_expression(int rbp) {
 Expression *Parser::nud(Token token) {
     switch(token.type) {
         case TokenType::IDENT: {
-            return Expression::Ident(token.value);
+            return new IdentExpression(token.value);
         }
 
         case TokenType::BOOL_FALSE: {
-            return Expression::Literal(token.type, "false");
+            return new LiteralExpression(token.type, "false");
         }
 
         case TokenType::BOOL_TRUE: {
-            return Expression::Literal(token.type, "true");
+            return new LiteralExpression(token.type, "true");
         }
 
         case TokenType::INT:
@@ -187,12 +157,12 @@ Expression *Parser::nud(Token token) {
         case TokenType::HEX:
         case TokenType::OCTAL:
         case TokenType::STRING: {
-            return Expression::Literal(token.type, token.value);
+            return new LiteralExpression(token.type, token.value);
         }
 
         case TokenType::NOT: 
         case TokenType::SUB: {
-            return Expression::Unary(token.type, parse_expression(60));
+            return new UnaryExpression(token.type, parse_expression(60));
         }
 
         default:
@@ -219,7 +189,7 @@ Expression *Parser::led(Token token, Expression *expression) {
         case TokenType::LSS:
         case TokenType::GEQ:
         case TokenType::LEQ: {
-            return Expression::Binary(token.type, expression, parse_expression(bp));
+            return new BinaryExpression(token.type, expression, parse_expression(bp));
         }
         
         case TokenType::LPAREN: {
@@ -230,7 +200,8 @@ Expression *Parser::led(Token token, Expression *expression) {
             }
             expect(TokenType::RPAREN);
 
-            return Expression::Call(expression->ident, args);
+            // TODO: find a way to remove this cast
+            return new CallExpression(static_cast<IdentExpression *>(expression)->ident, args);
         }
 
         default:

@@ -11,9 +11,17 @@
 #include <streambuf>
 #include <map>
 
+#include "token.h"
+#include "type.h"
+#include "ir.h"
+#include "irgen.h"
+#include "ast.h"
+#include "parser.h"
+
 #include "token.cpp"
+#include "type.cpp"
 #include "ast.cpp"
-#include "lexer.cpp"
-#include "parser.cpp"
 #include "ir.cpp"
 #include "irgen.cpp"
+#include "lexer.cpp"
+#include "parser.cpp"

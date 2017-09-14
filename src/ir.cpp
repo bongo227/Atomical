@@ -1,264 +1,230 @@
-struct Instruction {
-    bool terminatator;
+// Value
 
-    Instruction (bool terminatator) : terminatator(terminatator) {}
+Value::Value(int id, Type *type) : id(id), type(type) {}
 
-    bool is_terminator() {
-        return terminatator;
-    }
+// TODO: rename this to print_value
+void Value::printValue(std::ostream& os) const {
+    os << "v" << id /*<< " : " << *val.type*/;
+}
 
-    virtual void print_instruction(std::ostream& os) const {
-        os << "[INVALID INSTRUCTION]";
-    };
+std::ostream& operator<<(std::ostream& os, const Value& val) {
+    val.printValue(os);
+    return os;                                                         
+}
 
-    friend std::ostream& operator<<(std::ostream& os, const Instruction& ins) {
-        ins.print_instruction(os);
-        return os;                                                         
-    }
+// Instruction
+
+Instruction::Instruction (bool terminatator) : terminatator(terminatator) {}
+
+bool Instruction::is_terminator() {
+    return terminatator;
+}
+
+void Instruction::print_instruction(std::ostream& os) const {
+    os << "[INVALID INSTRUCTION]";
 };
 
-struct BasicBlock {
-    int id;
-    std::vector<BasicBlock *> preds;
-    std::vector<Instruction *> instructions;
-    Instruction *terminatator;
+std::ostream& operator<<(std::ostream& os, const Instruction& ins) {
+    ins.print_instruction(os);
+    return os;                                                         
+}
 
-    BasicBlock(int id) :id(id), instructions({}), terminatator(nullptr) {}
+// BasicBlock
 
-    void append_instruction(Instruction *i) {
-        instructions.push_back(i);
-        terminatator = i;
-        return;
+BasicBlock::BasicBlock(int id) :id(id), instructions({}), terminatator(nullptr) {}
+
+void BasicBlock::append_instruction(Instruction *i) {
+    instructions.push_back(i);
+    terminatator = i;
+    return;
+}
+
+bool BasicBlock::is_terminated() {
+    if(!terminatator) return false;
+    return terminatator->is_terminator();
+}
+
+std::string BasicBlock::to_string() const {
+    std::ostringstream stream;
+    stream << "b" << id << ":" << std::endl;
+    for (auto i : instructions) {
+        stream << "\t" << *i << std::endl;
     }
 
-    bool is_terminated() {
-        if(!terminatator) return false;
-        return terminatator->is_terminator();
-    }
+    return stream.str();;
+}
 
-    std::string to_string() const {
-        std::ostringstream stream;
-        stream << "b" << id << ":" << std::endl;
-        for (auto i : instructions) {
-            stream << "\t" << *i << std::endl;
-        }
+std::ostream& operator<<(std::ostream& os, const BasicBlock &block) {
+    os << block.to_string();
+    return os;
+}
 
-        return stream.str();;
-    }
+// IrFunction
 
-    friend std::ostream& operator<<(std::ostream& os, const BasicBlock& block) {
-        os << block.to_string();
-        return os;
-    }
-};
+IrFunction::IrFunction(
+    std::string name,
+    std::vector<std::tuple<Type *, std::string>> arguments,
+    std::vector<std::tuple<Type *, std::string>> returns) : 
+        name(name), arguments(arguments), returns(returns) {}
 
-struct IrFunction {
-    std::string name;
-    std::vector<std::tuple<Type *, std::string>> arguments;
-    std::vector<std::tuple<Type *, std::string>> returns;
-    std::vector<BasicBlock *> blocks;
 
-    IrFunction(
-        std::string name,
-        std::vector<std::tuple<Type *, std::string>> arguments,
-        std::vector<std::tuple<Type *, std::string>> returns) : 
-            name(name), arguments(arguments), returns(returns) {}
 
-    void append_block(BasicBlock *block) {
-        blocks.push_back(block);
-    }
+void IrFunction::append_block(BasicBlock *block) {
+    blocks.push_back(block);
+}
 
-    std::string to_string() const {
-        std::ostringstream stream;
-        
-        stream << "proc " << name << " :: ";
-        
-        for (size_t i = 0; i < arguments.size(); i++) {
-            auto arg = arguments[i];
-            if(i > 0) stream << ", ";
-            stream << *std::get<0>(arg) << " " << std::get<1>(arg);
-        }
-        
-        if(arguments.size() != 0) stream << " ";
-        
-        stream << "-> ";
-        
-        for (size_t i = 0; i < returns.size(); i++) {
-            auto ret = returns[i];
-            if(i > 0) stream << ", ";
-            stream << *std::get<0>(ret) << " " << std::get<1>(ret);
-        }
-
-        stream << ":" << std::endl;
-        
-        for(int i = 0; i < blocks.size(); i++) {
-            stream << *blocks[i];
-            if (i < blocks.size()-1) stream << std::endl;
-        }
-
-        std::string str = stream.str();
-        return str;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const IrFunction& func) {
-        os << func.to_string();
-        return os;
-    }
-};
-
-struct Value {
-    int id;
-    Type *type;
-
-    Value(int id, Type *type) : id(id), type(type) {}
-
-    virtual void printValue(std::ostream& os) const {
-        os << "v" << id /*<< " : " << *val.type*/;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Value& val) {
-        val.printValue(os);
-        return os;                                                         
-    }
-};
-
-struct Const : public Instruction, public Value {
-    std::string value;
-
-    Const(int id, Type *type, std::string value) 
-        : Instruction(false), Value(id, type), value(value) {}
-
-    void print_instruction(std::ostream &os) const {
-        os << static_cast<Value>(*this) << " = " << value;
-    }
-
-    friend std::ostream &operator<<(std::ostream& os, const Const& con) {
-        con.print_instruction(os);
-        return os;                                                         
-    }
-};
-
-struct Arg : public Instruction, public Value {
-    std::string name;
-
-    Arg(int id, Type *type, std::string name) : Instruction(false), Value(id, type), name(name) {}
-
-    void print_instruction(std::ostream& os) const {
-        os << static_cast<Value>(*this) << " = " << "argument " << name;
-    }
-
-    friend std::ostream &operator<<(std::ostream& os, const Arg& arg) {
-        arg.printValue(os);
-        return os;   
-    }
-};
-
-struct Call : public Instruction, public Value {
-    std::string function_name;
-    std::vector<Value *> args;
-
-    Call(int id, std::string function_name, std::vector<Value *> args) 
-        : Instruction(false), Value(id, NULL), function_name(function_name), args(args) {}
-
-    void print_instruction(std::ostream& os) const {
-        os << static_cast<Value>(*this) << " = " << function_name << "(";
-        for (int i = 0; i < args.size(); i++) {
-            os << *args[i];
-            if (i < args.size() - 1) os << ", ";
-        }
-        os << ")";
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Call& call) {
-        call.print_instruction(os);
-        return os;                                        
-    }
-};
-
-struct BinOp : public Instruction, public Value {
-    Value *lhs;
-    Value *rhs;
-    TokenType op;
-
-    BinOp(int id, Value *lhs, Value *rhs, TokenType op)
-        : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
-        // assert(*lhs.type == *rhs.type);
-    }
-
-    void print_instruction(std::ostream& os) const {
-        os << static_cast<Value>(*this) << " = " << *lhs << " " << op << " " << *rhs;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const BinOp& bin_op) {
-        bin_op.print_instruction(os);
-        return os;                                                         
-    }
-};
-
-struct UnaryOp : public Instruction, public Value {
-    Value *value;
-    TokenType op;
-
-    UnaryOp(int id, Value *value, TokenType op) 
-        : Instruction(false), Value(id, value->type), value(value), op(op) {}
-
-    void print_instruction(std::ostream& os) const {
-        os << static_cast<Value>(*this) << " = " << op << *value;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const UnaryOp& unary_op) {
-        unary_op.print_instruction(os);
-        return os;                                                         
-    }
-};
-
-struct Ret : public Instruction {
-    Value *val;
+std::string IrFunction::to_string() const {
+    std::ostringstream stream;
     
-    Ret(Value *val) : Instruction(true), val(val) {}
-
-    void print_instruction(std::ostream& os) const {
-        os << "ret " << *val;
+    stream << "proc " << name << " :: ";
+    
+    for (size_t i = 0; i < arguments.size(); i++) {
+        auto arg = arguments[i];
+        if(i > 0) stream << ", ";
+        stream << *std::get<0>(arg) << " " << std::get<1>(arg);
+    }
+    
+    if(arguments.size() != 0) stream << " ";
+    
+    stream << "-> ";
+    
+    for (size_t i = 0; i < returns.size(); i++) {
+        auto ret = returns[i];
+        if(i > 0) stream << ", ";
+        stream << *std::get<0>(ret) << " " << std::get<1>(ret);
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Ret& ret) {
-        ret.print_instruction(os);
-        return os;                                        
-    }
-};
-
-struct Branch : public Instruction {
-    int block_id;
-
-    Branch(int block_id) : Instruction(true), block_id(block_id) {}
-
-    void print_instruction(std::ostream &os) const {
-        os << "br b" << block_id; 
+    stream << ":" << std::endl;
+    
+    for(int i = 0; i < blocks.size(); i++) {
+        stream << *blocks[i];
+        if (i < blocks.size()-1) stream << std::endl;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Branch &branch) {
-        branch.print_instruction(os);
-        return os;
+    std::string str = stream.str();
+    return str;
+}
+
+std::ostream& operator<<(std::ostream& os, const IrFunction& func) {
+    os << func.to_string();
+    return os;
+}
+
+// Const
+
+Const::Const(int id, Type *type, std::string value) : Instruction(false), Value(id, type), 
+    value(value) {}
+
+void Const::print_instruction(std::ostream &os) const {
+    os << static_cast<Value>(*this) << " = " << value;
+}
+
+std::ostream &operator<<(std::ostream& os, const Const &con) {
+    con.print_instruction(os);
+    return os;                                                         
+}
+
+// Arg
+
+Arg::Arg(int id, Type *type, std::string name) : Instruction(false), Value(id, type), name(name) {}
+
+void Arg::print_instruction(std::ostream& os) const {
+    os << static_cast<Value>(*this) << " = " << "argument " << name;
+}
+
+std::ostream &operator<<(std::ostream& os, const Arg& arg) {
+    arg.printValue(os);
+    return os;   
+}
+
+// Call
+
+Call::Call(int id, std::string function_name, std::vector<Value *> args) : Instruction(false), 
+    Value(id, NULL), function_name(function_name), args(args) {}
+
+void Call::print_instruction(std::ostream& os) const {
+    os << static_cast<Value>(*this) << " = " << function_name << "(";
+    for (int i = 0; i < args.size(); i++) {
+        os << *args[i];
+        if (i < args.size() - 1) os << ", ";
     }
-};
+    os << ")";
+}
 
-struct ConditionalBranch : public Instruction {
-    int true_block_id;
-    int false_block_id;
-    Value *condition;
+std::ostream& operator<<(std::ostream& os, const Call& call) {
+    call.print_instruction(os);
+    return os;                                        
+}
 
-    ConditionalBranch(int true_block_id, int false_block_id, Value *condition) : 
-        Instruction(true), true_block_id(true_block_id), false_block_id(false_block_id), 
-        condition(condition) {}
+// BinOp
 
-    void print_instruction(std::ostream &os) const {
-        os << "condbr " << *condition 
-           << " b" << true_block_id 
-           << " b" << false_block_id;
-    }
+BinOp::BinOp(int id, Value *lhs, Value *rhs, TokenType op)
+    : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
+    // assert(*lhs.type == *rhs.type);
+}
 
-    friend std::ostream &operator<<(std::ostream &os, const ConditionalBranch &branch) {
-        branch.print_instruction(os);
-        return os;
-    }
-};
+void BinOp::print_instruction(std::ostream& os) const {
+    os << static_cast<Value>(*this) << " = " << *lhs << " " << op << " " << *rhs;
+}
+
+std::ostream& operator<<(std::ostream& os, const BinOp& bin_op) {
+    bin_op.print_instruction(os);
+    return os;                                                         
+}
+
+// UnaryOp
+
+UnaryOp::UnaryOp(int id, Value *value, TokenType op) : Instruction(false), Value(id, value->type), 
+    value(value), op(op) {}
+
+void UnaryOp::print_instruction(std::ostream& os) const {
+    os << static_cast<Value>(*this) << " = " << op << *value;
+}
+
+std::ostream& operator<<(std::ostream& os, const UnaryOp& unary_op) {
+    unary_op.print_instruction(os);
+    return os;                                                         
+}
+
+// Ret
+
+Ret::Ret(Value *val) : Instruction(true), val(val) {}
+
+void Ret::print_instruction(std::ostream& os) const {
+    os << "ret " << *val;
+}
+
+std::ostream& operator<<(std::ostream& os, const Ret& ret) {
+    ret.print_instruction(os);
+    return os;                                        
+}
+
+// Branch
+
+Branch::Branch(int block_id) : Instruction(true), block_id(block_id) {}
+
+void Branch::print_instruction(std::ostream &os) const {
+    os << "br b" << block_id; 
+}
+
+std::ostream &operator<<(std::ostream &os, const Branch &branch) {
+    branch.print_instruction(os);
+    return os;
+}
+
+// ConditionalBranch
+
+ConditionalBranch::ConditionalBranch(int true_block_id, int false_block_id, Value *condition) : 
+    Instruction(true), true_block_id(true_block_id), false_block_id(false_block_id), 
+    condition(condition) {}
+
+void ConditionalBranch::print_instruction(std::ostream &os) const {
+    os << "condbr " << *condition 
+        << " b" << true_block_id 
+        << " b" << false_block_id;
+}
+
+std::ostream &operator<<(std::ostream &os, const ConditionalBranch &branch) {
+    branch.print_instruction(os);
+    return os;
+}

@@ -2,137 +2,137 @@ TEST_SUITE_BEGIN("Ast");
 
 TEST_CASE("identifier expressions equal") {
     REQUIRE_EQ(
-        *Expression::Ident("foo"), 
-        *Expression::Ident("foo")
+        *new IdentExpression("foo"), 
+        *new IdentExpression("foo")
     );
     
     REQUIRE_NE(
-        *Expression::Ident("foo"), 
-        *Expression::Ident("bar")
+        *new IdentExpression("foo"), 
+        *new IdentExpression("bar")
     );
 }
 
 TEST_CASE("literal expressions equal") {
     REQUIRE_EQ(
-        *Expression::Literal(TokenType::INT, "100"), 
-        *Expression::Literal(TokenType::INT, "100")
+        *new LiteralExpression(TokenType::INT, "100"), 
+        *new LiteralExpression(TokenType::INT, "100")
     );
     
     REQUIRE_NE(
-        *Expression::Literal(TokenType::INT, "100"), 
-        *Expression::Literal(TokenType::FLOAT, "100")
+        *new LiteralExpression(TokenType::INT, "100"), 
+        *new LiteralExpression(TokenType::FLOAT, "100")
     );
 
     REQUIRE_NE(
-        *Expression::Literal(TokenType::INT, "100"), 
-        *Expression::Literal(TokenType::INT, "200")
+        *new LiteralExpression(TokenType::INT, "100"), 
+        *new LiteralExpression(TokenType::INT, "200")
     );
 }
 
 TEST_CASE("unary expressions equal") {
     REQUIRE_EQ(
-        *Expression::Unary(TokenType::NOT, Expression::Ident("a")), 
-        *Expression::Unary(TokenType::NOT, Expression::Ident("a"))
+        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")), 
+        *new UnaryExpression(TokenType::NOT, new IdentExpression("a"))
     );
     
     REQUIRE_NE(
-        *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
-        *Expression::Unary(TokenType::NOT, Expression::Ident("b"))
+        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")),
+        *new UnaryExpression(TokenType::NOT, new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
-        *Expression::Unary(TokenType::SUB, Expression::Ident("a"))
+        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")),
+        *new UnaryExpression(TokenType::SUB, new IdentExpression("a"))
     );
 
     REQUIRE_NE(
-        *Expression::Unary(TokenType::NOT, Expression::Ident("a")),
-        *Expression::Unary(TokenType::NOT, Expression::Literal(TokenType::INT, "100"))
+        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")),
+        *new UnaryExpression(TokenType::NOT, new LiteralExpression(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("binary expressions equal") {
     REQUIRE_EQ(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b"))
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::SUB, Expression::Ident("a"), Expression::Ident("b"))
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::SUB, new IdentExpression("a"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, Expression::Ident("b"), Expression::Ident("b"))
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("b"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), Expression::Ident("a"))
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("a"))
     );
 
     REQUIRE_NE(
-        *Expression::Binary(TokenType::ADD, 
-            Expression::Ident("a"), Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, 
-            Expression::Literal(TokenType::INT, "100"), Expression::Ident("b"))
+        *new BinaryExpression(TokenType::ADD, 
+            new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::ADD, 
+            new LiteralExpression(TokenType::INT, "100"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), 
-            Expression::Ident("b")),
-        *Expression::Binary(TokenType::ADD, Expression::Ident("a"), 
-            Expression::Literal(TokenType::INT, "100"))
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), 
+            new IdentExpression("b")),
+        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), 
+            new LiteralExpression(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("call expressions equal") {
     REQUIRE_EQ(
-        *Expression::Call("foo", {}),
-        *Expression::Call("foo", {})
+        *new CallExpression("foo", {}),
+        *new CallExpression("foo", {})
     );
 
     REQUIRE_NE(
-        *Expression::Call("foo", {}),
-        *Expression::Call("bar", {})
+        *new CallExpression("foo", {}),
+        *new CallExpression("bar", {})
     );
 
     REQUIRE_EQ(
-        *Expression::Call("foo", {Expression::Ident("a")}),
-        *Expression::Call("foo", {Expression::Ident("a")})
+        *new CallExpression("foo", {new IdentExpression("a")}),
+        *new CallExpression("foo", {new IdentExpression("a")})
     );
 
     REQUIRE_NE(
-        *Expression::Call("foo", {Expression::Ident("a")}),
-        *Expression::Call("foo", {})
+        *new CallExpression("foo", {new IdentExpression("a")}),
+        *new CallExpression("foo", {})
     );
 
     REQUIRE_NE(
-        *Expression::Call("foo", {Expression::Ident("a")}),
-        *Expression::Call("foo", {Expression::Ident("b")})
+        *new CallExpression("foo", {new IdentExpression("a")}),
+        *new CallExpression("foo", {new IdentExpression("b")})
     );
 
     REQUIRE_NE(
-        *Expression::Call("foo", {Expression::Ident("a")}),
-        *Expression::Call("foo", {Expression::Literal(TokenType::INT, "100")})
+        *new CallExpression("foo", {new IdentExpression("a")}),
+        *new CallExpression("foo", {new LiteralExpression(TokenType::INT, "100")})
     );
 }
 
 TEST_CASE("return statements equal") {
     REQUIRE_EQ(
-        *Statement::Return(Expression::Ident("a")),
-        *Statement::Return(Expression::Ident("a"))
+        *Statement::Return(new IdentExpression("a")),
+        *Statement::Return(new IdentExpression("a"))
     );
 
     REQUIRE_NE(
-        *Statement::Return(Expression::Ident("a")),
-        *Statement::Return(Expression::Ident("b"))
+        *Statement::Return(new IdentExpression("a")),
+        *Statement::Return(new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Statement::Return(Expression::Ident("a")),
-        *Statement::Return(Expression::Literal(TokenType::INT, "100"))
+        *Statement::Return(new IdentExpression("a")),
+        *Statement::Return(new LiteralExpression(TokenType::INT, "100"))
     );
 }
 
@@ -143,50 +143,50 @@ TEST_CASE("block statements equal") {
     );
 
     REQUIRE_NE(
-        *Statement::Block({Statement::Return(Expression::Ident("a"))}),
+        *Statement::Block({Statement::Return(new IdentExpression("a"))}),
         *Statement::Block({})
     );
 
     REQUIRE_NE(
-        *Statement::Block({Statement::Return(Expression::Ident("a"))}),
-        *Statement::Block({Statement::Return(Expression::Ident("b"))})
+        *Statement::Block({Statement::Return(new IdentExpression("a"))}),
+        *Statement::Block({Statement::Return(new IdentExpression("b"))})
     );
 
     REQUIRE_NE(
-        *Statement::Block({Statement::Return(Expression::Ident("a"))}),
+        *Statement::Block({Statement::Return(new IdentExpression("a"))}),
         *Statement::Block({Statement::Block({})})
     );
 }
 
 TEST_CASE("if statements equal") {
     REQUIRE_EQ(
-        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
-        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL)
+        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
+        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL)
     );
 
     REQUIRE_NE(
-        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
-        *Statement::If(Expression::Ident("bar"), Statement::Block({}), NULL)
+        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
+        *Statement::If(new IdentExpression("bar"), Statement::Block({}), NULL)
     );
 
     REQUIRE_NE(
-        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
-        *Statement::If(Expression::Literal(TokenType::INT, "100"), Statement::Block({}), NULL)
+        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
+        *Statement::If(new LiteralExpression(TokenType::INT, "100"), Statement::Block({}), NULL)
     );
 
     REQUIRE_NE(
-        *Statement::If(Expression::Ident("foo"), Statement::Block({}), NULL),
-        *Statement::If(Expression::Ident("foo"), Statement::Block({Statement::Block({})}), NULL)
+        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
+        *Statement::If(new IdentExpression("foo"), Statement::Block({Statement::Block({})}), NULL)
     );
 
     REQUIRE_EQ(
         *Statement::If(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             Statement::Block({}),
             Statement::If(NULL, Statement::Block({}), NULL)
         ),
         *Statement::If(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             Statement::Block({}),
             Statement::If(NULL, Statement::Block({}), NULL)
         )
@@ -194,12 +194,12 @@ TEST_CASE("if statements equal") {
 
     REQUIRE_NE(
         *Statement::If(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             Statement::Block({}),
             Statement::If(NULL, Statement::Block({}), NULL)
         ),
         *Statement::If(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             Statement::Block({}),
             Statement::If(NULL, Statement::Block({
                 Statement::Block({})
@@ -212,42 +212,42 @@ TEST_CASE("for statements equal") {
     REQUIRE_EQ(
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         ),
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         )
     );
@@ -255,42 +255,42 @@ TEST_CASE("for statements equal") {
     REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         ),
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("b"), 
+                new IdentExpression("b"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         )
     );
@@ -298,42 +298,42 @@ TEST_CASE("for statements equal") {
     REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         ),
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("b"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("b"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         )
     );
@@ -341,42 +341,42 @@ TEST_CASE("for statements equal") {
     REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         ),
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::SUB_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         )
     );
@@ -384,39 +384,39 @@ TEST_CASE("for statements equal") {
     REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         ),
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({})
         )
@@ -425,38 +425,38 @@ TEST_CASE("for statements equal") {
     REQUIRE_NE(
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Binary(
+            new BinaryExpression(
                 TokenType::LSS,
-                Expression::Ident("a"),
-                Expression::Literal(TokenType::INT, "10")
+                new IdentExpression("a"),
+                new LiteralExpression(TokenType::INT, "10")
             ),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         ),
         *Statement::For(
             Statement::Assign(
-                Expression::Ident("a"), 
+                new IdentExpression("a"), 
                 TokenType::DEFINE, 
-                Expression::Literal(TokenType::INT, "0")
+                new LiteralExpression(TokenType::INT, "0")
             ),
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             Statement::Assign(
-                Expression::Ident("a"),
+                new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
-                Expression::Literal(TokenType::INT, "1")
+                new LiteralExpression(TokenType::INT, "1")
             ),
             Statement::Block({
-                Statement::Return(Expression::Ident("a")),
+                Statement::Return(new IdentExpression("a")),
             })
         )
     );
@@ -465,66 +465,66 @@ TEST_CASE("for statements equal") {
 TEST_CASE("assignment statements equal") {
     REQUIRE_EQ(
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         ),
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         )
     );
 
     REQUIRE_NE(
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         ),
         *Statement::Assign(
-            Expression::Ident("bar"),
+            new IdentExpression("bar"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         )
     );
 
     REQUIRE_NE(
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         ),
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::SUB_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         )
     );
 
     REQUIRE_NE(
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         ),
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "200")
+            new LiteralExpression(TokenType::INT, "200")
         )
     );
 
     REQUIRE_NE(
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Literal(TokenType::INT, "100")
+            new LiteralExpression(TokenType::INT, "100")
         ),
         *Statement::Assign(
-            Expression::Ident("foo"),
+            new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
-            Expression::Ident("bar")
+            new IdentExpression("bar")
         )
     );
 }
@@ -676,10 +676,10 @@ TEST_CASE("functions equal") {
             },
             Statement::Block({
                 Statement::Return(
-                    Expression::Binary(
+                    new BinaryExpression(
                         TokenType::ADD,
-                        Expression::Ident("a"),
-                        Expression::Literal(TokenType::FLOAT, "u")
+                        new IdentExpression("a"),
+                        new LiteralExpression(TokenType::FLOAT, "u")
                     )
                 )
             })
@@ -694,10 +694,10 @@ TEST_CASE("functions equal") {
             },
             Statement::Block({
                 Statement::Return(
-                    Expression::Binary(
+                    new BinaryExpression(
                         TokenType::ADD,
-                        Expression::Ident("a"),
-                        Expression::Literal(TokenType::FLOAT, "1")
+                        new IdentExpression("a"),
+                        new LiteralExpression(TokenType::FLOAT, "1")
                     )
                 )
             })
