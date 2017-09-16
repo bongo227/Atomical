@@ -16,11 +16,11 @@ class Parser {
         Token expect(TokenType type);
         void accept(TokenType type);
           
-        Statement *parse_return_statement();
-        Statement *parse_block_statement();
-        Statement *parse_if_statement();
-        Statement *parse_for_statement();
-        Statement *parse_assign_statement();
+        ReturnStatement *parse_return_statement();
+        BlockStatement *parse_block_statement();
+        IfStatement *parse_if_statement();
+        ForStatement *parse_for_statement();
+        AssignStatement *parse_assign_statement();
 
         Expression *nud(Token token);
         Expression *led(Token token, Expression *expression);

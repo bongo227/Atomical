@@ -26,13 +26,12 @@ void Parser::accept(TokenType type) {
     if (tokens.front().type == type) tokens.pop_front();
 }
 
-Statement *Parser::parse_return_statement() {
+ReturnStatement *Parser::parse_return_statement() {
     expect(TokenType::RETURN);
-    Statement *smt = Statement::Return(parse_expression(0));;
-    return smt;
+    return new ReturnStatement(parse_expression(0));;
 }
 
-Statement *Parser::parse_block_statement() {
+BlockStatement *Parser::parse_block_statement() {
     expect(TokenType::LBRACE);
 
     std::vector<Statement *> smts(0);
@@ -42,15 +41,15 @@ Statement *Parser::parse_block_statement() {
 
     expect(TokenType::RBRACE);
     
-    return Statement::Block(smts);
+    return new BlockStatement(smts);
 }
 
-Statement *Parser::parse_if_statement() {
+IfStatement *Parser::parse_if_statement() {
     expect(TokenType::IF);
 
     Expression *condition = parse_expression(0);
-    Statement *body = parse_block_statement();
-    Statement *elses = NULL;
+    BlockStatement *body = parse_block_statement();
+    IfStatement *elses = NULL;
 
     if (tokens.front().type == TokenType::ELSE) {
         expect(TokenType::ELSE);
@@ -59,14 +58,14 @@ Statement *Parser::parse_if_statement() {
             elses = parse_if_statement();
         } else {
             // final else statement
-            elses = Statement::If(NULL, parse_block_statement(), NULL);
+            elses = new IfStatement(NULL, parse_block_statement(), NULL);
         }
     }
 
-    return Statement::If(condition, body, elses);
+    return new IfStatement(condition, body, elses);
 }
 
-Statement *Parser::parse_for_statement() {
+ForStatement *Parser::parse_for_statement() {
     expect(TokenType::FOR);
 
     Statement *declaration = parse_assign_statement();
@@ -76,15 +75,15 @@ Statement *Parser::parse_for_statement() {
     Statement *increment = parse_assign_statement();
     Statement *body = parse_block_statement();
 
-    return Statement::For(declaration, condition, increment, body);
+    return new ForStatement(declaration, condition, increment, body);
 }
 
-Statement *Parser::parse_assign_statement() {
+AssignStatement *Parser::parse_assign_statement() {
     Expression *ident = new IdentExpression(expect(TokenType::IDENT).value);
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
-    return Statement::Assign(ident, type.type, value); 
+    return new AssignStatement(ident, type.type, value); 
 }
 
 Statement *Parser::parse_statement() {
@@ -257,7 +256,7 @@ Function *Parser::parse_function() {
         returns.push_back(std::make_tuple(type, name));
     }
 
-    Statement *body = parse_block_statement();
+    BlockStatement *body = parse_block_statement();
 
     expect(TokenType::SEMI);
     

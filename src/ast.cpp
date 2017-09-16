@@ -19,7 +19,7 @@ std::ostream &operator<<(std::ostream& os, const Expression& exp) {
 IdentExpression::IdentExpression(std::string ident) : Expression(false), ident(ident) {}
 
 Value *IdentExpression::code_gen(Irgen *irgen) const {
-    return irgen->read_var(ident, irgen->current_block());
+    return irgen->read_var(ident, irgen->current_block);
 }
 
 bool IdentExpression::is_equal(const Expression &e) const {
@@ -33,12 +33,12 @@ void IdentExpression::print(std::ostream &os) const {
 
 // LiteralExpression
 
-LiteralExpression::LiteralExpression(TokenType type, std::string value) : Expression(false), type(type), 
-    value(value) {}
+LiteralExpression::LiteralExpression(TokenType type, std::string value) : Expression(false), 
+    type(type), value(value) {}
 
 Value *LiteralExpression::code_gen(Irgen *irgen) const {
     Const *con = new Const(irgen->next_var_id(), new PrimitiveType(type), value);
-    irgen->current_block()->append_instruction(con);
+    irgen->current_block->append_instruction(con);
     return static_cast<Value *>(con);
 }
 
@@ -59,7 +59,7 @@ UnaryExpression::UnaryExpression(TokenType op_type, Expression *exp) :
 Value *UnaryExpression::code_gen(Irgen *irgen) const {
     Value *value = irgen->gen(exp);
     UnaryOp *op = new UnaryOp(irgen->next_var_id(), value, op_type);
-    irgen->current_block()->append_instruction(op);
+    irgen->current_block->append_instruction(op);
     return static_cast<Value *>(op);
 }
 
@@ -84,7 +84,7 @@ Value *BinaryExpression::code_gen(Irgen *irgen) const {
     Value *lhs_value = irgen->gen(lhs);
     Value *rhs_value = irgen->gen(rhs);
     BinOp *op = new BinOp(irgen->next_var_id(), lhs_value, rhs_value, op_type);
-    irgen->current_block()->append_instruction(op);
+    irgen->current_block->append_instruction(op);
     return static_cast<Value *>(op);
 }
 
@@ -108,7 +108,7 @@ Value *CallExpression::code_gen(Irgen *irgen) const {
     for (Expression *arg : args) arg_values.push_back(irgen->gen(arg));
     
     Call *call_exp = new Call(irgen->next_var_id(), function_name, arg_values);
-    irgen->current_block()->append_instruction(call_exp);
+    irgen->current_block->append_instruction(call_exp);
     return static_cast<Value *>(call_exp);
 }
 
@@ -134,126 +134,225 @@ void CallExpression::print(std::ostream &os) const {
 
 // Statement
 
-Statement::Statement(Expression *value) : ret(value), type(RETURN) {}
-Statement::Statement(std::vector<Statement *> statements) : block(statements), type(BLOCK) {}
-Statement::Statement(Expression *condition, Statement *body, Statement *elses) 
-    : ifs{condition, body, elses}, type(IF) { assert(body); }
-Statement::Statement(Expression *variable, TokenType type, Expression *value)
-    : assign{variable, type, value}, type(ASSIGN) {}
-Statement::Statement(Statement *declaration, Expression *condition, Statement *increment, 
-    Statement *body) : fors{declaration, condition, increment, body}, type(FOR) {}
-
-bool Statement::is_equal(const Statement &smt) const {
-    if (type != smt.type) return false;
-
-    switch(type) {
-        case RETURN:
-            return *ret == *smt.ret;
-        
-        case BLOCK:
-            if (block.size() != smt.block.size()) return false;
-            for (size_t i = 0; i < smt.block.size(); i++) {
-                if(!(*block[i] == *smt.block[i])) return false;
-            }
-            return true;
-        
-        case IF:
-            return (ifs.condition == smt.ifs.condition || 
-                *ifs.condition == *smt.ifs.condition) &&
-                (ifs.elses == smt.ifs.elses || *ifs.elses == *smt.ifs.elses) &&
-                (ifs.body == smt.ifs.body || *ifs.body == *smt.ifs.body);
-
-        case ASSIGN:
-            return *assign.variable == *smt.assign.variable &&
-                assign.type == smt.assign.type &&
-                *assign.value == *smt.assign.value;
-
-        case FOR:
-            return *fors.declaration == *smt.fors.declaration &&
-                *fors.condition == *smt.fors.condition &&
-                *fors.increment == *smt.fors.increment &&
-                *fors.body == *smt.fors.body;
-    }
-    
-    assert(false);
-}
+Statement::Statement() {}
 
 bool operator==(const Statement& lhs, const Statement& rhs) {
-    return lhs.is_equal(rhs);
+    return typeid(lhs) == typeid(rhs) && lhs.is_equal(rhs);
 }
 
 bool operator!=(const Statement& lhs, const Statement& rhs) {
-    return !lhs.is_equal(rhs);
+    return typeid(lhs) != typeid(rhs) || !lhs.is_equal(rhs);
 }
 
-std::ostream &operator<<(std::ostream& os, const Statement& smt) {
-    switch(smt.type) {
-        case Statement::RETURN:
-            os << "return " << *smt.ret;
-            break;
-
-        case Statement::BLOCK:
-            os << "{" << std::endl;
-            for (auto s : smt.block) {
-                os << "  " << *s << std::endl;
-            }
-            os << "}" << std::endl;       
-            break;
-
-        case Statement::IF:
-            if (smt.ifs.condition) os << "if " << *smt.ifs.condition << " ";
-            os << *smt.ifs.body;
-            if (smt.ifs.elses) os << "else " << *smt.ifs.elses;
-            break;
-
-        case Statement::ASSIGN:
-            os << *smt.assign.variable << " " << smt.assign.type << " " 
-                << *smt.assign.value;
-            break;
-
-        case Statement::FOR:
-            os << "for " << *smt.fors.declaration << "; " << *smt.fors.condition << "; " 
-                << *smt.fors.increment << " " << *smt.fors.body;
-            break;
-    }
-    
+std::ostream& operator<<(std::ostream& os, const Statement& smt) {
+    smt.print(os);
     return os;
 }
 
+ReturnStatement::ReturnStatement(Expression *exp) : Statement(), exp(exp) {}
+
+void ReturnStatement::code_gen(Irgen *irgen) const {
+    Value *value = irgen->gen(exp);
+    Instruction *ins = new Ret(value);
+    irgen->current_block->append_instruction(ins);
+}
+
+bool ReturnStatement::is_equal(const Statement &s) const {
+    ReturnStatement return_smt = dynamic_cast<const ReturnStatement &>(s);
+    return *exp == *return_smt.exp;
+}
+
+void ReturnStatement::print(std::ostream &os) const {
+    os << "return " << *exp;
+}
+
+// Block Statement
+
+BlockStatement::BlockStatement(std::vector<Statement *> statements) : statements(statements) {}
+
+void BlockStatement::code_gen(Irgen *irgen) const {
+    BasicBlock *new_block = irgen->new_basic_block();
+    BasicBlock *out_block = irgen->gen_block(new_block, this);
+    BasicBlock *continue_block = irgen->new_basic_block();
+    
+    irgen->current_block->append_instruction(new Branch(new_block, irgen->current_block));
+    // TODO: should this be current_block or out_block? 
+    out_block->append_instruction(new Branch(continue_block, irgen->current_block));
+    
+    irgen->current_block = continue_block;
+}
+
+bool BlockStatement::is_equal(const Statement &s) const {
+    BlockStatement block_smt = dynamic_cast<const BlockStatement &>(s);
+
+    if (statements.size() != block_smt.statements.size()) return false;
+    for (size_t i = 0; i < block_smt.statements.size(); i++) {
+        if(!(*statements[i] == *block_smt.statements[i])) return false;
+    }
+    return true;
+}
+
+void BlockStatement::print(std::ostream &os) const {
+    os << "{" << std::endl;
+    for (auto s : statements) {
+        os << "  " << *s << std::endl;
+    }
+    os << "}" << std::endl;       
+}
+
+// If Statement
+
+IfStatement::IfStatement(Expression *condition, BlockStatement *body, IfStatement *elses) : 
+    condition(condition), body(body), elses(elses) {}
+
+void IfStatement::code_gen(Irgen *irgen) const {
+    BasicBlock *end_block = irgen->new_basic_block();
+    code_gen_if_branch(irgen, this, nullptr, end_block);
+}
+
+void IfStatement::code_gen_if_branch(Irgen *irgen, const IfStatement *ifs, BasicBlock *parent_block, 
+    BasicBlock *end_block) const {
+
+    if(!ifs->condition) {
+        // Statment is an else block, gen and exit
+        BasicBlock *out_block = irgen->gen_block(parent_block, ifs->body);
+        
+        // If "else" doesnt terminate, branch to end block
+        if (!out_block->is_terminated()) {
+            out_block->append_instruction(new Branch(end_block, out_block));
+            irgen->current_block = end_block;
+        } else {
+            irgen->current_block = out_block;
+            irgen->destroy_basic_block(end_block->id);
+        }
+        
+        return;
+    }
+
+    // Generate conditional
+    Value *condition = irgen->gen(ifs->condition);
+    
+    // If we wernt passed a parent block, assume current block
+    if (parent_block == nullptr) parent_block = irgen->current_block;
+
+    // true block for if the conditional is true
+    BasicBlock *true_block = irgen->new_basic_block();
+
+    // false block is either the next else/elseif block if the block to continue from
+    BasicBlock *false_block = end_block;
+    if(ifs->elses) false_block = irgen->new_basic_block();
+        
+    // Branch into "if branch" from parent
+    parent_block->append_instruction(
+        new ConditionalBranch(true_block, false_block, parent_block, condition));
+            
+    // generate the true block
+    BasicBlock *out_block = irgen->gen_block(true_block, ifs->body);
+    if (!out_block->is_terminated())
+        out_block->append_instruction(new Branch(end_block, out_block));
+        
+    // TODO: do we need this?
+    irgen->current_block = false_block;
+
+    // Generate chaining elseif/else statements
+    if (ifs->elses)
+        code_gen_if_branch(irgen, ifs->elses, false_block, end_block);
+        
+    irgen->current_block = end_block;
+}
+
+bool IfStatement::is_equal(const Statement &s) const {
+    IfStatement if_smt = dynamic_cast<const IfStatement &>(s);
+
+    return (condition == if_smt.condition || *condition == *if_smt.condition) &&
+        (elses == if_smt.elses || *elses == *if_smt.elses) &&
+        (body == if_smt.body || *body == *if_smt.body);
+}
+
+void IfStatement::print(std::ostream &os) const {
+    if (condition) os << "if " << *condition << " ";
+    os << *body;
+    if (elses) os << "else " << *elses;
+}
+
+// Assign Statement
+
+AssignStatement::AssignStatement(Expression *variable, TokenType op_type, Expression *value) :
+    variable(variable), op_type(op_type), value(value) {}
+
+void AssignStatement::code_gen(Irgen *irgen) const {
+    std::string var_name = static_cast<const IdentExpression *>(variable)->ident;
+    irgen->write_var(var_name, irgen->gen(value));
+}
+
+bool AssignStatement::is_equal(const Statement &s) const {
+    AssignStatement assign_smt = dynamic_cast<const AssignStatement &>(s);
+    return *variable == *assign_smt.variable &&
+        op_type == assign_smt.op_type &&
+        *value == *assign_smt.value;
+}
+
+void AssignStatement::print(std::ostream &os) const {
+    os << *variable << " " << op_type << " " << *value;
+}
+
+// For Statement
+
+ForStatement::ForStatement(Statement *declaration, Expression *condition, Statement *increment, 
+    Statement *body) : declaration(declaration), condition(condition), increment(increment),
+    body(body) {}
+
+void ForStatement::code_gen(Irgen *irgen) const {
+    assert(false);
+}
+
+bool ForStatement::is_equal(const Statement &s) const {
+    ForStatement for_smt = dynamic_cast<const ForStatement &>(s);
+    return *declaration == *for_smt.declaration &&
+        *condition == *for_smt.condition &&
+        *increment == *for_smt.increment &&
+        *body == *for_smt.body;
+}
+
+void ForStatement::print(std::ostream &os) const {
+    os << "for " << *declaration << "; " << *condition << "; " << *increment << " " << *body;
+}
+
+// Function
+
 Function::Function(std::string name, std::vector<std::tuple<Type *, std::string>> arguments,
-    std::vector<std::tuple<Type *, std::string>> returns, Statement *body) : name(name), 
+    std::vector<std::tuple<Type *, std::string>> returns, BlockStatement *body) : name(name), 
     arguments(arguments), returns(returns), body(body) {}
 
 bool Function::is_equal(const Function &func) const {
-    if(this->name != func.name) return false;
+    if(name != func.name) return false;
     
     // Check arguments are equal
-    if(this->arguments.size() != func.arguments.size()) return false;
-    for (size_t i = 0; i < this->arguments.size(); i++) {
-        auto type = std::get<0>(this->arguments[i]);
+    if(arguments.size() != func.arguments.size()) return false;
+    for (size_t i = 0; i < arguments.size(); i++) {
+        auto type = std::get<0>(arguments[i]);
         auto func_type = std::get<0>(func.arguments[i]);
         if(*type != *func_type) return false;
 
-        auto name = std::get<1>(this->arguments[i]);
+        auto name = std::get<1>(arguments[i]);
         auto func_name = std::get<1>(func.arguments[i]);
         if(name != func_name) return false;
     }
     
     // Check returns are equal
-    if(this->returns.size() != func.returns.size()) return false;
-    for (size_t i = 0; i < this->returns.size(); i++) {
-        auto type = std::get<0>(this->returns[i]);
+    if(returns.size() != func.returns.size()) return false;
+    for (size_t i = 0; i < returns.size(); i++) {
+        auto type = std::get<0>(returns[i]);
         auto func_type = std::get<0>(func.returns[i]);
         if(*type != *func_type) return false;
 
-        auto name = std::get<1>(this->returns[i]);
+        auto name = std::get<1>(returns[i]);
         auto func_name = std::get<1>(func.returns[i]);
         if(name != func_name) return false;
     }
 
     // Check bodys are equal
-    if(*static_cast<Statement *>(this->body) != *static_cast<Statement *>(func.body)) 
-        return false;
+    if(*body != *func.body) return false;
     
     return true;
 }

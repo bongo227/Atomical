@@ -121,88 +121,88 @@ TEST_CASE("call expressions equal") {
 
 TEST_CASE("return statements equal") {
     REQUIRE_EQ(
-        *Statement::Return(new IdentExpression("a")),
-        *Statement::Return(new IdentExpression("a"))
+        *new ReturnStatement(new IdentExpression("a")),
+        *new ReturnStatement(new IdentExpression("a"))
     );
 
     REQUIRE_NE(
-        *Statement::Return(new IdentExpression("a")),
-        *Statement::Return(new IdentExpression("b"))
+        *new ReturnStatement(new IdentExpression("a")),
+        *new ReturnStatement(new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *Statement::Return(new IdentExpression("a")),
-        *Statement::Return(new LiteralExpression(TokenType::INT, "100"))
+        *new ReturnStatement(new IdentExpression("a")),
+        *new ReturnStatement(new LiteralExpression(TokenType::INT, "100"))
     );
 }
 
 TEST_CASE("block statements equal") {
     REQUIRE_EQ(
-        *Statement::Block({}),
-        *Statement::Block({})
+        *new BlockStatement({}),
+        *new BlockStatement({})
     );
 
     REQUIRE_NE(
-        *Statement::Block({Statement::Return(new IdentExpression("a"))}),
-        *Statement::Block({})
+        *new BlockStatement({new ReturnStatement(new IdentExpression("a"))}),
+        *new BlockStatement({})
     );
 
     REQUIRE_NE(
-        *Statement::Block({Statement::Return(new IdentExpression("a"))}),
-        *Statement::Block({Statement::Return(new IdentExpression("b"))})
+        *new BlockStatement({new ReturnStatement(new IdentExpression("a"))}),
+        *new BlockStatement({new ReturnStatement(new IdentExpression("b"))})
     );
 
     REQUIRE_NE(
-        *Statement::Block({Statement::Return(new IdentExpression("a"))}),
-        *Statement::Block({Statement::Block({})})
+        *new BlockStatement({new ReturnStatement(new IdentExpression("a"))}),
+        *new BlockStatement({new BlockStatement({})})
     );
 }
 
 TEST_CASE("if statements equal") {
     REQUIRE_EQ(
-        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
-        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL)
+        *new IfStatement(new IdentExpression("foo"), new BlockStatement({}), NULL),
+        *new IfStatement(new IdentExpression("foo"), new BlockStatement({}), NULL)
     );
 
     REQUIRE_NE(
-        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
-        *Statement::If(new IdentExpression("bar"), Statement::Block({}), NULL)
+        *new IfStatement(new IdentExpression("foo"), new BlockStatement({}), NULL),
+        *new IfStatement(new IdentExpression("bar"), new BlockStatement({}), NULL)
     );
 
     REQUIRE_NE(
-        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
-        *Statement::If(new LiteralExpression(TokenType::INT, "100"), Statement::Block({}), NULL)
+        *new IfStatement(new IdentExpression("foo"), new BlockStatement({}), NULL),
+        *new IfStatement(new LiteralExpression(TokenType::INT, "100"), new BlockStatement({}), NULL)
     );
 
     REQUIRE_NE(
-        *Statement::If(new IdentExpression("foo"), Statement::Block({}), NULL),
-        *Statement::If(new IdentExpression("foo"), Statement::Block({Statement::Block({})}), NULL)
+        *new IfStatement(new IdentExpression("foo"), new BlockStatement({}), NULL),
+        *new IfStatement(new IdentExpression("foo"), new BlockStatement({new BlockStatement({})}), NULL)
     );
 
     REQUIRE_EQ(
-        *Statement::If(
+        *new IfStatement(
             new IdentExpression("foo"),
-            Statement::Block({}),
-            Statement::If(NULL, Statement::Block({}), NULL)
+            new BlockStatement({}),
+            new IfStatement(NULL, new BlockStatement({}), NULL)
         ),
-        *Statement::If(
+        *new IfStatement(
             new IdentExpression("foo"),
-            Statement::Block({}),
-            Statement::If(NULL, Statement::Block({}), NULL)
+            new BlockStatement({}),
+            new IfStatement(NULL, new BlockStatement({}), NULL)
         )
     );
 
     REQUIRE_NE(
-        *Statement::If(
+        *new IfStatement(
             new IdentExpression("foo"),
-            Statement::Block({}),
-            Statement::If(NULL, Statement::Block({}), NULL)
+            new BlockStatement({}),
+            new IfStatement(NULL, new BlockStatement({}), NULL)
         ),
-        *Statement::If(
+        *new IfStatement(
             new IdentExpression("foo"),
-            Statement::Block({}),
-            Statement::If(NULL, Statement::Block({
-                Statement::Block({})
+            new BlockStatement({}),
+            new IfStatement(NULL, new BlockStatement({
+                new BlockStatement({})
             }), NULL)
         )
     );
@@ -210,8 +210,8 @@ TEST_CASE("if statements equal") {
 
 TEST_CASE("for statements equal") {
     REQUIRE_EQ(
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -221,17 +221,17 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         ),
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -241,20 +241,20 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         )
     );
 
     REQUIRE_NE(
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -264,17 +264,17 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         ),
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("b"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -284,20 +284,20 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         )
     );
 
     REQUIRE_NE(
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -307,17 +307,17 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         ),
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -327,20 +327,20 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("b"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         )
     );
 
     REQUIRE_NE(
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -350,17 +350,17 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         ),
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -370,20 +370,20 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::SUB_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         )
     );
 
     REQUIRE_NE(
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -393,17 +393,17 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         ),
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -413,18 +413,18 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
     REQUIRE_NE(
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
@@ -434,29 +434,29 @@ TEST_CASE("for statements equal") {
                 new IdentExpression("a"),
                 new LiteralExpression(TokenType::INT, "10")
             ),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         ),
-        *Statement::For(
-            Statement::Assign(
+        *new ForStatement(
+            new AssignStatement(
                 new IdentExpression("a"), 
                 TokenType::DEFINE, 
                 new LiteralExpression(TokenType::INT, "0")
             ),
             new IdentExpression("foo"),
-            Statement::Assign(
+            new AssignStatement(
                 new IdentExpression("a"),
                 TokenType::ADD_ASSIGN,
                 new LiteralExpression(TokenType::INT, "1")
             ),
-            Statement::Block({
-                Statement::Return(new IdentExpression("a")),
+            new BlockStatement({
+                new ReturnStatement(new IdentExpression("a")),
             })
         )
     );
@@ -464,12 +464,12 @@ TEST_CASE("for statements equal") {
 
 TEST_CASE("assignment statements equal") {
     REQUIRE_EQ(
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
         ),
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
@@ -477,12 +477,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     REQUIRE_NE(
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
         ),
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("bar"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
@@ -490,12 +490,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     REQUIRE_NE(
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
         ),
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::SUB_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
@@ -503,12 +503,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     REQUIRE_NE(
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
         ),
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "200")
@@ -516,12 +516,12 @@ TEST_CASE("assignment statements equal") {
     );
 
     REQUIRE_NE(
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new LiteralExpression(TokenType::INT, "100")
         ),
-        *Statement::Assign(
+        *new AssignStatement(
             new IdentExpression("foo"),
             TokenType::ADD_ASSIGN,
             new IdentExpression("bar")
@@ -535,13 +535,13 @@ TEST_CASE("functions equal") {
             "foo",
             {},
             {},
-            Statement::Block({})
+            new BlockStatement({})
         ),
         Function(
             "foo",
             {},
             {},
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
@@ -550,13 +550,13 @@ TEST_CASE("functions equal") {
             "foo",
             {},
             {},
-            Statement::Block({})
+            new BlockStatement({})
         ),
         Function(
             "bar",
             {},
             {},
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
@@ -571,7 +571,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         ),
         Function(
             "foo",
@@ -583,7 +583,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
@@ -598,7 +598,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         ),
         Function(
             "foo",
@@ -610,7 +610,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
@@ -625,7 +625,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         ),
         Function(
             "foo",
@@ -637,7 +637,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::INT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
@@ -649,7 +649,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         ),
         Function(
             "foo",
@@ -661,7 +661,7 @@ TEST_CASE("functions equal") {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "bing"),
                 std::make_tuple(new PrimitiveType(Primitive::FLOAT), "boo"),
             },
-            Statement::Block({})
+            new BlockStatement({})
         )
     );
 
@@ -674,8 +674,8 @@ TEST_CASE("functions equal") {
             {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
             },
-            Statement::Block({
-                Statement::Return(
+            new BlockStatement({
+                new ReturnStatement(
                     new BinaryExpression(
                         TokenType::ADD,
                         new IdentExpression("a"),
@@ -692,8 +692,8 @@ TEST_CASE("functions equal") {
             {
                 std::make_tuple(new PrimitiveType(Primitive::INT), "b"),
             },
-            Statement::Block({
-                Statement::Return(
+            new BlockStatement({
+                new ReturnStatement(
                     new BinaryExpression(
                         TokenType::ADD,
                         new IdentExpression("a"),
