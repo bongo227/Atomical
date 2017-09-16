@@ -23,7 +23,6 @@ public:
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
     void print(std::ostream &os) const;
-    friend std::ostream &operator<<(std::ostream &os, const IdentExpression &exp);
 };
 
 class LiteralExpression : public Expression {
@@ -37,7 +36,6 @@ public:
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
     void print(std::ostream &os) const;
-    friend std::ostream &operator<<(std::ostream &os, const LiteralExpression &exp);
 };
 
 class UnaryExpression : public Expression {
@@ -50,7 +48,6 @@ public:
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
     void print(std::ostream &os) const;
-    friend std::ostream &operator<<(std::ostream &os, const UnaryExpression &exp);
 };
 
 class BinaryExpression : public Expression {
@@ -65,7 +62,6 @@ public:
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
     void print(std::ostream &os) const;
-    friend std::ostream &operator<<(std::ostream &os, const BinaryExpression &exp);
 };
 
 class CallExpression : public Expression {
@@ -78,7 +74,6 @@ public:
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
     void print(std::ostream &os) const;
-    friend std::ostream &operator<<(std::ostream &os, const CallExpression &exp);
 };
 
 struct Statement {

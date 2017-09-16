@@ -18,11 +18,6 @@ std::ostream &operator<<(std::ostream& os, const Expression& exp) {
 
 IdentExpression::IdentExpression(std::string ident) : Expression(false), ident(ident) {}
 
-std::ostream &operator<<(std::ostream &os, const IdentExpression &exp) {
-    os << exp.ident;
-    return os;
-}
-
 Value *IdentExpression::code_gen(Irgen *irgen) const {
     return irgen->read_var(ident, irgen->current_block());
 }
@@ -56,11 +51,6 @@ void LiteralExpression::print(std::ostream &os) const {
     os << value;
 }
 
-std::ostream &operator<<(std::ostream &os, const LiteralExpression &exp) {
-    exp.print(os);
-    return os;
-}
-
 // UnaryExpression
 
 UnaryExpression::UnaryExpression(TokenType op_type, Expression *exp) : 
@@ -85,11 +75,6 @@ void UnaryExpression::print(std::ostream &os) const {
     if (exp->is_bracketed_with_unary) os << ")";
 }
 
-std::ostream &operator<<(std::ostream &os, const UnaryExpression &exp) {
-    exp.print(os);
-    return os;
-}
-
 // BinaryExpression
 
 BinaryExpression::BinaryExpression(TokenType op_type, Expression *lhs, Expression *rhs) 
@@ -110,11 +95,6 @@ bool BinaryExpression::is_equal(const Expression &e) const {
 
 void BinaryExpression::print(std::ostream &os) const {
     os << *lhs << " " << op_type << " " << *rhs;
-}
-
-std::ostream &operator<<(std::ostream &os, const BinaryExpression &exp) {
-    exp.print(os);
-    return os;
 }
 
 // CallExpression
@@ -150,11 +130,6 @@ void CallExpression::print(std::ostream &os) const {
         os << *a;
     }
     os << ")";
-}
-
-std::ostream &operator<<(std::ostream &os, const CallExpression &exp) {
-    exp.print(os);
-    return os;
 }
 
 // Statement
