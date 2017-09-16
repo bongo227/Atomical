@@ -7,7 +7,7 @@ before_install:
   - sudo apt-add-repository 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
   - sudo apt-add-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main'
   - sudo apt-get -qq update
-  - sudo apt-get install -y --allow-unauthenticated libstdc++-6-dev
+  - sudo apt-get install -y --allow-unauthenticated libstdc++-6-dev lcov
   - sudo apt-get install -y --allow-unauthenticated clang-4.0 clang-4.0-doc libclang-common-4.0-dev libclang-4.0-dev libclang1-4.0 libclang1-4.0-dbg libllvm-4.0-ocaml-dev libllvm4.0 libllvm4.0-dbg lldb-4.0 llvm-4.0 llvm-4.0-dev llvm-4.0-doc llvm-4.0-examples llvm-4.0-runtime clang-format-4.0 python-clang-4.0 libfuzzer-4.0-dev
 
 script:
@@ -17,3 +17,12 @@ script:
   - make
   # run tests
   - ./atomical-test
+
+after_success:
+    # Creating report
+  - cd ${TRAVIS_BUILD_DIR}
+  - lcov --directory . --capture --output-file coverage.info # capture coverage info
+  - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter out system
+  - lcov --list coverage.info #debug info
+  # Uploading report to CodeCov
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
