@@ -1,0 +1,23 @@
+proc gcd :: int a, int b -> int :
+b1:
+	v1 = argument a
+	v2 = argument b
+	v3 = 0
+	v4 = v2 == v3
+	condbr v4 b3 b2
+
+b2:
+	v5 = v1 % v2
+	v6 = gcd(v2, v5)
+	ret v6
+
+b3:
+	ret v1
+
+proc main :: -> int :
+b4:
+	v7 = 1529
+	v8 = 14039
+	v9 = gcd(v7, v8)
+	ret v9
+

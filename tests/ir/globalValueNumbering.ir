@@ -1,0 +1,14 @@
+proc main :: -> int :
+b1:
+	v1 = 10
+	v2 = true
+	condbr v2 b3 b2
+
+b2:
+	v4 = phi (b1 : v1) (b3 : v3)
+	ret v4
+
+b3:
+	v3 = 5
+	br b2
+

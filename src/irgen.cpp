@@ -23,10 +23,21 @@ Value *Irgen::read_var_recursive(std::string var_name, BasicBlock *block) {
         // One predessor, no phi needed
         value = read_var(var_name, block->preds[0]);
     } else {
-        assert(false);
+        Phi *phi = new Phi(next_var_id(), {});
+        block->append_instruction(phi); 
+        value = phi;
+        write_var(var_name, block->id, value);
+        add_phi_operands(var_name, block, phi);
     }
     write_var(var_name, block->id, value);
     return value;
+}
+
+void Irgen::add_phi_operands(std::string var_name, BasicBlock *block, Phi *phi) {
+    for(BasicBlock *pred : block->preds) {
+        PhiOperand op = PhiOperand(pred->id, read_var(var_name, pred));
+        phi->append_operand(op);
+    }
 }
 
 BasicBlock *Irgen::new_basic_block() {
@@ -54,9 +65,7 @@ Value *Irgen::gen(const Expression *exp) {
     return exp->code_gen(this);
 }
 
-void Irgen::gen_if_branch(const Statement *smt, BasicBlock *parent_block, 
-    BasicBlock *end_block) {
-    
+void Irgen::gen_if_branch(const Statement *smt, BasicBlock *parent_block, BasicBlock *end_block) {
     assert(smt->type == Statement::IF);
     
     if(!smt->ifs.condition) {
@@ -65,7 +74,7 @@ void Irgen::gen_if_branch(const Statement *smt, BasicBlock *parent_block,
         
         // If "else" doesnt terminate, branch to end block
         if (!out_block->is_terminated()) {
-            out_block->append_instruction(new Branch(end_block->id));
+            out_block->append_instruction(new Branch(end_block, out_block));
             _current_block = end_block;
         } else {
             _current_block = out_block;
@@ -89,15 +98,15 @@ void Irgen::gen_if_branch(const Statement *smt, BasicBlock *parent_block,
     BasicBlock *false_block = end_block;
     if(smt->ifs.elses)
         false_block = new_basic_block();
-
+        
+    // Branch into "if branch" from parent
+    parent_block->append_instruction(
+        new ConditionalBranch(true_block, false_block, parent_block, condition));
+            
     // generate the true block
     BasicBlock *out_block = gen_block(true_block, smt->ifs.body->block);
     if (!out_block->is_terminated())
-        out_block->append_instruction(new Branch(end_block->id));
-
-    // Branch into "if branch" from parent
-    parent_block->append_instruction(
-        new ConditionalBranch(true_block->id, false_block->id, condition));
+        out_block->append_instruction(new Branch(end_block, out_block));
         
     // TODO: do we need this?
     _current_block = false_block;
@@ -116,18 +125,18 @@ Instruction *Irgen::gen(const Statement *smt) {
             Value *val = gen(smt->ret);
             Instruction *ins = new Ret(val);
             _current_block->append_instruction(ins);
-            return ins;
+            return NULL;
         }
         case Statement::BLOCK: {
+            // BasicBlock *parent_block = current_block;
             BasicBlock *new_block = new_basic_block();
             BasicBlock *out_block = gen_block(new_block, smt->block);
             BasicBlock *continue_block = new_basic_block();
             
-            new_block->preds.push_back(_current_block);
-            continue_block->preds.push_back(_current_block);
+            _current_block->append_instruction(new Branch(new_block, _current_block));
+            // TODO: should this be _current_block or out_block? 
+            out_block->append_instruction(new Branch(continue_block, _current_block));
             
-            _current_block->append_instruction(new Branch(new_block->id));
-            out_block->append_instruction(new Branch(continue_block->id));
             _current_block = continue_block;
             return NULL; 
         }

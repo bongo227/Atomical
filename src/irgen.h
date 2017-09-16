@@ -20,6 +20,7 @@ public:
     void write_var(std::string var_name, Value *value);
     Value *read_var(std::string var_name, BasicBlock *block);
     Value *read_var_recursive(std::string var_name, BasicBlock *block);
+    void add_phi_operands(std::string var_name, BasicBlock *block, Phi *phi);
 
     int next_var_id() { return ++var_id_counter; }
     int next_block_id() { return ++block_id_counter; }

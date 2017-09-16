@@ -46,7 +46,18 @@ bool BasicBlock::is_terminated() {
 
 std::string BasicBlock::to_string() const {
     std::ostringstream stream;
-    stream << "b" << id << ":" << std::endl;
+    stream << "b" << id << ":";
+#if 0
+    stream << " (";
+    for (int i = 0; i < preds.size(); i++) {
+        stream << "b" << preds[i]->id;
+        if (i < preds.size() - 1) {
+            stream << ", ";
+        }
+    }
+    stream << ")";
+#endif
+    stream << std::endl;
     for (auto i : instructions) {
         stream << "\t" << *i << std::endl;
     }
@@ -201,10 +212,14 @@ std::ostream& operator<<(std::ostream& os, const Ret& ret) {
 
 // Branch
 
-Branch::Branch(int block_id) : Instruction(true), block_id(block_id) {}
+Branch::Branch(BasicBlock *destination, BasicBlock *source) : Instruction(true), 
+    destination(destination) {
+    
+    destination->preds.push_back(source);
+}
 
 void Branch::print_instruction(std::ostream &os) const {
-    os << "br b" << block_id; 
+    os << "br b" << destination->id; 
 }
 
 std::ostream &operator<<(std::ostream &os, const Branch &branch) {
@@ -214,17 +229,54 @@ std::ostream &operator<<(std::ostream &os, const Branch &branch) {
 
 // ConditionalBranch
 
-ConditionalBranch::ConditionalBranch(int true_block_id, int false_block_id, Value *condition) : 
-    Instruction(true), true_block_id(true_block_id), false_block_id(false_block_id), 
-    condition(condition) {}
+ConditionalBranch::ConditionalBranch(BasicBlock *true_block, BasicBlock *false_block, 
+    BasicBlock *source_block, Value *condition) : Instruction(true), true_block(true_block), 
+    false_block(false_block), condition(condition) {
+
+    true_block->preds.push_back(source_block);
+    false_block->preds.push_back(source_block);
+}
 
 void ConditionalBranch::print_instruction(std::ostream &os) const {
     os << "condbr " << *condition 
-        << " b" << true_block_id 
-        << " b" << false_block_id;
+        << " b" << true_block->id 
+        << " b" << false_block->id;
 }
 
 std::ostream &operator<<(std::ostream &os, const ConditionalBranch &branch) {
     branch.print_instruction(os);
+    return os;
+}
+
+// Phi
+
+PhiOperand::PhiOperand(int block_id, Value *value) : block_id(block_id), value(value) {}
+
+Phi::Phi(int id, std::vector<PhiOperand> operands) : Instruction(false), Value(id, nullptr), 
+    operands(operands) {}
+
+void Phi::print_instruction(std::ostream &os) const {
+    if (type == nullptr) {
+        os << static_cast<Value>(*this) << " = phi null";
+        return;
+    }
+
+    os << static_cast<Value>(*this) << " = phi ";
+
+    for(int i = 0; i < operands.size(); i++) {
+        os << "(b" << operands[i].block_id << " : " << *operands[i].value << ")";
+        if (i < operands.size() - 1) os << " ";
+    }
+}
+
+void Phi::append_operand(const PhiOperand &op) {
+    std::cout << *op.value->type << std::endl;
+    assert(type == nullptr || *type == *op.value->type);
+    type = op.value->type;
+    operands.push_back(op);
+}
+
+std::ostream &operator<<(std::ostream &os, const Phi &phi) {
+    phi.print_instruction(os);
     return os;
 }

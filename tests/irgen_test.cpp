@@ -39,6 +39,6 @@ TEST_CASE("Gen Test") {
 
 		// Check ir
 		Irgen irgen = Irgen(acl);
-		REQUIRE_EQ(irgen.to_string(), ir);
+		CHECK_EQ(irgen.to_string(), ir);
 	}
 }

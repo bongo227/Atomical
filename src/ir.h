@@ -105,21 +105,40 @@ struct Ret : public Instruction {
 };
 
 struct Branch : public Instruction {
-    int block_id;
+    BasicBlock *destination;
 
-    Branch(int block_id);
+    Branch(BasicBlock *destination, BasicBlock *source);
     
     void print_instruction(std::ostream &os) const;
     friend std::ostream &operator<<(std::ostream &os, const Branch &branch);
 };
 
 struct ConditionalBranch : public Instruction {
-    int true_block_id;
-    int false_block_id;
+    BasicBlock *true_block;
+    BasicBlock *false_block;
     Value *condition;
 
-    ConditionalBranch(int true_block_id, int false_block_id, Value *condition);
+    ConditionalBranch(BasicBlock *true_block, BasicBlock *false_block, BasicBlock *source_block, 
+        Value *condition);
     
     void print_instruction(std::ostream &os) const;
     friend std::ostream &operator<<(std::ostream &os, const ConditionalBranch &branch);
+};
+
+struct PhiOperand {
+    int block_id;
+    Value *value;
+
+    PhiOperand(int block_id, Value *value);
+};
+
+struct Phi : public Instruction, public Value {
+    std::vector<PhiOperand> operands;
+    
+    Phi(int id, std::vector<PhiOperand> operands);
+
+    void append_operand(const PhiOperand &op);
+
+    void print_instruction(std::ostream &os) const;
+    friend std::ostream& operator<<(std::ostream& os, const Phi& phi);
 };
