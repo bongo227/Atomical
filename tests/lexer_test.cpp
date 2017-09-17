@@ -137,8 +137,8 @@ TEST_CASE("line numbers") {
     Lexer *lexer = new Lexer("1\n2\n3");
     std::deque<Token> tokens = lexer->lex();
     REQUIRE_EQ(6, tokens.size());
-    for (int i = 0; i < 0; i++) {
-        REQUIRE_EQ(i+1, tokens[i].line);
+    for (int i = 0; i < 6; i+=2) {
+        REQUIRE_EQ(i/2+1, tokens[i].line);
     }
 }
 

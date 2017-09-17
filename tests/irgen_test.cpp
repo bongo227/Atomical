@@ -1,10 +1,3 @@
-std::string get_file_string(){
-	std::ifstream t("file.txt");
-	std::string str((std::istreambuf_iterator<char>(t)),
-		std::istreambuf_iterator<char>());
-	return str;
-}
-
 TEST_CASE("Gen Test") {
 	namespace fs = std::experimental::filesystem;
 	std::string acls_path = "../tests/acl/";
