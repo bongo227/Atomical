@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Atomical)
 
 # Use gcc
-set(CMAKE_CXX_COMPILER /usr/bin/g++-7)
+set(CMAKE_CXX_COMPILER /usr/bin/g++-6)
 
 # Enable debug symbols
 # set(CMAKE_BUILD_TYPE Debug)
