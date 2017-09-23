@@ -129,9 +129,9 @@ class AssignStatement : public Statement {
 public:
     const Expression *variable; 
     const enum TokenType op_type;
-    const Expression *value;
+    const Expression *exp;
 
-    AssignStatement(Expression *variable, enum TokenType op_type, Expression *value);
+    AssignStatement(Expression *variable, enum TokenType op_type, Expression *exp);
 
     void code_gen(Irgen *irgen) const;
     bool is_equal(const Statement &smt) const;
@@ -143,10 +143,10 @@ public:
     const Statement *declaration; 
     const Expression *condition; 
     const Statement *increment; 
-    const Statement *body;
+    const BlockStatement *body;
 
     ForStatement(Statement *declaration, Expression *condition, Statement *increment, 
-        Statement *body);
+        BlockStatement *body);
 
     void code_gen(Irgen *irgen) const;
     bool is_equal(const Statement &smt) const;
