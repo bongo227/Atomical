@@ -73,7 +73,7 @@ ForStatement *Parser::parse_for_statement() {
     Expression *condition = parse_expression(0);
     expect(TokenType::SEMI);
     Statement *increment = parse_assign_statement();
-    Statement *body = parse_block_statement();
+    BlockStatement *body = parse_block_statement();
 
     return new ForStatement(declaration, condition, increment, body);
 }

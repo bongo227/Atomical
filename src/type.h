@@ -27,13 +27,13 @@ enum class Primitive {
 };
 
 class Type {
-    virtual bool is_equal(const Type &type) const;
+    virtual bool is_equal(const Type &type) const = 0;
+    virtual void print_node(std::ostream& os) const = 0;
 
-    virtual void print_node(std::ostream& os) const;
+    friend std::ostream& operator<<(std::ostream& os, const Type& type); 
 
     EQUAL_OP(Type);
     NOT_EQUAL_OP(Type);
-    PRINT_OP(Type);
 };
 
 class PrimitiveType : public Type {

@@ -1,6 +1,8 @@
 // Value
 
-Value::Value(int id, Type *type) : id(id), type(type) {}
+Value::Value(int id, Type *type) : id(id), type(type) {
+    std::cout << "Value ctor, type: " << type << std::endl;
+}
 
 // TODO: rename this to print_value
 void Value::printValue(std::ostream& os) const {
@@ -171,7 +173,8 @@ std::ostream& operator<<(std::ostream& os, const Call& call) {
 
 BinOp::BinOp(int id, Value *lhs, Value *rhs, TokenType op)
     : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
-    // assert(*lhs.type == *rhs.type);
+    std::cout << "BinOp ctor, type: " << lhs->type << std::endl;
+        // assert(*lhs.type == *rhs.type);
 }
 
 void BinOp::print_instruction(std::ostream& os) const {

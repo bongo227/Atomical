@@ -277,33 +277,95 @@ void IfStatement::print(std::ostream &os) const {
 
 // Assign Statement
 
-AssignStatement::AssignStatement(Expression *variable, TokenType op_type, Expression *value) :
-    variable(variable), op_type(op_type), value(value) {}
+AssignStatement::AssignStatement(Expression *variable, TokenType op_type, Expression *exp) :
+    variable(variable), op_type(op_type), exp(exp) {}
 
 void AssignStatement::code_gen(Irgen *irgen) const {
     std::string var_name = static_cast<const IdentExpression *>(variable)->ident;
-    irgen->write_var(var_name, irgen->gen(value));
+    Value *value = irgen->gen(exp);
+    
+    // TODO: make variable of type IdentExpression
+    if(op_type == TokenType::DEFINE || op_type == TokenType::ASSIGN) {
+        irgen->write_var(var_name, value);
+        return;
+    }
+    
+    Value *var_value = irgen->read_var(var_name, irgen->current_block);
+    std::cout << "var_value, type: " << var_value->type << std::endl;
+    TokenType bin_op;
+
+    switch(op_type) {
+        case TokenType::ADD_ASSIGN: {
+            bin_op = TokenType::ADD;
+            break;
+        }
+        case TokenType::SUB_ASSIGN: {
+            bin_op = TokenType::SUB;
+            break;
+        }
+        case TokenType::MUL_ASSIGN: {
+            bin_op = TokenType::MUL;
+            break;
+        }
+        case TokenType::QUO_ASSIGN: {
+            bin_op = TokenType::QUO;
+            break;
+        }
+        case TokenType::REM_ASSIGN: {
+            bin_op = TokenType::REM;
+            break;
+        }
+        default: {
+            assert(false);
+            break;
+        }
+    }
+
+    BinOp *op = new BinOp(irgen->next_var_id(), var_value, value, bin_op);
+    irgen->current_block->append_instruction(op);
+    irgen->write_var(var_name, op);
 }
 
 bool AssignStatement::is_equal(const Statement &s) const {
     AssignStatement assign_smt = dynamic_cast<const AssignStatement &>(s);
     return *variable == *assign_smt.variable &&
         op_type == assign_smt.op_type &&
-        *value == *assign_smt.value;
+        *exp == *assign_smt.exp;
 }
 
 void AssignStatement::print(std::ostream &os) const {
-    os << *variable << " " << op_type << " " << *value;
+    os << *variable << " " << op_type << " " << *exp;
 }
 
 // For Statement
 
 ForStatement::ForStatement(Statement *declaration, Expression *condition, Statement *increment, 
-    Statement *body) : declaration(declaration), condition(condition), increment(increment),
+    BlockStatement *body) : declaration(declaration), condition(condition), increment(increment),
     body(body) {}
 
 void ForStatement::code_gen(Irgen *irgen) const {
-    assert(false);
+    // Generate for loop body
+    BasicBlock *in_for_block = irgen->new_basic_block();
+    BasicBlock *out_for_block = irgen->gen_block(in_for_block, body);
+    
+    // Create continue block
+    BasicBlock *continue_block = irgen->new_basic_block();
+    
+    // Conditionaly branch into for loop
+    irgen->gen(declaration);
+    Value *value = irgen->gen(condition);
+    irgen->current_block->append_instruction(new ConditionalBranch(in_for_block, continue_block, 
+        irgen->current_block, value));
+
+    // Conditionly continue for loop
+    // TODO: Added target block to gen and make current_block read only
+    irgen->current_block = out_for_block;
+    irgen->gen(increment);
+    Value *inner_value = irgen->gen(condition); 
+    out_for_block->append_instruction(new ConditionalBranch(in_for_block, continue_block,
+        out_for_block, inner_value));
+
+    irgen->current_block = continue_block;
 }
 
 bool ForStatement::is_equal(const Statement &s) const {

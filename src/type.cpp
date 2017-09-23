@@ -6,19 +6,8 @@ void Type::print_node(std::ostream& os) const {
     os << "[BASE TYPE]";
 }
 
-std::ostream &operator<<(std::ostream &os, const Primitive &prim) {
-    switch(prim) {
-        case Primitive::I8: os << "i8"; break;
-        case Primitive::I16: os << "i16"; break;
-        case Primitive::I32: os << "i32"; break;
-        case Primitive::I64: os << "i64"; break;
-        case Primitive::INT: os << "int"; break;
-        case Primitive::F32: os << "f32"; break;
-        case Primitive::F64: os << "f64"; break;
-        case Primitive::FLOAT: os << "float"; break;
-        case Primitive::BOOL: os << "bool"; break;
-    }
-
+std::ostream &operator<<(std::ostream& os, const Type& type) {
+    type.print_node(os);
     return os;
 }
 
@@ -54,5 +43,15 @@ bool PrimitiveType::is_equal(const Type &type) const {
 }
 
 void PrimitiveType::print_node(std::ostream& os) const {
-    os << prim;
+    switch(prim) {
+        case Primitive::I8: os << "i8"; break;
+        case Primitive::I16: os << "i16"; break;
+        case Primitive::I32: os << "i32"; break;
+        case Primitive::I64: os << "i64"; break;
+        case Primitive::INT: os << "int"; break;
+        case Primitive::F32: os << "f32"; break;
+        case Primitive::F64: os << "f64"; break;
+        case Primitive::FLOAT: os << "float"; break;
+        case Primitive::BOOL: os << "bool"; break;
+    }
 }
