@@ -1,3 +1,4 @@
+mkdir build &&
 cd build &&
 # Remove build files
 rm -rf CMakeFiles/ &&
