@@ -15,8 +15,7 @@ addons:
             - lcov
 
 env:
-    - CC=gcc-7
-    - CXX=g++-7
+    - CC=gcc-7 CXX=g++-7
 
 # before_install:
 #   # Install llvm
