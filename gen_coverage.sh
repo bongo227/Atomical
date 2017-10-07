@@ -5,7 +5,7 @@ rm -rf CMakeFiles/ &&
 rm -rf coverage/ &&
 rm -f atomical-test cmake_install.cmake CMakeCache.txt libatomical.a Makefile &&
 # Make and run
-cmake . && 
+cmake ../. && 
 make &&
 ./atomical-test &&
 # Generate coverage files
