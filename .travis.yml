@@ -2,29 +2,38 @@ dist: trusty
 sudo: required
 language: cpp
 
-addons:
-    apt:
-        sources:
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+            - cmake
+            - libstdc++-7-dev 
+            - lcov
+      env:
+         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
             - ubuntu-toolchain-r-test
-        packages:
-            - gcc-7
+          packages:
             - g++-7
             - cmake
             - libstdc++-7-dev 
             - lcov
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
-env:
-    - CC=gcc-7 CXX=g++-7
-
-# before_install:
-#   # Install llvm
-#   - sudo apt-add-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main'
-#   - sudo apt-get -qq update
-#   - sudo apt-get install -y --allow-unauthenticated clang-4.0 clang-4.0-doc libclang-common-4.0-dev libclang-4.0-dev libclang1-4.0 libclang1-4.0-dbg libllvm-4.0-ocaml-dev libllvm4.0 libllvm4.0-dbg lldb-4.0 llvm-4.0 llvm-4.0-dev llvm-4.0-doc llvm-4.0-examples llvm-4.0-runtime clang-format-4.0 python-clang-4.0 libfuzzer-4.0-dev
+before_install:
+    - eval "${MATRIX_EVAL}"
 
 script:
-    # Print versions
-    - gcc-6 -v && g++-6 -v && cmake --version  
     # Print dir
     - ls -a
     # run tests and generate coverage files
