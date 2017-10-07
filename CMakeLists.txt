@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 2.6)
 project(Atomical)
 
 # Use gcc
-set(CMAKE_CXX_COMPILER /usr/bin/g++-6)
+#set(CMAKE_CXX_COMPILER /usr/bin/g++-6)
 
 # Enable debug symbols
 # set(CMAKE_BUILD_TYPE Debug)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14") # use c++14
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17") # use c++17
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimisation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
 
 # Compiler library
-add_library(atomical ../src/lib.cpp)
+add_library(atomical src/lib.cpp)
 
 # Compiler executable
 # add_executable(atomical-bin ../src/main.cpp)
@@ -22,5 +22,10 @@ add_library(atomical ../src/lib.cpp)
 # set_target_properties(atomical-bin PROPERTIES OUTPUT_NAME atomical)
 
 # Test executable 
-add_executable(atomical-test ../tests/test.cpp)
-target_link_libraries(atomical-test atomical stdc++fs)
+add_executable(atomical-test tests/test.cpp)
+target_link_libraries(atomical-test atomical)
+IF (WIN32)
+    target_link_libraries(atomical-test Shlwapi)
+ELSE()
+    target_link_libraries(atomical-test stdc++fs)
+ENDIF()
