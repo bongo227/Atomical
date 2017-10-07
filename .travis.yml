@@ -23,6 +23,8 @@ addons:
 script:
     # Print versions
     - gcc-6 -v && g++-6 -v && cmake --version  
+    # Print dir
+    - ls -a
     # run tests and generate coverage files
     - bash gen_coverage.sh
 
