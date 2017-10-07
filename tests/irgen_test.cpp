@@ -13,10 +13,12 @@ TEST_CASE("Gen Test") {
             std::string ir_string_path = acl_string_path;
             MESSAGE("Gen: " << acl_string_path);
 
-            auto i = ir_string_path.find("/acl/");
-            if (i != std::string::npos) ir_string_path.replace(i, 5, "/ir/");
+            auto i = ir_string_path.find("\\acl\\");
+            if (i != std::string::npos) ir_string_path.replace(i, 5, "\\ir\\");
 
             ir_string_path.replace(ir_string_path.size()-4, 4, ".ir");
+
+            MESSAGE("Does: " << ir_string_path << " exist?");
 
             if(PathFileExists(ir_string_path.c_str()) != 1) continue;
 
@@ -30,7 +32,7 @@ TEST_CASE("Gen Test") {
 
             // Check ir
             Irgen irgen = Irgen(acl);
-            CHECK_EQ(irgen.to_string(), ir);
+            CHECK_EQ(irgen.to_string(), remove_carrige_return(ir));
 
         } while(FindNextFile(h_find, &data));
 

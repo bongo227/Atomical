@@ -1,0 +1,26 @@
+proc fib :: int n -> int :
+b1:
+	v1 = argument n
+	v2 = 2
+	v3 = v1 < v2
+	condbr v3 b3 b2
+
+b2:
+	v4 = 1
+	v5 = v1 - v4
+	v6 = fib(v5)
+	v7 = 2
+	v8 = v1 - v7
+	v9 = fib(v8)
+	v10 = v6 + v9
+	ret v10
+
+b3:
+	ret v1
+
+proc main :: -> int :
+b4:
+	v11 = 12
+	v12 = fib(v11)
+	ret v12
+
