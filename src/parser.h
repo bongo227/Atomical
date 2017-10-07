@@ -13,8 +13,8 @@ class Parser {
         
 
     private:
-        Token expect(TokenType type);
-        void accept(TokenType type);
+        Token expect(enum TokenType type);
+        void accept(enum TokenType type);
           
         ReturnStatement *parse_return_statement();
         BlockStatement *parse_block_statement();

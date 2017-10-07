@@ -14,76 +14,76 @@ TEST_CASE("identifier expressions equal") {
 
 TEST_CASE("literal expressions equal") {
     REQUIRE_EQ(
-        *new LiteralExpression(TokenType::INT, "100"), 
-        *new LiteralExpression(TokenType::INT, "100")
+        *new LiteralExpression(TokenType::LITERAL_INT, "100"),
+        *new LiteralExpression(TokenType::LITERAL_INT, "100")
     );
     
     REQUIRE_NE(
-        *new LiteralExpression(TokenType::INT, "100"), 
-        *new LiteralExpression(TokenType::FLOAT, "100")
+        *new LiteralExpression(TokenType::LITERAL_INT, "100"),
+        *new LiteralExpression(TokenType::LITERAL_FLOAT, "100")
     );
 
     REQUIRE_NE(
-        *new LiteralExpression(TokenType::INT, "100"), 
-        *new LiteralExpression(TokenType::INT, "200")
+        *new LiteralExpression(TokenType::LITERAL_INT, "100"),
+        *new LiteralExpression(TokenType::LITERAL_INT, "200")
     );
 }
 
 TEST_CASE("unary expressions equal") {
     REQUIRE_EQ(
-        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")), 
-        *new UnaryExpression(TokenType::NOT, new IdentExpression("a"))
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new IdentExpression("a")), 
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new IdentExpression("a"))
     );
     
     REQUIRE_NE(
-        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")),
-        *new UnaryExpression(TokenType::NOT, new IdentExpression("b"))
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new IdentExpression("a")),
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")),
-        *new UnaryExpression(TokenType::SUB, new IdentExpression("a"))
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new IdentExpression("a")),
+        *new UnaryExpression(TokenType::SYMBOL_SUB, new IdentExpression("a"))
     );
 
     REQUIRE_NE(
-        *new UnaryExpression(TokenType::NOT, new IdentExpression("a")),
-        *new UnaryExpression(TokenType::NOT, new LiteralExpression(TokenType::INT, "100"))
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new IdentExpression("a")),
+        *new UnaryExpression(TokenType::SYMBOL_NOT, new LiteralExpression(TokenType::LITERAL_INT, "100"))
     );
 }
 
 TEST_CASE("binary expressions equal") {
     REQUIRE_EQ(
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b"))
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        *new BinaryExpression(TokenType::SUB, new IdentExpression("a"), new IdentExpression("b"))
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::SYMBOL_SUB, new IdentExpression("a"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("b"), new IdentExpression("b"))
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("b"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("b")),
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), new IdentExpression("a"))
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), new IdentExpression("b")),
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), new IdentExpression("a"))
     );
 
     REQUIRE_NE(
-        *new BinaryExpression(TokenType::ADD, 
+        *new BinaryExpression(TokenType::SYMBOL_ADD, 
             new IdentExpression("a"), new IdentExpression("b")),
-        *new BinaryExpression(TokenType::ADD, 
-            new LiteralExpression(TokenType::INT, "100"), new IdentExpression("b"))
+        *new BinaryExpression(TokenType::SYMBOL_ADD, 
+            new LiteralExpression(TokenType::LITERAL_INT, "100"), new IdentExpression("b"))
     );
 
     REQUIRE_NE(
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), 
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), 
             new IdentExpression("b")),
-        *new BinaryExpression(TokenType::ADD, new IdentExpression("a"), 
-            new LiteralExpression(TokenType::INT, "100"))
+        *new BinaryExpression(TokenType::SYMBOL_ADD, new IdentExpression("a"), 
+            new LiteralExpression(TokenType::LITERAL_INT, "100"))
     );
 }
 
@@ -115,7 +115,7 @@ TEST_CASE("call expressions equal") {
 
     REQUIRE_NE(
         *new CallExpression("foo", {new IdentExpression("a")}),
-        *new CallExpression("foo", {new LiteralExpression(TokenType::INT, "100")})
+        *new CallExpression("foo", {new LiteralExpression(TokenType::LITERAL_INT, "100")})
     );
 }
 
@@ -132,7 +132,7 @@ TEST_CASE("return statements equal") {
 
     REQUIRE_NE(
         *new ReturnStatement(new IdentExpression("a")),
-        *new ReturnStatement(new LiteralExpression(TokenType::INT, "100"))
+        *new ReturnStatement(new LiteralExpression(TokenType::LITERAL_INT, "100"))
     );
 }
 
@@ -171,7 +171,7 @@ TEST_CASE("if statements equal") {
 
     REQUIRE_NE(
         *new IfStatement(new IdentExpression("foo"), new BlockStatement({}), NULL),
-        *new IfStatement(new LiteralExpression(TokenType::INT, "100"), new BlockStatement({}), NULL)
+        *new IfStatement(new LiteralExpression(TokenType::LITERAL_INT, "100"), new BlockStatement({}), NULL)
     );
 
     REQUIRE_NE(
@@ -213,18 +213,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -233,18 +233,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -256,18 +256,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -276,18 +276,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("b"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -299,18 +299,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -319,18 +319,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("b"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -342,18 +342,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -362,18 +362,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::SUB_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_SUB_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -385,18 +385,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -405,18 +405,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({})
         )
@@ -426,18 +426,18 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new BinaryExpression(
-                TokenType::LSS,
+                TokenType::SYMBOL_LSS,
                 new IdentExpression("a"),
-                new LiteralExpression(TokenType::INT, "10")
+                new LiteralExpression(TokenType::LITERAL_INT, "10")
             ),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -446,14 +446,14 @@ TEST_CASE("for statements equal") {
         *new ForStatement(
             new AssignStatement(
                 new IdentExpression("a"), 
-                TokenType::DEFINE, 
-                new LiteralExpression(TokenType::INT, "0")
+                TokenType::SYMBOL_DEFINE, 
+                new LiteralExpression(TokenType::LITERAL_INT, "0")
             ),
             new IdentExpression("foo"),
             new AssignStatement(
                 new IdentExpression("a"),
-                TokenType::ADD_ASSIGN,
-                new LiteralExpression(TokenType::INT, "1")
+                TokenType::SYMBOL_ADD_ASSIGN,
+                new LiteralExpression(TokenType::LITERAL_INT, "1")
             ),
             new BlockStatement({
                 new ReturnStatement(new IdentExpression("a")),
@@ -466,64 +466,64 @@ TEST_CASE("assignment statements equal") {
     REQUIRE_EQ(
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         ),
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         )
     );
 
     REQUIRE_NE(
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         ),
         *new AssignStatement(
             new IdentExpression("bar"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         )
     );
 
     REQUIRE_NE(
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         ),
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::SUB_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_SUB_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         )
     );
 
     REQUIRE_NE(
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         ),
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "200")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "200")
         )
     );
 
     REQUIRE_NE(
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
-            new LiteralExpression(TokenType::INT, "100")
+            TokenType::SYMBOL_ADD_ASSIGN,
+            new LiteralExpression(TokenType::LITERAL_INT, "100")
         ),
         *new AssignStatement(
             new IdentExpression("foo"),
-            TokenType::ADD_ASSIGN,
+            TokenType::SYMBOL_ADD_ASSIGN,
             new IdentExpression("bar")
         )
     );
@@ -677,9 +677,9 @@ TEST_CASE("functions equal") {
             new BlockStatement({
                 new ReturnStatement(
                     new BinaryExpression(
-                        TokenType::ADD,
+                        TokenType::SYMBOL_ADD,
                         new IdentExpression("a"),
-                        new LiteralExpression(TokenType::FLOAT, "u")
+                        new LiteralExpression(TokenType::LITERAL_FLOAT, "u")
                     )
                 )
             })
@@ -695,9 +695,9 @@ TEST_CASE("functions equal") {
             new BlockStatement({
                 new ReturnStatement(
                     new BinaryExpression(
-                        TokenType::ADD,
+                        TokenType::SYMBOL_ADD,
                         new IdentExpression("a"),
-                        new LiteralExpression(TokenType::FLOAT, "1")
+                        new LiteralExpression(TokenType::LITERAL_FLOAT, "1")
                     )
                 )
             })

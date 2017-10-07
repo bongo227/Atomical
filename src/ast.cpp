@@ -33,7 +33,7 @@ void IdentExpression::print(std::ostream &os) const {
 
 // LiteralExpression
 
-LiteralExpression::LiteralExpression(TokenType type, std::string value) : Expression(false), 
+LiteralExpression::LiteralExpression(enum TokenType type, std::string value) : Expression(false),
     type(type), value(value) {}
 
 Value *LiteralExpression::code_gen(Irgen *irgen) const {
@@ -53,7 +53,7 @@ void LiteralExpression::print(std::ostream &os) const {
 
 // UnaryExpression
 
-UnaryExpression::UnaryExpression(TokenType op_type, Expression *exp) : 
+UnaryExpression::UnaryExpression(enum TokenType op_type, Expression *exp) :
     Expression(true), op_type(op_type), exp(exp) {}
 
 Value *UnaryExpression::code_gen(Irgen *irgen) const {
@@ -77,7 +77,7 @@ void UnaryExpression::print(std::ostream &os) const {
 
 // BinaryExpression
 
-BinaryExpression::BinaryExpression(TokenType op_type, Expression *lhs, Expression *rhs) 
+BinaryExpression::BinaryExpression(enum TokenType op_type, Expression *lhs, Expression *rhs)
     : Expression(true), op_type(op_type), lhs(lhs), rhs(rhs) {}
 
 Value *BinaryExpression::code_gen(Irgen *irgen) const {
@@ -277,7 +277,7 @@ void IfStatement::print(std::ostream &os) const {
 
 // Assign Statement
 
-AssignStatement::AssignStatement(Expression *variable, TokenType op_type, Expression *value) :
+AssignStatement::AssignStatement(Expression *variable, enum TokenType op_type, Expression *value) :
     variable(variable), op_type(op_type), value(value) {}
 
 void AssignStatement::code_gen(Irgen *irgen) const {

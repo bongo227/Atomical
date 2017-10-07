@@ -40,9 +40,9 @@ class PrimitiveType : public Type {
     Primitive prim;
 
 public:
-    explicit PrimitiveType(Primitive prim);
-    explicit PrimitiveType(TokenType type);
+    explicit PrimitiveType(Primitive);
+    explicit PrimitiveType(enum TokenType);
 
-    virtual bool is_equal(const Type& type) const override;
-    virtual void print_node(std::ostream& os) const override;
+    virtual bool is_equal(const Type &) const override;
+    virtual void print_node(std::ostream &) const override;
 };

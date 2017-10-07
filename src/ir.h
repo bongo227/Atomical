@@ -77,9 +77,9 @@ struct Call : public Instruction, public Value {
 struct BinOp : public Instruction, public Value {
     Value *lhs;
     Value *rhs;
-    TokenType op;
+    enum TokenType op;
 
-    BinOp(int id, Value *lhs, Value *rhs, TokenType op);
+    BinOp(int id, Value *lhs, Value *rhs, enum TokenType op);
 
     void print_instruction(std::ostream& os) const;
     friend std::ostream& operator<<(std::ostream& os, const BinOp& bin_op);
@@ -87,9 +87,9 @@ struct BinOp : public Instruction, public Value {
 
 struct UnaryOp : public Instruction, public Value {
     Value *value;
-    TokenType op;
+    enum TokenType op;
 
-    UnaryOp(int id, Value *value, TokenType op);
+    UnaryOp(int id, Value *value, enum TokenType op);
 
     void print_instruction(std::ostream& os) const;
     friend std::ostream& operator<<(std::ostream& os, const UnaryOp& unary_op);

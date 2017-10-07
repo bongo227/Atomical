@@ -24,16 +24,16 @@ std::ostream &operator<<(std::ostream &os, const Primitive &prim) {
 
 PrimitiveType::PrimitiveType(Primitive prim) : prim(prim) {}
 
-PrimitiveType::PrimitiveType(TokenType type) {
+PrimitiveType::PrimitiveType(enum TokenType type) {
     switch(type) {
-        case TokenType::INT:
-        case TokenType::HEX:
-        case TokenType::OCTAL: {
+        case TokenType::LITERAL_INT:
+        case TokenType::LITERAL_HEX:
+        case TokenType::LITERAL_OCTAL: {
             prim = Primitive::INT;
             break;
         }
         
-        case TokenType::FLOAT: 
+        case TokenType::LITERAL_FLOAT: 
             prim = Primitive::FLOAT; 
             break;
         

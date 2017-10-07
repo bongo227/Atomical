@@ -26,11 +26,11 @@ public:
 
 class LiteralExpression : public Expression {
 public:
-    const TokenType type;
+    const enum TokenType type;
     const std::string value;
 
     // TODO: TokenType -> LiteralType
-    LiteralExpression(TokenType type, std::string value);
+    LiteralExpression(enum TokenType type, std::string value);
 
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
@@ -39,10 +39,10 @@ public:
 
 class UnaryExpression : public Expression {
 public:
-    const TokenType op_type;
+    const enum TokenType op_type;
     const Expression *exp;
 
-    UnaryExpression(TokenType op_type, Expression *exp);
+    UnaryExpression(enum TokenType op_type, Expression *exp);
 
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
@@ -52,11 +52,11 @@ public:
 class BinaryExpression : public Expression {
 public:
     // BinaryTypw
-    const TokenType op_type;
+    const enum TokenType op_type;
     const Expression *lhs;
     const Expression *rhs;
 
-    BinaryExpression(TokenType op_type, Expression *lhs, Expression *rhs);
+    BinaryExpression(enum TokenType op_type, Expression *lhs, Expression *rhs);
 
     Value *code_gen(Irgen *irgen) const;
     bool is_equal(const Expression &exp) const;
@@ -128,10 +128,10 @@ public:
 class AssignStatement : public Statement {
 public:
     const Expression *variable; 
-    const TokenType op_type; 
+    const enum TokenType op_type;
     const Expression *value;
 
-    AssignStatement(Expression *variable, TokenType op_type, Expression *value);
+    AssignStatement(Expression *variable, enum TokenType op_type, Expression *value);
 
     void code_gen(Irgen *irgen) const;
     bool is_equal(const Statement &smt) const;

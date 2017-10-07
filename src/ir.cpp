@@ -169,7 +169,7 @@ std::ostream& operator<<(std::ostream& os, const Call& call) {
 
 // BinOp
 
-BinOp::BinOp(int id, Value *lhs, Value *rhs, TokenType op)
+BinOp::BinOp(int id, Value *lhs, Value *rhs, enum TokenType op)
     : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
     // assert(*lhs.type == *rhs.type);
 }
@@ -185,7 +185,7 @@ std::ostream& operator<<(std::ostream& os, const BinOp& bin_op) {
 
 // UnaryOp
 
-UnaryOp::UnaryOp(int id, Value *value, TokenType op) : Instruction(false), Value(id, value->type), 
+UnaryOp::UnaryOp(int id, Value *value, enum TokenType op) : Instruction(false), Value(id, value->type),
     value(value), op(op) {}
 
 void UnaryOp::print_instruction(std::ostream& os) const {

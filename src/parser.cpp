@@ -11,7 +11,7 @@ std::vector<Function *> Parser::parse() {
     return functions;
 }
 
-Token Parser::expect(TokenType type) {
+Token Parser::expect(enum TokenType type) {
     if (tokens.front().type != type) {
         std::cout << "Expected: \"" << type << "\"" << std::endl;
         std::cout << "Got: \"" << tokens.front().type << "\"" << std::endl;
@@ -22,38 +22,38 @@ Token Parser::expect(TokenType type) {
     return token;
 }
 
-void Parser::accept(TokenType type) {
+void Parser::accept(enum TokenType type) {
     if (tokens.front().type == type) tokens.pop_front();
 }
 
 ReturnStatement *Parser::parse_return_statement() {
-    expect(TokenType::RETURN);
+    expect(TokenType::KEY_WORD_RETURN);
     return new ReturnStatement(parse_expression(0));;
 }
 
 BlockStatement *Parser::parse_block_statement() {
-    expect(TokenType::LBRACE);
+    expect(TokenType::SYMBOL_LBRACE);
 
     std::vector<Statement *> smts(0);
-    while(tokens.front().type != TokenType::RBRACE) {
+    while(tokens.front().type != TokenType::SYMBOL_RBRACE) {
         smts.push_back(parse_statement());
     }
 
-    expect(TokenType::RBRACE);
+    expect(TokenType::SYMBOL_RBRACE);
     
     return new BlockStatement(smts);
 }
 
 IfStatement *Parser::parse_if_statement() {
-    expect(TokenType::IF);
+    expect(TokenType::KEY_WORD_IF);
 
     Expression *condition = parse_expression(0);
     BlockStatement *body = parse_block_statement();
     IfStatement *elses = NULL;
 
-    if (tokens.front().type == TokenType::ELSE) {
-        expect(TokenType::ELSE);
-        if (tokens.front().type == TokenType::IF) {
+    if (tokens.front().type == TokenType::KEY_WORD_ELSE) {
+        expect(TokenType::KEY_WORD_ELSE);
+        if (tokens.front().type == TokenType::KEY_WORD_IF) {
             // else if so recursivly parse the chain.
             elses = parse_if_statement();
         } else {
@@ -66,12 +66,12 @@ IfStatement *Parser::parse_if_statement() {
 }
 
 ForStatement *Parser::parse_for_statement() {
-    expect(TokenType::FOR);
+    expect(TokenType::KEY_WORD_FOR);
 
     Statement *declaration = parse_assign_statement();
-    expect(TokenType::SEMI);
+    expect(TokenType::SYMBOL_SEMI);
     Expression *condition = parse_expression(0);
-    expect(TokenType::SEMI);
+    expect(TokenType::SYMBOL_SEMI);
     Statement *increment = parse_assign_statement();
     Statement *body = parse_block_statement();
 
@@ -79,7 +79,7 @@ ForStatement *Parser::parse_for_statement() {
 }
 
 AssignStatement *Parser::parse_assign_statement() {
-    Expression *ident = new IdentExpression(expect(TokenType::IDENT).value);
+    Expression *ident = new IdentExpression(expect(TokenType::TOKEN_IDENT).value);
     Token type = tokens.front();
     tokens.pop_front();
     Expression *value = parse_expression(0);
@@ -89,23 +89,23 @@ AssignStatement *Parser::parse_assign_statement() {
 Statement *Parser::parse_statement() {
     Statement *statement = nullptr;
     switch(tokens.front().type) {
-        case TokenType::RETURN: {
+        case TokenType::KEY_WORD_RETURN: {
             statement = parse_return_statement();
             break;
         } 
-        case TokenType::LBRACE: {
+        case TokenType::SYMBOL_LBRACE: {
             statement = parse_block_statement();
             break;
         } 
-        case TokenType::IF: {
+        case TokenType::KEY_WORD_IF: {
             statement = parse_if_statement();
             break;
         } 
-        case TokenType::IDENT: {
+        case TokenType::TOKEN_IDENT: {
             statement = parse_assign_statement();
             break;
         } 
-        case TokenType::FOR: {
+        case TokenType::KEY_WORD_FOR: {
             statement = parse_for_statement();
             break;
         } 
@@ -118,7 +118,7 @@ Statement *Parser::parse_statement() {
             break;
         }
     }
-    expect(TokenType:: SEMI);
+    expect(TokenType::SYMBOL_SEMI);
     return statement;
 }
 
@@ -139,7 +139,7 @@ Expression *Parser::parse_expression(int rbp) {
 
 Expression *Parser::nud(Token token) {
     switch(token.type) {
-        case TokenType::IDENT: {
+        case TokenType::TOKEN_IDENT: {
             return new IdentExpression(token.value);
         }
 
@@ -151,16 +151,16 @@ Expression *Parser::nud(Token token) {
             return new LiteralExpression(token.type, "true");
         }
 
-        case TokenType::INT:
-        case TokenType::FLOAT:
-        case TokenType::HEX:
-        case TokenType::OCTAL:
-        case TokenType::STRING: {
+        case TokenType::LITERAL_INT:
+        case TokenType::LITERAL_FLOAT:
+        case TokenType::LITERAL_HEX:
+        case TokenType::LITERAL_OCTAL:
+        case TokenType::LITERAL_STRING: {
             return new LiteralExpression(token.type, token.value);
         }
 
-        case TokenType::NOT: 
-        case TokenType::SUB: {
+        case TokenType::SYMBOL_NOT:
+        case TokenType::SYMBOL_SUB: {
             return new UnaryExpression(token.type, parse_expression(60));
         }
 
@@ -177,27 +177,27 @@ Expression *Parser::nud(Token token) {
 Expression *Parser::led(Token token, Expression *expression) {
     int bp = token.get_binding_power();
     switch(token.type) {
-        case TokenType::ADD:
-        case TokenType::SUB:
-        case TokenType::MUL:
-        case TokenType::QUO:
-        case TokenType::REM:
-        case TokenType::EQL:
-        case TokenType::NEQ:
-        case TokenType::GTR:
-        case TokenType::LSS:
-        case TokenType::GEQ:
-        case TokenType::LEQ: {
+        case TokenType::SYMBOL_ADD:
+        case TokenType::SYMBOL_SUB:
+        case TokenType::SYMBOL_MUL:
+        case TokenType::SYMBOL_QUO:
+        case TokenType::SYMBOL_REM:
+        case TokenType::SYMBOL_EQL:
+        case TokenType::SYMBOL_NEQ:
+        case TokenType::SYMBOL_GTR:
+        case TokenType::SYMBOL_LSS:
+        case TokenType::SYMBOL_GEQ:
+        case TokenType::SYMBOL_LEQ: {
             return new BinaryExpression(token.type, expression, parse_expression(bp));
         }
         
-        case TokenType::LPAREN: {
+        case TokenType::SYMBOL_LPAREN: {
             std::vector<Expression *> args(0);
-            while(tokens.front().type != TokenType::RPAREN) {
-                if(args.size()) expect(TokenType::COMMA);
+            while(tokens.front().type != TokenType::SYMBOL_RPAREN) {
+                if(args.size()) expect(TokenType::SYMBOL_COMMA);
                 args.push_back(parse_expression(0)); // crash
             }
-            expect(TokenType::RPAREN);
+            expect(TokenType::SYMBOL_RPAREN);
 
             // TODO: find a way to remove this cast
             return new CallExpression(static_cast<IdentExpression *>(expression)->ident, args);
@@ -210,7 +210,7 @@ Expression *Parser::led(Token token, Expression *expression) {
 }
 
 Type *Parser::parse_type() {
-    Token ident = expect(TokenType::IDENT);
+    Token ident = expect(TokenType::TOKEN_IDENT);
     if(ident.value == "i8") return new PrimitiveType(Primitive::I8);
     else if(ident.value == "i16") return new PrimitiveType(Primitive::I16);
     else if(ident.value == "i32") return new PrimitiveType(Primitive::I32);
@@ -225,40 +225,40 @@ Type *Parser::parse_type() {
 }
 
 Function *Parser::parse_function() {
-    expect(TokenType::PROC);
+    expect(TokenType::KEY_WORD_PROC);
 
-    Token ident = expect(TokenType::IDENT);
+    Token ident = expect(TokenType::TOKEN_IDENT);
 
-    expect(TokenType::DOUBLE_COLON);
+    expect(TokenType::SYMBOL_DOUBLE_COLON);
 
     std::vector<std::tuple<Type *, std::string>> arguments;
-    while(tokens.front().type != TokenType::ARROW) {
-        if (arguments.size()) expect(TokenType::COMMA);
+    while(tokens.front().type != TokenType::SYMBOL_ARROW) {
+        if (arguments.size()) expect(TokenType::SYMBOL_COMMA);
         Type *type = parse_type();
-        Token ident = expect(TokenType::IDENT);
+        Token ident = expect(TokenType::TOKEN_IDENT);
         std::string name = ident.value;
         arguments.push_back(std::make_tuple(type, name));
     }
 
-    expect(TokenType::ARROW);
+    expect(TokenType::SYMBOL_ARROW);
 
     std::vector<std::tuple<Type *, std::string>> returns;
-    while(tokens.front().type != TokenType::LBRACE) {
+    while(tokens.front().type != TokenType::SYMBOL_LBRACE) {
         if (returns.size()) 
-            expect(TokenType::COMMA);
+            expect(TokenType::SYMBOL_COMMA);
         
         Type *type = parse_type();
         
         std::string name = "";
-        if(tokens.front().type == TokenType::IDENT)
-            name = expect(TokenType::IDENT).value;
+        if(tokens.front().type == TokenType::TOKEN_IDENT)
+            name = expect(TokenType::TOKEN_IDENT).value;
 
         returns.push_back(std::make_tuple(type, name));
     }
 
     BlockStatement *body = parse_block_statement();
 
-    expect(TokenType::SEMI);
+    expect(TokenType::SYMBOL_SEMI);
     
     return new Function(ident.value, arguments, returns, body);
 }

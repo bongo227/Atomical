@@ -13,20 +13,20 @@ TEST_CASE("identifiers") {
         Lexer *lexer = new Lexer(c);
         std::deque<Token> tokens = lexer->lex();
         REQUIRE_EQ(2, tokens.size());
-        REQUIRE_EQ(TokenType::IDENT, tokens[0].type);
+        REQUIRE_EQ(TokenType::TOKEN_IDENT, tokens[0].type);
         REQUIRE_EQ(c, tokens[0].value);
     }
 }
 
 TEST_CASE("numbers") {
     auto cases = {
-        std::make_tuple("0", TokenType::INT, "0"),
-        std::make_tuple("1", TokenType::INT, "1"),
-        std::make_tuple("1204", TokenType::INT, "1204"),
-        std::make_tuple("213.42", TokenType::FLOAT, "213.42"),
-        std::make_tuple("0.5", TokenType::FLOAT, ".5"),
-        std::make_tuple("0x1000", TokenType::HEX, "1000"),
-        std::make_tuple("0600", TokenType::OCTAL, "600"),
+        std::make_tuple("0", TokenType::LITERAL_INT, "0"),
+        std::make_tuple("1", TokenType::LITERAL_INT, "1"),
+        std::make_tuple("1204", TokenType::LITERAL_INT, "1204"),
+        std::make_tuple("213.42", TokenType::LITERAL_FLOAT, "213.42"),
+        std::make_tuple("0.5", TokenType::LITERAL_FLOAT, ".5"),
+        std::make_tuple("0x1000", TokenType::LITERAL_HEX, "1000"),
+        std::make_tuple("0600", TokenType::LITERAL_OCTAL, "600"),
     };
 
     for (auto c : cases) {
@@ -40,13 +40,13 @@ TEST_CASE("numbers") {
 
 TEST_CASE("strings") {
     auto cases = {
-        std::make_tuple("\"test\"", TokenType::STRING, "test"),
-        std::make_tuple("\"\"", TokenType::STRING, ""),
-        std::make_tuple("\"\n\"", TokenType::STRING, "\n"),
-        std::make_tuple("\"\021\"", TokenType::STRING, "\021"),
-        std::make_tuple("\"\x41\"", TokenType::STRING, "\x41"),
-        std::make_tuple("\"\u1000\"", TokenType::STRING, "\u1000"),
-        std::make_tuple("\"\u10001000\"", TokenType::STRING, "\u10001000"),
+        std::make_tuple("\"test\"", TokenType::LITERAL_STRING, "test"),
+        std::make_tuple("\"\"", TokenType::LITERAL_STRING, ""),
+        std::make_tuple("\"\n\"", TokenType::LITERAL_STRING, "\n"),
+        std::make_tuple("\"\021\"", TokenType::LITERAL_STRING, "\021"),
+        std::make_tuple("\"\x41\"", TokenType::LITERAL_STRING, "\x41"),
+        std::make_tuple("\"\u1000\"", TokenType::LITERAL_STRING, "\u1000"),
+        std::make_tuple("\"\u10001000\"", TokenType::LITERAL_STRING, "\u10001000"),
     };
 
     for (auto c : cases) {
@@ -60,68 +60,68 @@ TEST_CASE("strings") {
 
 TEST_CASE("symbols") {
     auto cases = {
-        std::make_tuple(":", TokenType::COLON, "" ),
-        std::make_tuple(":=", TokenType::DEFINE, "" ),
-        std::make_tuple("::", TokenType::DOUBLE_COLON, "" ),
+        std::make_tuple(":", TokenType::SYMBOL_COLON, "" ),
+        std::make_tuple(":=", TokenType::SYMBOL_DEFINE, "" ),
+        std::make_tuple("::", TokenType::SYMBOL_DOUBLE_COLON, "" ),
 
-        std::make_tuple(".", TokenType::PERIOD, "" ),
-        std::make_tuple("...", TokenType::ELLIPSE, "" ),
+        std::make_tuple(".", TokenType::SYMBOL_PERIOD, "" ),
+        std::make_tuple("...", TokenType::SYMBOL_ELLIPSE, "" ),
 
-        std::make_tuple(",", TokenType::COMMA, "" ),
+        std::make_tuple(",", TokenType::SYMBOL_COMMA, "" ),
 
-        std::make_tuple("(", TokenType::LPAREN, "" ),
-        std::make_tuple(")", TokenType::RPAREN, "" ),
-        std::make_tuple("[", TokenType::LBRACK, "" ),
-        std::make_tuple("]", TokenType::RBRACK, "" ),
-        std::make_tuple("{", TokenType::LBRACE, "" ),
-        std::make_tuple("}", TokenType::RBRACE, "" ),
+        std::make_tuple("(", TokenType::SYMBOL_LPAREN, "" ),
+        std::make_tuple(")", TokenType::SYMBOL_RPAREN, "" ),
+        std::make_tuple("[", TokenType::SYMBOL_LBRACK, "" ),
+        std::make_tuple("]", TokenType::SYMBOL_RBRACK, "" ),
+        std::make_tuple("{", TokenType::SYMBOL_LBRACE, "" ),
+        std::make_tuple("}", TokenType::SYMBOL_RBRACE, "" ),
 
-        std::make_tuple("+", TokenType::ADD, "" ),
-        std::make_tuple("+=", TokenType::ADD_ASSIGN, "" ),
-        std::make_tuple("++", TokenType::INC, "" ),
+        std::make_tuple("+", TokenType::SYMBOL_ADD, "" ),
+        std::make_tuple("+=", TokenType::SYMBOL_ADD_ASSIGN, "" ),
+        std::make_tuple("++", TokenType::SYMBOL_INC, "" ),
 
-        std::make_tuple("-", TokenType::SUB, "" ),
-        std::make_tuple("-=", TokenType::SUB_ASSIGN, "" ),
-        std::make_tuple("--", TokenType::DEC, "" ),
-        std::make_tuple("->", TokenType::ARROW, "" ),
+        std::make_tuple("-", TokenType::SYMBOL_SUB, "" ),
+        std::make_tuple("-=", TokenType::SYMBOL_SUB_ASSIGN, "" ),
+        std::make_tuple("--", TokenType::SYMBOL_DEC, "" ),
+        std::make_tuple("->", TokenType::SYMBOL_ARROW, "" ),
 
-        std::make_tuple("*", TokenType::MUL, "" ),
-        std::make_tuple("*=", TokenType::MUL_ASSIGN, "" ),
+        std::make_tuple("*", TokenType::SYMBOL_MUL, "" ),
+        std::make_tuple("*=", TokenType::SYMBOL_MUL_ASSIGN, "" ),
 
-        std::make_tuple("/", TokenType::QUO, "" ),
-        std::make_tuple("/=", TokenType::QUO_ASSIGN, "" ),
+        std::make_tuple("/", TokenType::SYMBOL_QUO, "" ),
+        std::make_tuple("/=", TokenType::SYMBOL_QUO_ASSIGN, "" ),
 
-        std::make_tuple("%", TokenType::REM, "" ),
-        std::make_tuple("%=", TokenType::REM_ASSIGN, "" ),
+        std::make_tuple("%", TokenType::SYMBOL_REM, "" ),
+        std::make_tuple("%=", TokenType::SYMBOL_REM_ASSIGN, "" ),
 
-        std::make_tuple("^", TokenType::XOR, "" ),
-        std::make_tuple("^=", TokenType::XOR_ASSIGN, "" ),
+        std::make_tuple("^", TokenType::SYMBOL_XOR, "" ),
+        std::make_tuple("^=", TokenType::SYMBOL_XOR_ASSIGN, "" ),
 
-        std::make_tuple("<", TokenType::LSS, "" ),
-        std::make_tuple("<=", TokenType::LEQ, "" ),
-        std::make_tuple("<<", TokenType::SHL, "" ),
-        std::make_tuple("<<=", TokenType::SHL_ASSIGN, "" ),
+        std::make_tuple("<", TokenType::SYMBOL_LSS, "" ),
+        std::make_tuple("<=", TokenType::SYMBOL_LEQ, "" ),
+        std::make_tuple("<<", TokenType::SYMBOL_SHL, "" ),
+        std::make_tuple("<<=", TokenType::SYMBOL_SHL_ASSIGN, "" ),
 
-        std::make_tuple(">", TokenType::GTR, "" ),
-        std::make_tuple(">=", TokenType::GEQ, "" ),
-        std::make_tuple(">>", TokenType::SHR, "" ),
-        std::make_tuple(">>=", TokenType::SHR_ASSIGN, "" ),
+        std::make_tuple(">", TokenType::SYMBOL_GTR, "" ),
+        std::make_tuple(">=", TokenType::SYMBOL_GEQ, "" ),
+        std::make_tuple(">>", TokenType::SYMBOL_SHR, "" ),
+        std::make_tuple(">>=", TokenType::SYMBOL_SHR_ASSIGN, "" ),
 
-        std::make_tuple("=", TokenType::ASSIGN, "" ),
-        std::make_tuple("==", TokenType::EQL, "" ),
+        std::make_tuple("=", TokenType::SYMBOL_ASSIGN, "" ),
+        std::make_tuple("==", TokenType::SYMBOL_EQL, "" ),
 
-        std::make_tuple("!", TokenType::NOT, "" ),
-        std::make_tuple("!=", TokenType::NEQ, "" ),
+        std::make_tuple("!", TokenType::SYMBOL_NOT, "" ),
+        std::make_tuple("!=", TokenType::SYMBOL_NEQ, "" ),
 
-        std::make_tuple("&", TokenType::AND, "" ),
-        std::make_tuple("&=", TokenType::AND_ASSIGN, "" ),
-        std::make_tuple("&&", TokenType::LAND, "" ),
-        std::make_tuple("&^", TokenType::AND_NOT, "" ),
-        std::make_tuple("&^=", TokenType::AND_NOT_ASSIGN, "" ),
+        std::make_tuple("&", TokenType::SYMBOL_AND, "" ),
+        std::make_tuple("&=", TokenType::SYMBOL_AND_ASSIGN, "" ),
+        std::make_tuple("&&", TokenType::SYMBOL_LAND, "" ),
+        std::make_tuple("&^", TokenType::SYMBOL_AND_NOT, "" ),
+        std::make_tuple("&^=", TokenType::SYMBOL_AND_NOT_ASSIGN, "" ),
     
-        std::make_tuple("|", TokenType::OR, ""),
-        std::make_tuple("||", TokenType::LOR, ""),
-        std::make_tuple("|=", TokenType::OR_ASSIGN, ""),
+        std::make_tuple("|", TokenType::SYMBOL_OR, ""),
+        std::make_tuple("||", TokenType::SYMBOL_LOR, ""),
+        std::make_tuple("|=", TokenType::SYMBOL_OR_ASSIGN, ""),
     };
 
     for (auto c : cases) {
@@ -154,25 +154,25 @@ TEST_CASE("column numbers") {
 
 TEST_CASE("keywords") {
     auto cases = {
-        std::make_tuple("break", TokenType::BREAK),
-        std::make_tuple("case", TokenType::CASE),
-        std::make_tuple("const", TokenType::CONST),
-        std::make_tuple("continue", TokenType::CONTINUE),
-        std::make_tuple("default", TokenType::DEFAULT),
-        std::make_tuple("defer", TokenType::DEFER),
-        std::make_tuple("else", TokenType::ELSE),
-        std::make_tuple("fallthrough", TokenType::FALLTHROUGH),
-        std::make_tuple("for", TokenType::FOR),
-        std::make_tuple("func", TokenType::FUNC),
-        std::make_tuple("proc", TokenType::PROC),
-        std::make_tuple("if", TokenType::IF),
-        std::make_tuple("import", TokenType::IMPORT),
-        std::make_tuple("return", TokenType::RETURN),
-        std::make_tuple("select", TokenType::SELECT),
-        std::make_tuple("struct", TokenType::STRUCT),
-        std::make_tuple("switch", TokenType::SWITCH),
-        std::make_tuple("type", TokenType::TYPE),
-        std::make_tuple("var", TokenType::VAR),
+        std::make_tuple("break", TokenType::KEY_WORD_BREAK),
+        std::make_tuple("case", TokenType::KEY_WORD_CASE),
+        std::make_tuple("const", TokenType::KEY_WORD_CONST),
+        std::make_tuple("continue", TokenType::KEY_WORD_CONTINUE),
+        std::make_tuple("default", TokenType::KEY_WORD_DEFAULT),
+        std::make_tuple("defer", TokenType::KEY_WORD_DEFER),
+        std::make_tuple("else", TokenType::KEY_WORD_ELSE),
+        std::make_tuple("fallthrough", TokenType::KEY_WORD_FALLTHROUGH),
+        std::make_tuple("for", TokenType::KEY_WORD_FOR),
+        std::make_tuple("func", TokenType::KEY_WORD_FUNC),
+        std::make_tuple("proc", TokenType::KEY_WORD_PROC),
+        std::make_tuple("if", TokenType::KEY_WORD_IF),
+        std::make_tuple("import", TokenType::KEY_WORD_IMPORT),
+        std::make_tuple("return", TokenType::KEY_WORD_RETURN),
+        std::make_tuple("select", TokenType::KEY_WORD_SELECT),
+        std::make_tuple("struct", TokenType::KEY_WORD_STRUCT),
+        std::make_tuple("switch", TokenType::KEY_WORD_SWITCH),
+        std::make_tuple("type", TokenType::KEY_WORD_TYPE),
+        std::make_tuple("var", TokenType::KEY_WORD_VAR),
     };
 
     for (auto c : cases) {
@@ -203,8 +203,8 @@ TEST_CASE("semicolon insertion") {
         for (int i = 0; i < tokens.size(); i++) {
             os << tokens[i];
             if (i < tokens.size() - 1 && 
-                tokens[i+1].type != TokenType::SEMI &&
-                tokens[i+1].type != TokenType::INC) os << " ";
+                tokens[i+1].type != TokenType::SYMBOL_SEMI &&
+                tokens[i+1].type != TokenType::SYMBOL_INC) os << " ";
         }
 
         std::string formatted = os.str(); 
