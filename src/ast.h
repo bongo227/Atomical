@@ -127,7 +127,7 @@ public:
 
 class AssignStatement : public Statement {
 public:
-    const Expression *variable; 
+    const Expression *variable;
     const enum TokenType op_type;
     const Expression *exp;
 

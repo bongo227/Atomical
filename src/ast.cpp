@@ -338,7 +338,7 @@ void AssignStatement::print(std::ostream &os) const {
 
 // For Statement
 
-ForStatement::ForStatement(Statement *declaration, Expression *condition, Statement *increment, 
+ForStatement::ForStatement(Statement *declaration, Expression *condition, Statement *increment,
     BlockStatement *body) : declaration(declaration), condition(condition), increment(increment),
     body(body) {}
 
