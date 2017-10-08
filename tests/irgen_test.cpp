@@ -18,8 +18,6 @@ TEST_CASE("Gen Test") {
 
             ir_string_path.replace(ir_string_path.size()-4, 4, ".ir");
 
-            MESSAGE("Does: " << ir_string_path << " exist?");
-
             if(PathFileExists(ir_string_path.c_str()) != 1) continue;
 
             std::ifstream acl_file(acl_string_path);

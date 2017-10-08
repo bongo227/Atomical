@@ -18,9 +18,14 @@ Value *Irgen::read_var(std::string var_name, BasicBlock *block) {
 
 Value *Irgen::read_var_recursive(std::string var_name, BasicBlock *block) {
     Value *value;
-    std::cout << "Blocks: " << block->preds.size() << std::endl;
+
+	// Only entry block doesnt have predecessor
+	// If entry block then var_name should have been in current_def
+	// If not entry block, predecessors setup incorrectly
+	assert(block->preds.size() != 0);
+
     if (block->preds.size() == 1) {
-        // One predessor, no phi needed
+        // One predecessor, no phi needed
         value = read_var(var_name, block->preds[0]);
     } else {
         Phi *phi = new Phi(next_var_id(), {});

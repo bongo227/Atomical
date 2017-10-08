@@ -1,8 +1,6 @@
 // Value
 
-Value::Value(int id, Type *type) : id(id), type(type) {
-    std::cout << "Value ctor, type: " << type << std::endl;
-}
+Value::Value(int id, Type *type) : id(id), type(type) {}
 
 // TODO: rename this to print_value
 void Value::printValue(std::ostream& os) const {
@@ -39,6 +37,11 @@ void BasicBlock::append_instruction(Instruction *i) {
     instructions.push_back(i);
     terminatator = i;
     return;
+}
+
+void BasicBlock::append_pred(BasicBlock *block) {
+    if(std::find(preds.begin(), preds.end(), block) == preds.end())
+        preds.push_back(block);
 }
 
 bool BasicBlock::is_terminated() {
@@ -172,10 +175,7 @@ std::ostream& operator<<(std::ostream& os, const Call& call) {
 // BinOp
 
 BinOp::BinOp(int id, Value *lhs, Value *rhs, enum TokenType op)
-    : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {
-    std::cout << "BinOp ctor, type: " << lhs->type << std::endl;
-        // assert(*lhs.type == *rhs.type);
-}
+    : Instruction(false), Value(id, lhs->type), lhs(lhs), rhs(rhs), op(op) {}
 
 void BinOp::print_instruction(std::ostream& os) const {
     os << static_cast<Value>(*this) << " = " << *lhs << " " << op << " " << *rhs;
@@ -218,7 +218,7 @@ std::ostream& operator<<(std::ostream& os, const Ret& ret) {
 Branch::Branch(BasicBlock *destination, BasicBlock *source) : Instruction(true), 
     destination(destination) {
     
-    destination->preds.push_back(source);
+    destination->append_pred(source);
 }
 
 void Branch::print_instruction(std::ostream &os) const {
@@ -236,8 +236,8 @@ ConditionalBranch::ConditionalBranch(BasicBlock *true_block, BasicBlock *false_b
     BasicBlock *source_block, Value *condition) : Instruction(true), true_block(true_block), 
     false_block(false_block), condition(condition) {
 
-    true_block->preds.push_back(source_block);
-    false_block->preds.push_back(source_block);
+    true_block->append_pred(source_block);
+    false_block->append_pred(source_block);
 }
 
 void ConditionalBranch::print_instruction(std::ostream &os) const {
@@ -273,7 +273,6 @@ void Phi::print_instruction(std::ostream &os) const {
 }
 
 void Phi::append_operand(const PhiOperand &op) {
-    std::cout << *op.value->type << std::endl;
     assert(type == nullptr || *type == *op.value->type);
     type = op.value->type;
     operands.push_back(op);

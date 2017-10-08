@@ -277,7 +277,7 @@ void IfStatement::print(std::ostream &os) const {
 
 // Assign Statement
 
-AssignStatement::AssignStatement(Expression *variable, enum TokenType op_type, Expression *value) :
+AssignStatement::AssignStatement(Expression *variable, enum TokenType op_type, Expression *exp) :
     variable(variable), op_type(op_type), exp(exp) {}
 
 void AssignStatement::code_gen(Irgen *irgen) const {
@@ -285,34 +285,33 @@ void AssignStatement::code_gen(Irgen *irgen) const {
     Value *value = irgen->gen(exp);
 
     // TODO: make variable of type IdentExpression
-    if(op_type == TokenType::DEFINE || op_type == TokenType::ASSIGN) {
+    if(op_type == TokenType::SYMBOL_DEFINE || op_type == TokenType::SYMBOL_ASSIGN) {
         irgen->write_var(var_name, value);
         return;
     }
 
     Value *var_value = irgen->read_var(var_name, irgen->current_block);
-    std::cout << "var_value, type: " << var_value->type << std::endl;
-    TokenType bin_op;
+    enum TokenType bin_op;
 
     switch(op_type) {
-        case TokenType::ADD_ASSIGN: {
-            bin_op = TokenType::ADD;
+        case TokenType::SYMBOL_ADD_ASSIGN: {
+            bin_op = TokenType::SYMBOL_ADD;
             break;
         }
-        case TokenType::SUB_ASSIGN: {
-            bin_op = TokenType::SUB;
+        case TokenType::SYMBOL_SUB_ASSIGN: {
+            bin_op = TokenType::SYMBOL_SUB;
             break;
         }
-        case TokenType::MUL_ASSIGN: {
-            bin_op = TokenType::MUL;
+        case TokenType::SYMBOL_MUL_ASSIGN: {
+            bin_op = TokenType::SYMBOL_MUL;
             break;
         }
-        case TokenType::QUO_ASSIGN: {
-            bin_op = TokenType::QUO;
+        case TokenType::SYMBOL_QUO_ASSIGN: {
+            bin_op = TokenType::SYMBOL_QUO;
             break;
         }
-        case TokenType::REM_ASSIGN: {
-            bin_op = TokenType::REM;
+        case TokenType::SYMBOL_REM_ASSIGN: {
+            bin_op = TokenType::SYMBOL_REM;
             break;
         }
         default: {
@@ -346,9 +345,11 @@ ForStatement::ForStatement(Statement *declaration, Expression *condition, Statem
 void ForStatement::code_gen(Irgen *irgen) const {
     // Generate for loop body
     BasicBlock *in_for_block = irgen->new_basic_block();
+	in_for_block->append_pred(irgen->current_block);
     BasicBlock *out_for_block = irgen->gen_block(in_for_block, body);
+	in_for_block->append_pred(out_for_block);
 
-    // Create continue block
+	// Create continue block
     BasicBlock *continue_block = irgen->new_basic_block();
 
     // Conditionaly branch into for loop

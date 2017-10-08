@@ -9,6 +9,7 @@
 #include <fstream>
 #include <streambuf>
 #include <map>
+#include <algorithm>
 
 #include "token.h"
 #include "type.h"

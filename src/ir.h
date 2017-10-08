@@ -27,7 +27,8 @@ struct BasicBlock {
     BasicBlock(int id);
     
     void append_instruction(Instruction *i);
-    bool is_terminated();
+    void append_pred(BasicBlock *block);
+	bool is_terminated();
     std::string to_string() const;
     friend std::ostream& operator<<(std::ostream& os, const BasicBlock& block);
 };
